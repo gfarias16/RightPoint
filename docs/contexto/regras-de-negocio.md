@@ -6,11 +6,13 @@ Este documento registra a primeira versao das regras de negocio do sistema Right
 
 O objetivo do RightPoint e auxiliar um empreendedor a avaliar o potencial comercial de uma atividade economica em uma determinada regiao ou localizacao, considerando dados publicos, concorrencia existente e indicadores relevantes para o tipo de negocio analisado.
 
+Documentos relacionados: [minimundo estruturado](./minimundo.md), [restricoes de integridade](./restricoes-de-integridade.md), [glossario](./glossario.md) e [limitacoes conhecidas](./limitacoes-conhecidas.md).
+
 ## Escopo desta versao
 
 Esta versao descreve somente regras de negocio, ou seja, condicoes que orientam como a realidade representada pelo sistema deve funcionar.
 
-Restricoes de integridade, classes, atributos e relacionamentos serao detalhados em documentos proprios ou secoes posteriores do trabalho.
+Restricoes de integridade, classes, atributos e relacionamentos estao detalhados em documentos proprios e permanecem sujeitos a validacao do grupo.
 
 ## Conceitos principais
 
