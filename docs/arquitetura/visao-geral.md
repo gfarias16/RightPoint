@@ -2,7 +2,7 @@
 
 ## Estado
 
-Arquitetura conceitual para orientar a modelagem. Tecnologias, banco de dados e forma de implantação ainda não foram escolhidos.
+Arquitetura conceitual para orientar a modelagem. Em 24/09/2026, foi confirmada a criação da base Laravel em `Rigth_Point/`. O `composer.json` declara Laravel `^12.0` e PHP `^8.2`; essas restrições não comprovam as versões instaladas nem a execução local. Frontend, banco de dados do projeto e forma de implantação ainda precisam ser definidos. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
 
 ## Objetivo arquitetural
 
@@ -53,7 +53,7 @@ flowchart LR
 ## Decisões pendentes
 
 - arquitetura de implantação;
-- tecnologias de frontend, backend e banco;
+- tecnologias de frontend e banco, com backend baseado em Laravel;
 - execução síncrona ou assíncrona das análises;
 - atualização sob demanda ou periódica das fontes;
 - persistência obrigatória ou opcional do histórico;

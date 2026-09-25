@@ -1,6 +1,6 @@
 # Documentação do RightPoint
 
-Esta pasta reúne a documentação V2 do RightPoint. O projeto está na fase de modelagem acadêmica; portanto, os documentos descrevem o domínio e uma arquitetura conceitual, ainda sem definir tecnologias de implementação.
+Esta pasta reúne a documentação V2 do RightPoint. O projeto possui uma modelagem acadêmica inicial e uma base Laravel criada em `Rigth_Point/`. A implementação das funcionalidades do domínio ainda está pendente; a arquitetura descrita permanece conceitual, salvo as escolhas explicitamente confirmadas.
 
 ## Fontes originais
 
@@ -42,5 +42,7 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 - Identificadores como `RN-001` e `RI-001` permitem rastrear regras entre os documentos.
 
 ## Estado atual
+
+Atualizado em 24/09/2026. A base Laravel foi criada, mas o fluxo de consulta do RightPoint ainda não foi implementado. Para retomar o desenvolvimento, consulte o [plano de continuidade](./planos/implementacao-inicial.md), que registra o estado verificado, as decisões pendentes e a próxima etapa.
 
 As regras de negócio formam a primeira base para validação. As restrições de integridade e as classes são propostas iniciais derivadas dessas regras e devem ser revisadas depois que os pontos `A CONFIRMAR` forem decididos.

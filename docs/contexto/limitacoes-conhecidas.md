@@ -2,7 +2,7 @@
 
 ## Estado da modelagem
 
-O RightPoint está em fase de definição do domínio. Não existe ainda implementação, banco de dados, integração com fontes públicas ou fórmula validada para o score.
+O RightPoint está em fase de definição do domínio, com a base Laravel criada em `Rigth_Point/`. Ainda não existem funcionalidades do domínio implementadas nos arquivos inspecionados, integração com fontes públicas ou fórmula validada para o score. A configuração e a conectividade do banco não foram verificadas; as migrations existentes são as iniciais do Laravel. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
 
 ## Limitações funcionais
 
