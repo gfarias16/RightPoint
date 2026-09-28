@@ -1,6 +1,6 @@
 # Plano de implementação inicial — RightPoint
 
-Última atualização: 24/09/2026.
+Última atualização: 28/09/2026.
 
 ## Objetivo
 
@@ -16,6 +16,9 @@ Dar continuidade à base Laravel e construir, em etapas verificáveis, o fluxo d
 - Os arquivos inspecionados de aplicação e banco contêm a estrutura inicial: model `User`, controller base, provider, factory, seeder e migrations de usuários, cache e jobs.
 - A documentação contém minimundo, regras de negócio, restrições de integridade e modelo conceitual de classes.
 - Não foram executados testes, servidor, migrations ou verificações de conexão com o banco nesta etapa documental. A instalação funcional do ambiente ainda precisa ser validada.
+- O usuário confirmou que pretende utilizar o serviço MySQL compatível do XAMPP, administrado pelo phpMyAdmin. Nome do banco, versão exata do servidor, collation e credenciais locais permanecem `A CONFIRMAR`.
+- O `.env`, o banco local, `vendor/` e `node_modules/` não são sincronizados pelo Git. A continuidade entre computadores deve seguir o [procedimento de ambiente local](../procedimentos/ambiente-multiplos-computadores.md).
+- O repositório remoto contém somente as migrations padrão do Laravel. No computador da escola, ainda é necessário verificar se existem migrations ou outros arquivos locais que não receberam commit e push.
 
 O model `User` fornecido pelo Laravel não significa que login ou cadastro foram aprovados como funcionalidades do RightPoint.
 
@@ -35,7 +38,7 @@ Revisar o modelo de dados e delimitar a primeira versão antes de criar migratio
 
 | Tema | Decisão necessária | Impacto |
 | --- | --- | --- |
-| Banco | Escolher o banco e confirmar a configuração local, sem divulgar credenciais. | Tipos, migrations e execução local. |
+| Banco | MySQL compatível fornecido pelo XAMPP foi indicado; confirmar nome do banco, versão MySQL/MariaDB, collation e configuração local sem divulgar credenciais. | Tipos, migrations e execução local. |
 | Área geográfica | Definir se a primeira versão consulta município, bairro ou coordenadas com raio. | Relacionamentos, entrada da consulta e seleção de concorrentes. |
 | Atividades | Definir uso de CNAE, atividades principal/secundárias e critério de equivalência. | Catálogo e associação com estabelecimentos. |
 | Concorrentes | Definir quais situações cadastrais serão consideradas. | Resultado da consulta. |
@@ -52,6 +55,7 @@ Resolver cada pendência antes da etapa que depende dela. Fontes e fórmula pode
 ### 1. Validar escopo e ambiente
 
 - [ ] Confirmar as decisões que afetam o primeiro modelo de dados.
+- [ ] Conferir e preservar o ambiente existente no computador da escola, incluindo migrations ainda não enviadas.
 - [ ] Verificar versões instaladas, dependências e execução básica do Laravel.
 - [ ] Verificar a configuração do banco sem expor secrets e consultar o estado das migrations.
 - [ ] Registrar as decisões aprovadas na documentação pertinente.
