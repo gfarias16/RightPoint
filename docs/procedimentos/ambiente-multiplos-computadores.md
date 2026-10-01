@@ -6,17 +6,30 @@ Este procedimento explica como manter o RightPoint utilizável no computador da 
 
 Leia este documento antes de instalar dependências, criar o `.env`, executar migrations ou atualizar um ambiente que já possua trabalho local.
 
-## Estado conhecido em 28/09/2026
+## Estado conhecido em 01/10/2026
 
 - O repositório Git está hospedado em `https://github.com/gfarias16/RightPoint.git`.
-- A aplicação Laravel está em `Rigth_Point/`. A grafia atual da pasta deve ser preservada até que uma eventual renomeação seja planejada.
+- A aplicação Laravel está em `Right_Point/`, após renomeação intencional de `Rigth_Point/` confirmada pelo usuário.
 - O backend declara PHP `^8.2` e Laravel `^12.0`.
 - O banco pretendido é o serviço MySQL compatível fornecido pelo XAMPP e administrado pelo phpMyAdmin.
 - `phpMyAdmin` é a interface de administração; o banco efetivo é o serviço MySQL/MariaDB iniciado pelo painel do XAMPP.
-- O nome do banco, a versão exata do servidor e as credenciais locais permanecem `A CONFIRMAR`.
-- O `.env.example` ainda contém a configuração inicial do Laravel para SQLite e não representa a decisão de banco do RightPoint.
-- No clone verificado fora da escola não existem `.env`, `vendor/`, `node_modules` nem banco local configurado.
-- O GitHub contém apenas as migrations padrão do Laravel para usuários/sessões, cache e filas. Não existem migrations de domínio do RightPoint versionadas neste momento.
+- Este computador usa MariaDB 10.4.32 e banco local `rightpoint`; o nome lógico obrigatório para os demais computadores permanece `A CONFIRMAR`.
+- O `.env.example` contém a configuração MySQL mantida pelo usuário. Por decisão explícita, o `.env` real também foi incluído no Git e contém a chave desta instalação; revise a exposição dessa chave antes de publicar o commit.
+- Em um clone novo desta versão, o `.env` virá do Git; `vendor/`, `node_modules` e o banco local não virão.
+- O projeto possui as migrations padrão do Laravel e as migrations iniciais de municípios e atividades econômicas por CNAE.
+
+## Conferência deste computador em 01/10/2026
+
+- A cópia em `C:\xampp\htdocs\RightPoint` foi atualizada a partir de `6ef8852` antes da renomeação da pasta e das migrations do domínio.
+- O `.env` local já existia e foi preservado. Ele aponta para um banco MySQL local chamado `rightpoint`; isso não define o nome obrigatório nos demais computadores.
+- PHP 8.2.12, Composer 2.9.7, Node 22.13.0 e Laravel 12.69.2 foram verificados. As dependências PHP já estavam instaladas, e `composer check-platform-reqs` passou.
+- O servidor é MariaDB 10.4.32, com collation `utf8mb4_general_ci` no banco local. Antes da preparação, o banco não continha tabelas. As três migrations padrão e as duas migrations de catálogo foram executadas com sucesso e aparecem como `Ran` em `php artisan migrate:status`.
+- `php artisan test` passou nos dois testes iniciais do Laravel. Ainda não há testes das regras de negócio do RightPoint.
+- `php artisan db:show` falhou porque a consulta interna a `performance_schema.session_status` não encontrou essa tabela nesta instalação do MariaDB. Consultas de leitura e `migrate:status` funcionaram; a falha do comando `db:show` não indica falha da conexão principal.
+- O `.env.example` permanece com a configuração MySQL deixada pelo usuário neste computador.
+- `node_modules` e `package-lock.json` ainda não existem. `npm.cmd install` falhou primeiro porque o npm estava em modo offline e, ao desativar esse modo apenas no comando, falhou com `UNABLE_TO_VERIFY_LEAF_SIGNATURE`. A cadeia de certificados do acesso ao registro npm precisa ser corrigida para concluir a instalação e validar o build; não desative a verificação TLS.
+
+Os fatos acima descrevem apenas este computador. Verifique novamente o estado da pasta, do banco e das migrations antes de operar em outra máquina.
 
 ## O que o Git sincroniza
 
@@ -28,18 +41,18 @@ Devem ser versionados:
 - seeders e factories que contenham apenas dados adequados ao repositório;
 - documentação;
 - `.env.example`, sem credenciais;
+- `.env` real, por decisão explícita do usuário em 01/10/2026; trate seu conteúdo como sensível;
 - `composer.lock` e, quando gerado, `package-lock.json`.
 
 Não devem ser versionados:
 
-- `.env` e suas credenciais;
 - `vendor/`;
 - `node_modules/`;
 - banco local do XAMPP;
 - dumps contendo dados ou informações sensíveis;
-- chaves, tokens ou senhas.
+- outras chaves, tokens ou senhas além da chave já presente no `.env` versionado.
 
-O `.gitignore` do Laravel exclui intencionalmente `.env`, `vendor/` e `node_modules`. Portanto, esses itens não aparecem depois de um clone e precisam ser preparados em cada computador.
+O `.gitignore` ainda contém `.env`, mas ele foi adicionado explicitamente ao índice e já é rastreado: alterações futuras nesse arquivo aparecerão no Git. `vendor/` e `node_modules` continuam ignorados e precisam ser instalados em cada computador.
 
 ## Migrations: arquivos versus execução
 
@@ -63,7 +76,7 @@ Get-ChildItem database\migrations
 Test-Path .env
 ```
 
-Execute esses comandos dentro de `Rigth_Point/`, com exceção dos comandos Git, que também podem ser executados na raiz do repositório.
+Execute esses comandos dentro de `Right_Point/`, com exceção dos comandos Git, que também podem ser executados na raiz do repositório.
 
 Antes de baixar atualizações, procure:
 
@@ -112,7 +125,7 @@ Não registre senha. Depois dessa conferência, atualize esta documentação e o
 
 ### 1. Instalar dependências
 
-Dentro de `Rigth_Point/`:
+Dentro de `Right_Point/`:
 
 ```powershell
 composer install
@@ -125,14 +138,14 @@ No PowerShell, `npm.cmd` pode ser necessário quando a política de execução b
 
 ### 2. Criar a configuração local
 
-Somente quando ainda não existir `.env`:
+Neste repositório, confira o `.env` recebido pelo Git antes de alterar a configuração local. Não execute `key:generate` automaticamente sobre a chave versionada. Somente se o arquivo realmente não existir em um checkout antigo:
 
 ```powershell
 Copy-Item .env.example .env
 php artisan key:generate
 ```
 
-Configure localmente a conexão MySQL sem commitar o `.env`:
+Confira a conexão MySQL antes de usar o banco local. Ao alterar o `.env` rastreado, revise o diff antes de qualquer novo commit:
 
 ```dotenv
 DB_CONNECTION=mysql
@@ -205,5 +218,5 @@ Ao retomar o RightPoint em qualquer computador, o agente deve:
 
 ## Diagnóstico atual e próxima conferência
 
-No próximo acesso ao computador da escola, a prioridade é descobrir se há arquivos não enviados e registrar o estado real do banco. Somente depois dessa conferência será seguro ajustar o `.env.example`, instalar o ambiente no outro computador e criar as migrations do domínio.
+No próximo acesso ao computador da escola, a prioridade é descobrir se há arquivos não enviados e registrar o estado real do banco. Depois de preservar esse trabalho, atualize o repositório, instale as dependências necessárias e aplique as migrations pendentes no banco local.
 

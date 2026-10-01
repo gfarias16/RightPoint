@@ -12,6 +12,6 @@ Esta pasta armazenará planos de mudanças que precisem continuar por várias et
 
 ## Continuidade da implementação
 
-O backend terá como base o projeto Laravel já criado em `Rigth_Point/`. O escopo da primeira versão ainda precisa ser validado.
+O backend utiliza o projeto Laravel em `Right_Point/`. Município e CNAE foram escolhidos para a primeira versão; os demais detalhes do escopo ainda precisam ser validados.
 
 Consulte o [plano de implementação inicial](./implementacao-inicial.md) antes de retomar o desenvolvimento. Ele complementa as etapas de modelagem acima.

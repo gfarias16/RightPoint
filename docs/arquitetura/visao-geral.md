@@ -2,7 +2,7 @@
 
 ## Estado
 
-Arquitetura conceitual para orientar a modelagem. Em 24/09/2026, foi confirmada a criação da base Laravel em `Rigth_Point/`. O `composer.json` declara Laravel `^12.0` e PHP `^8.2`; essas restrições não comprovam as versões instaladas nem a execução local. Frontend, banco de dados do projeto e forma de implantação ainda precisam ser definidos. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
+Arquitetura conceitual para orientar a modelagem. A base Laravel está em `Right_Point/` e declara Laravel `^12.0` e PHP `^8.2`; neste computador, Laravel 12.69.2 e PHP 8.2.12 foram verificados. O banco local é MariaDB do XAMPP. A abordagem de frontend e a forma de implantação ainda precisam ser definidas. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
 
 ## Objetivo arquitetural
 

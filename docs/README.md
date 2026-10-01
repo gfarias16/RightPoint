@@ -1,6 +1,6 @@
 # Documentação do RightPoint
 
-Esta pasta reúne a documentação V2 do RightPoint. O projeto possui uma modelagem acadêmica inicial e uma base Laravel criada em `Rigth_Point/`. A implementação das funcionalidades do domínio ainda está pendente; a arquitetura descrita permanece conceitual, salvo as escolhas explicitamente confirmadas.
+Esta pasta reúne a documentação V2 do RightPoint. O projeto possui uma modelagem acadêmica inicial e uma base Laravel em `Right_Point/`. As tabelas iniciais de municípios e atividades econômicas foram criadas; o fluxo de consulta ainda está pendente. A arquitetura descrita permanece conceitual, salvo as escolhas explicitamente confirmadas.
 
 ## Fontes originais
 
@@ -44,8 +44,8 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 
 ## Estado atual
 
-Atualizado em 28/09/2026. A base Laravel foi criada, mas o fluxo de consulta do RightPoint ainda não foi implementado. Para retomar o desenvolvimento, consulte o [plano de continuidade](./planos/implementacao-inicial.md), que registra o estado verificado, as decisões pendentes e a próxima etapa.
+Atualizado em 01/10/2026. A pasta Laravel foi renomeada intencionalmente para `Right_Point/`, e as migrations iniciais do domínio foram executadas neste computador. O fluxo de consulta do RightPoint ainda não foi implementado. Para retomar o desenvolvimento, consulte o [plano de continuidade](./planos/implementacao-inicial.md), que registra o estado verificado, as decisões pendentes e a próxima etapa.
 
-O desenvolvimento ocorrerá em mais de um computador. O `.env`, as dependências instaladas e o banco do XAMPP são locais e não chegam por meio do Git. Antes de configurar ou atualizar um ambiente, siga o [procedimento para múltiplos computadores](./procedimentos/ambiente-multiplos-computadores.md), especialmente ao retornar ao computador da escola, onde podem existir arquivos ou migrations ainda não enviados ao GitHub.
+O desenvolvimento ocorrerá em mais de um computador. Por decisão explícita do usuário, o `.env` desta aplicação está versionado e será recebido em outro clone; as dependências instaladas e o banco do XAMPP continuam locais. Antes de configurar ou atualizar um ambiente, siga o [procedimento para múltiplos computadores](./procedimentos/ambiente-multiplos-computadores.md), especialmente ao retornar ao computador da escola, onde podem existir arquivos ou migrations ainda não enviados ao GitHub.
 
 As regras de negócio formam a primeira base para validação. As restrições de integridade e as classes são propostas iniciais derivadas dessas regras e devem ser revisadas depois que os pontos `A CONFIRMAR` forem decididos.

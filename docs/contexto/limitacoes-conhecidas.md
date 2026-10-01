@@ -2,7 +2,7 @@
 
 ## Estado da modelagem
 
-O RightPoint está em fase de definição do domínio, com a base Laravel criada em `Rigth_Point/`. Ainda não existem funcionalidades do domínio implementadas nos arquivos inspecionados, integração com fontes públicas ou fórmula validada para o score. A configuração e a conectividade do banco não foram verificadas; as migrations existentes são as iniciais do Laravel. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
+O RightPoint está em fase de definição do domínio, com a base Laravel em `Right_Point/`. Ainda não existem fluxo de consulta, integração com fontes públicas ou fórmula validada para o score. Neste computador, a conexão com MariaDB foi verificada e as migrations padrão do Laravel, de municípios e de atividades econômicas foram aplicadas. As demais estruturas do domínio seguem pendentes. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
 
 ## Limitações funcionais
 

@@ -10,22 +10,22 @@ Estas instruções se aplicam a todo o repositório RightPoint. Instruções mai
 - A entrada prevista inclui atividade econômica, região ou localização e, quando aplicável, raio geográfico.
 - A saída prevista inclui score de 0 a 100, concorrentes, indicadores, justificativa e avisos sobre insuficiência de dados.
 - O score é orientativo e não representa garantia de sucesso comercial.
-- A aplicação Laravel está em `Rigth_Point/`. A grafia atual da pasta contém `Rigth` e deve ser preservada até que uma renomeação seja planejada e autorizada.
+- A aplicação Laravel está em `Right_Point/`. A renomeação de `Rigth_Point/` para `Right_Point/` foi intencional e confirmada pelo usuário em 01/10/2026.
 - A documentação acadêmica e operacional está em `docs/`.
 
 ## Estado atual conhecido
 
-Estado documentado em 28/09/2026:
+Estado verificado neste computador em 01/10/2026:
 
 - backend declarado com PHP `^8.2` e Laravel `^12.0`;
 - aplicação ainda próxima do esqueleto inicial do Laravel;
 - rota principal ainda retorna a view padrão `welcome`;
 - nenhuma funcionalidade de domínio do RightPoint foi confirmada como implementada;
-- o repositório contém somente as migrations padrão do Laravel;
+- as migrations padrão do Laravel e as migrations iniciais de municípios e atividades econômicas foram executadas no banco local;
 - o banco pretendido é o serviço MySQL compatível do XAMPP, administrado pelo phpMyAdmin;
-- nome do banco, versão exata MySQL/MariaDB, collation e credenciais permanecem `A CONFIRMAR`;
-- o `.env.example` ainda aponta para SQLite e não representa a configuração final do RightPoint;
-- `.env`, banco local, `vendor/` e `node_modules/` não são sincronizados pelo Git.
+- este computador usa MariaDB 10.4.32 e banco local `rightpoint`; o nome lógico obrigatório para os demais computadores permanece `A CONFIRMAR`;
+- o `.env.example` aponta para MySQL com a configuração mantida pelo usuário; não trate seus valores como configuração obrigatória de outro computador;
+- O `.env` foi incluído no Git por decisão explícita do usuário em 01/10/2026; banco local, `vendor/` e `node_modules/` não são sincronizados.
 
 Não trate este resumo como prova do estado atual. Confirme código, Git e ambiente antes de agir, especialmente no computador da escola.
 
@@ -60,7 +60,7 @@ Antes de clonar novamente, atualizar o repositório ou instalar dependências:
 
 - verifique se a pasta antiga do projeto ainda existe;
 - verifique `git status`, branch atual e arquivos não rastreados;
-- liste `Rigth_Point/database/migrations/` e compare com os arquivos rastreados pelo Git;
+- liste `Right_Point/database/migrations/` e compare com os arquivos rastreados pelo Git;
 - confirme apenas a existência do `.env`, sem mostrar seu conteúdo completo;
 - consulte `php artisan migrate:status` quando o Laravel estiver funcional;
 - confirme no XAMPP/phpMyAdmin o nome e a versão do banco sem expor credenciais.
@@ -69,7 +69,7 @@ Não clone por cima da pasta antiga, não sobrescreva o `.env` e não descarte m
 
 ## Ambiente local
 
-- Em um clone novo, a ausência de `.env`, `vendor/` e `node_modules/` é esperada.
+- Em um clone novo desta versão, o `.env` é recebido do Git; a ausência de `vendor/` e `node_modules/` é esperada. Confira a configuração antes de executar comandos que alterem a chave ou o banco.
 - Use `composer install`, não `composer update`, para respeitar `composer.lock`.
 - No PowerShell, use `npm.cmd` se `npm.ps1` estiver bloqueado pela política de execução.
 - Se `php` não estiver no `PATH` e o XAMPP estiver em seu caminho padrão, verifique o executável `C:\xampp\php\php.exe` antes de concluir que o PHP não está instalado.
@@ -100,7 +100,7 @@ Não clone por cima da pasta antiga, não sobrescreva o `.env` e não descarte m
 ## Segurança
 
 - Nunca leia ou publique o conteúdo completo do `.env` sem necessidade específica.
-- Nunca registre senhas, tokens, chaves, strings de conexão ou credenciais em código, documentação, commits ou logs.
+- Não acrescente novas senhas, tokens, chaves ou credenciais a código, documentação, commits ou logs. O `.env` já versionado por decisão explícita do usuário é uma exceção existente e deve ser tratado como sensível.
 - Use exemplos seguros em `.env.example`.
 - Trate URLs privadas, dados de conexão e eventuais dados empresariais não públicos como informações sensíveis.
 
@@ -110,7 +110,7 @@ Não clone por cima da pasta antiga, não sobrescreva o `.env` e não descarte m
 - Não use `git add -A` em uma árvore de trabalho mista; prepare caminhos explícitos.
 - Não execute automaticamente `push`, `merge`, `rebase`, `reset --hard`, `clean` ou force push.
 - Migrations, models, seeders e documentação necessários para reproduzir o projeto devem receber commits semanticamente coerentes.
-- Dependências instaladas, `.env` e o banco local não devem ser commitados.
+- Dependências instaladas e o banco local não devem ser commitados. O `.env` é a exceção versionada por solicitação explícita; revise alterações nele antes de novos commits.
 
 ## Validação
 

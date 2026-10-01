@@ -1,6 +1,6 @@
 # Plano de implementação inicial — RightPoint
 
-Última atualização: 28/09/2026.
+Última atualização: 01/10/2026.
 
 ## Objetivo
 
@@ -9,16 +9,16 @@ Dar continuidade à base Laravel e construir, em etapas verificáveis, o fluxo d
 ## Estado confirmado
 
 - Repositório local: `C:\xampp\htdocs\RightPoint`.
-- Aplicação Laravel: `Rigth_Point/` (grafia atual da pasta, preservada).
+- Aplicação Laravel: `Right_Point/` (renomeação intencional confirmada pelo usuário em 01/10/2026).
 - O usuário informou que criou o projeto Laravel para o RightPoint.
-- `Rigth_Point/composer.json` declara PHP `^8.2` e Laravel `^12.0`.
-- `Rigth_Point/routes/web.php` contém a rota inicial que retorna a view `welcome`.
-- Os arquivos inspecionados de aplicação e banco contêm a estrutura inicial: model `User`, controller base, provider, factory, seeder e migrations de usuários, cache e jobs.
+- `Right_Point/composer.json` declara PHP `^8.2` e Laravel `^12.0`.
+- `Right_Point/routes/web.php` contém a rota inicial que retorna a view `welcome`.
+- A aplicação contém a estrutura inicial do Laravel e os models `Municipio` e `AtividadeEconomica`, com migrations próprias para os dois catálogos.
 - A documentação contém minimundo, regras de negócio, restrições de integridade e modelo conceitual de classes.
-- Não foram executados testes, servidor, migrations ou verificações de conexão com o banco nesta etapa documental. A instalação funcional do ambiente ainda precisa ser validada.
-- O usuário confirmou que pretende utilizar o serviço MySQL compatível do XAMPP, administrado pelo phpMyAdmin. Nome do banco, versão exata do servidor, collation e credenciais locais permanecem `A CONFIRMAR`.
-- O `.env`, o banco local, `vendor/` e `node_modules/` não são sincronizados pelo Git. A continuidade entre computadores deve seguir o [procedimento de ambiente local](../procedimentos/ambiente-multiplos-computadores.md).
-- O repositório remoto contém somente as migrations padrão do Laravel. No computador da escola, ainda é necessário verificar se existem migrations ou outros arquivos locais que não receberam commit e push.
+- Neste computador, o Laravel e a conexão com MariaDB foram verificados, as três migrations padrão e as duas migrations de catálogo foram aplicadas. Os dois testes iniciais passaram após as migrations de catálogo. O frontend ainda não foi validado porque a instalação npm está bloqueada por um erro de certificado. Consulte os detalhes no [procedimento de ambiente local](../procedimentos/ambiente-multiplos-computadores.md).
+- O usuário confirmou que pretende utilizar o serviço MySQL compatível do XAMPP, administrado pelo phpMyAdmin. Este computador usa MariaDB 10.4.32 e banco local `rightpoint`; o nome obrigatório para o projeto e a configuração de outros computadores permanecem `A CONFIRMAR`.
+- O `.env` foi incluído no commit por decisão explícita do usuário. O banco local, `vendor/` e `node_modules/` não são sincronizados pelo Git. A continuidade entre computadores deve seguir o [procedimento de ambiente local](../procedimentos/ambiente-multiplos-computadores.md).
+- As migrations de municípios e atividades econômicas foram criadas neste computador. No computador da escola, ainda é necessário verificar se existem migrations ou outros arquivos locais não enviados antes de qualquer sincronização.
 
 O model `User` fornecido pelo Laravel não significa que login ou cadastro foram aprovados como funcionalidades do RightPoint.
 
@@ -32,15 +32,15 @@ O model `User` fornecido pelo Laravel não significa que login ou cadastro foram
 
 ## Próxima etapa imediata
 
-Revisar o modelo de dados e delimitar a primeira versão antes de criar migrations do domínio. Validar também o ambiente Laravel existente, sem presumir que a criação do projeto comprovou seu funcionamento.
+As migrations iniciais de municípios e atividades econômicas por CNAE já foram criadas e aplicadas neste computador. A próxima etapa é validar os models e definir os dados de demonstração e as próximas estruturas do domínio; instalação npm e conferência dos demais computadores continuam pendentes.
 
 ### Decisões a confirmar
 
 | Tema | Decisão necessária | Impacto |
 | --- | --- | --- |
 | Banco | MySQL compatível fornecido pelo XAMPP foi indicado; confirmar nome do banco, versão MySQL/MariaDB, collation e configuração local sem divulgar credenciais. | Tipos, migrations e execução local. |
-| Área geográfica | Definir se a primeira versão consulta município, bairro ou coordenadas com raio. | Relacionamentos, entrada da consulta e seleção de concorrentes. |
-| Atividades | Definir uso de CNAE, atividades principal/secundárias e critério de equivalência. | Catálogo e associação com estabelecimentos. |
+| Área geográfica | Município foi escolhido para a primeira versão; bairros e coordenadas com raio continuam fora do recorte inicial. | Relacionamentos, entrada da consulta e seleção de concorrentes. |
+| Atividades | CNAE foi escolhido para identificar as atividades; cada registro inicial possui um código obrigatório e único. Atividades principal/secundárias dos estabelecimentos e equivalência continuam `A CONFIRMAR`. | Catálogo e associação com estabelecimentos. |
 | Concorrentes | Definir quais situações cadastrais serão consideradas. | Resultado da consulta. |
 | Histórico | Definir se análises serão persistidas na primeira versão. | Armazenamento de resultados e dados usados no cálculo. |
 | Identidade | Definir necessidade de login e de análises vinculadas ao usuário. | Autenticação e autorização. |
@@ -64,6 +64,7 @@ Critério de conclusão: escopo inicial explícito e ambiente mínimo validado, 
 
 ### 2. Implementar a base de dados do domínio
 
+- [x] Criar e aplicar neste computador as migrations iniciais de municípios e atividades econômicas por CNAE.
 - [ ] Revisar atributos, cardinalidades e restrições do modelo conceitual.
 - [ ] Definir migrations e models para atividades econômicas, regiões, indicadores, fontes e estabelecimentos conforme o recorte aprovado.
 - [ ] Incluir relacionamentos necessários, sem converter automaticamente cada classe conceitual em tabela.
