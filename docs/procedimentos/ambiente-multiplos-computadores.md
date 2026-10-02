@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Este procedimento explica como manter o RightPoint utilizável no computador da escola e em outros computadores sem versionar credenciais ou confundir arquivos do Git com o estado local do MySQL.
+Este procedimento explica como manter o RightPoint utilizável no computador da escola e em outros computadores sem confundir arquivos do Git com o estado local do MySQL. O `.env` é uma exceção versionada por decisão explícita do usuário e deve ser tratado como sensível.
 
 Leia este documento antes de instalar dependências, criar o `.env`, executar migrations ou atualizar um ambiente que já possua trabalho local.
 

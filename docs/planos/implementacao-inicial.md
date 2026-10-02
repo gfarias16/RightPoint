@@ -103,4 +103,4 @@ Critério de conclusão: resultado rastreável, cálculo reproduzível e limita�
 
 ## Ponto de retomada
 
-Na próxima sessão, começar pela etapa 1: conferir o estado do repositório e do Laravel, revisar as referências de domínio e resolver as decisões necessárias para a primeira modelagem física. Nenhuma migration de domínio ou funcionalidade foi implementada nesta atualização documental.
+Na próxima sessão ou em outro computador, começar pela conferência do Git, do Laravel e do banco local conforme o [STATUS.md](../STATUS.md) e o [procedimento para múltiplos computadores](../procedimentos/ambiente-multiplos-computadores.md). As migrations de municípios e atividades econômicas já foram criadas e aplicadas neste computador; a próxima tarefa de código é completar e validar os dois models. O fluxo de consulta continua pendente.
