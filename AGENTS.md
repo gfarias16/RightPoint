@@ -34,6 +34,7 @@ Não trate este resumo como prova do estado atual. Confirme código, Git e ambie
 1. Execute `git status --short --branch` antes de alterar qualquer arquivo.
 2. Preserve todas as mudanças locais, inclusive arquivos ainda não rastreados.
 3. Leia, nesta ordem:
+   - `docs/STATUS.md`
    - `docs/README.md`;
    - `docs/planos/implementacao-inicial.md`;
    - `docs/procedimentos/ambiente-multiplos-computadores.md`.
