@@ -13,15 +13,15 @@ Leia este documento antes de instalar dependências, criar o `.env`, executar mi
 - O backend declara PHP `^8.2` e Laravel `^12.0`.
 - O banco pretendido é o serviço MySQL compatível fornecido pelo XAMPP e administrado pelo phpMyAdmin.
 - `phpMyAdmin` é a interface de administração; o banco efetivo é o serviço MySQL/MariaDB iniciado pelo painel do XAMPP.
-- Este computador usa MariaDB 10.4.32 e banco local `rightpoint`; o nome lógico obrigatório para os demais computadores permanece `A CONFIRMAR`.
+- O nome padronizado do banco de desenvolvimento em todas as máquinas é `rightpoint`, em letras minúsculas. No notebook do trabalho, a conexão confirmada em 05/10/2026 é MariaDB 10.4.32 em `127.0.0.1:3306`, usuário `root` e senha vazia. Confira porta e credenciais de cada máquina antes de operar seu banco.
 - O `.env.example` contém a configuração MySQL mantida pelo usuário. Por decisão explícita, o `.env` real também foi incluído no Git e contém a chave desta instalação; revise a exposição dessa chave antes de publicar o commit.
 - Em um clone novo desta versão, o `.env` virá do Git; `vendor/`, `node_modules` e o banco local não virão.
 - O projeto possui as migrations padrão do Laravel e as migrations iniciais de municípios e atividades econômicas por CNAE.
 
-## Conferência deste computador em 01/10/2026
+## Registro anterior em 01/10/2026 — máquina a confirmar
 
 - A cópia em `C:\xampp\htdocs\RightPoint` foi atualizada a partir de `6ef8852` antes da renomeação da pasta e das migrations do domínio.
-- O `.env` local já existia e foi preservado. Ele aponta para um banco MySQL local chamado `rightpoint`; isso não define o nome obrigatório nos demais computadores.
+- O `.env` local já existia e foi preservado. Ele apontava para um banco MySQL local chamado `rightpoint`, nome posteriormente padronizado para o projeto.
 - PHP 8.2.12, Composer 2.9.7, Node 22.13.0 e Laravel 12.69.2 foram verificados. As dependências PHP já estavam instaladas, e `composer check-platform-reqs` passou.
 - O servidor é MariaDB 10.4.32, com collation `utf8mb4_general_ci` no banco local. Antes da preparação, o banco não continha tabelas. As três migrations padrão e as duas migrations de catálogo foram executadas com sucesso e aparecem como `Ran` em `php artisan migrate:status`.
 - `php artisan test` passou nos dois testes iniciais do Laravel. Ainda não há testes das regras de negócio do RightPoint.
@@ -29,7 +29,15 @@ Leia este documento antes de instalar dependências, criar o `.env`, executar mi
 - O `.env.example` permanece com a configuração MySQL deixada pelo usuário neste computador.
 - `node_modules` e `package-lock.json` ainda não existem. `npm.cmd install` falhou primeiro porque o npm estava em modo offline e, ao desativar esse modo apenas no comando, falhou com `UNABLE_TO_VERIFY_LEAF_SIGNATURE`. A cadeia de certificados do acesso ao registro npm precisa ser corrigida para concluir a instalação e validar o build; não desative a verificação TLS.
 
-Os fatos acima descrevem apenas este computador. Verifique novamente o estado da pasta, do banco e das migrations antes de operar em outra máquina.
+O registro anterior não identifica de modo confiável se a máquina era a da escola ou a do trabalho. Ele não garante o estado atual de nenhuma das duas. Verifique novamente a pasta, o banco e as migrations antes de operar.
+
+## Conferência do notebook do trabalho em 05/10/2026
+
+- O checkout estava alinhado a `origin/main` no commit `d7398f2`. As alterações locais em `.env` e `.env.example` são intencionais e foram preservadas.
+- PHP 8.2.12, MariaDB 10.4.32 e Laravel 12.69.2 foram verificados. `vendor/` foi instalado com `composer install`, respeitando `composer.lock`; neste notebook, o Composer não estava no `PATH` e foi usado um PHAR oficial temporário.
+- O MariaDB do XAMPP falhou em uma tentativa inicial de inicialização com uma asserção InnoDB. Depois, o servidor passou a escutar na porta 3306 e respondeu normalmente. Não houve reparo nem alteração no diretório de dados do XAMPP; se a falha voltar, preserve os bancos e investigue antes de restaurar ou apagar qualquer arquivo.
+- O banco `rightpoint` existia e não continha tabelas. As três migrations padrão e as duas de catálogo foram executadas, todas aparecem como `Ran` em `php artisan migrate:status`, e os dois testes iniciais passaram.
+- Não foi instalado `node_modules/` nem executado build do frontend neste notebook. Uma tentativa de inicializar um banco isolado para diagnóstico foi descartada quando o servidor do XAMPP ficou acessível; o diretório temporário criado foi removido, sem tocar no banco do XAMPP.
 
 ## O que o Git sincroniza
 
@@ -40,7 +48,7 @@ Devem ser versionados:
 - models, controllers, views e testes;
 - seeders e factories que contenham apenas dados adequados ao repositório;
 - documentação;
-- `.env.example`, sem credenciais;
+- `.env.example`, revisado antes de publicar; a alteração local de 05/10/2026 inclui `APP_KEY` por decisão do usuário e deve ser tratada como sensível;
 - `.env` real, por decisão explícita do usuário em 01/10/2026; trate seu conteúdo como sensível;
 - `composer.lock` e, quando gerado, `package-lock.json`.
 
@@ -50,7 +58,7 @@ Não devem ser versionados:
 - `node_modules/`;
 - banco local do XAMPP;
 - dumps contendo dados ou informações sensíveis;
-- outras chaves, tokens ou senhas além da chave já presente no `.env` versionado.
+- outras chaves, tokens ou senhas além da chave já presente no `.env` versionado e da alteração intencional do `.env.example` ainda pendente de publicação.
 
 O `.gitignore` ainda contém `.env`, mas ele foi adicionado explicitamente ao índice e já é rastreado: alterações futuras nesse arquivo aparecerão no Git. `vendor/` e `node_modules` continuam ignorados e precisam ser instalados em cada computador.
 
@@ -151,17 +159,17 @@ Confira a conexão MySQL antes de usar o banco local. Ao alterar o `.env` rastre
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=A_CONFIRMAR
-DB_USERNAME=A_CONFIRMAR
-DB_PASSWORD=A_CONFIRMAR
+DB_DATABASE=rightpoint
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-Os valores `A_CONFIRMAR` são marcadores documentais e não devem ser usados literalmente. Cada computador pode ter credenciais locais diferentes, mas deve utilizar o mesmo nome lógico de banco e a mesma estrutura criada pelas migrations depois que esses valores forem definidos pelo grupo.
+Esta é a configuração de desenvolvimento confirmada no notebook do trabalho. O nome `rightpoint` deve ser mantido nas outras máquinas; se porta, usuário ou senha forem diferentes, ajuste apenas a configuração local necessária e revise as alterações do `.env` rastreado antes de publicar. A senha vazia é adequada somente para este ambiente local de estudo, não para servidores expostos.
 
 ### 3. Criar e validar o banco local
 
 1. Inicie o serviço MySQL pelo painel do XAMPP.
-2. Crie pelo phpMyAdmin um banco vazio com o nome aprovado pelo grupo.
+2. Se ainda não existir, crie pelo phpMyAdmin um banco vazio chamado `rightpoint`.
 3. Confirme que o `.env` aponta para esse banco.
 4. Execute:
 

@@ -9,7 +9,7 @@ O RightPoint está em fase de definição do domínio, com a base Laravel em `Ri
 | Limitação | Impacto | Tratamento atual |
 | --- | --- | --- |
 | Fórmula e pesos do score indefinidos | Ainda não é possível reproduzir um cálculo real. | `A CONFIRMAR` com o grupo. |
-| Fontes oficiais não selecionadas | Disponibilidade, atualização e formato dos dados são desconhecidos. | Manter a arquitetura independente de uma fonte específica. |
+| Fontes candidatas indicadas, ainda não validadas para integração | Disponibilidade, cobertura, atualização, licença e formato da maioria dos dados ainda são desconhecidos. | Conferir cada fonte em [FONTES_DADOS](../FONTES_DADOS) e manter a arquitetura independente de um fornecedor específico. |
 | Equivalência entre atividades indefinida | A contagem de concorrentes pode variar conforme o critério. | Registrar como regra pendente. |
 | Escopo geográfico indefinido | Não está decidido se a primeira versão cobrirá bairro, município, coordenadas ou todos. | Validar antes da modelagem física. |
 | Tratamento de empresas inativas indefinido | A concorrência pode ser superestimada. | Não presumir que todo CNPJ encontrado é concorrente ativo. |

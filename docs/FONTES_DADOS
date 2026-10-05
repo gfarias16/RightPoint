@@ -1,0 +1,43 @@
+
+# Fontes de dados candidatas — RightPoint
+
+Registro inicial do grupo, atualizado em 05/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados.
+
+| Fonte candidata | Dados pretendidos | Possível uso | Estado |
+| --- | --- | --- | --- |
+| CNPJ Aberto / Receita Federal | CNPJ, CNAE, situação, endereço e abertura | Identificação de estabelecimentos e concorrência; sobrevivência/mortalidade exige critério e dados históricos apropriados | Endpoint e viabilidade A CONFIRMAR |
+| IBGE — Localidades e Censo/SIDRA | Municípios, população, renda, densidade e perfil etário, conforme tabela disponível | Delimitação municipal e indicadores socioeconômicos | Dois endpoints testados abaixo; os demais indicadores não foram testados |
+| ANP | Preços de combustíveis por região | Possível indicador indireto, cuja relação com fluxo/movimento ainda precisa ser justificada | A CONFIRMAR |
+| INMET | Temperatura, chuva e histórico climático | Avaliar influência climática conforme a atividade | A CONFIRMAR |
+| Portal da Transparência / SICONFI | Obras e investimentos públicos | Investigar investimento regional; não presumir valorização como consequência | A CONFIRMAR |
+| OpenStreetMap / Mapbox | Coordenadas, ruas, bairros, pontos de interesse e geocodificação | Consulta espacial e mapa | A CONFIRMAR |
+
+## 1. IBGE — municípios do estado do Rio de Janeiro
+
+Endpoint fornecido pelo usuário:
+
+https://servicodados.ibge.gov.br/api/v1/localidades/estados/33/municipios?
+
+Consulta de leitura realizada em 05/10/2026: retornou 92 municípios. Cada item inclui `id` (código IBGE), `nome` e dados da divisão territorial; a sigla `RJ` aparece na estrutura aninhada da UF. O município do Rio de Janeiro tem código `3304557`. Esta resposta **não** traz população nem coordenadas. O `?` final da URL não adiciona nenhum parâmetro.
+
+Mapeamento possível para a tabela `municipios` já criada: `id` da API → `codigo_ibge` (guardar como texto de sete caracteres); `nome` → `nome`; sigla da UF → `uf`. O `id` interno da tabela Laravel é diferente do código IBGE.
+
+## 2. IBGE SIDRA — população residente do Rio de Janeiro no Censo 2022
+
+Endpoint fornecido pelo usuário:
+
+https://apisidra.ibge.gov.br/values/t/4714/n6/3304557/v/93/p/2022
+
+Consulta de leitura realizada em 05/10/2026: a primeira posição do array é um cabeçalho que explica os campos. O registro seguinte contém `D1C=3304557` (código do município), `D2N=População residente`, `D3C=2022`, `MN=Pessoas` e `V=6211223`. O valor `V` vem como texto; validar antes de convertê-lo em número.
+
+Esta URL pede **apenas população residente de 2022 para um município**. Ela não entrega renda, perfil etário, dados por bairro ou concorrentes. Como o recorte é municipal, não se deve atribuir esse total a um bairro ou a um raio específico.
+
+O código IBGE `3304557` permite associar a resposta do SIDRA ao município da API de Localidades, sem depender do nome escrito da cidade.
+
+## 3. Receita Federal — CNPJ
+
+O usuário reservou esta seção, mas ainda não forneceu endpoint ou arquivo para teste. Acesso, licença, campos, cobertura e atualização permanecem A CONFIRMAR. Não afirmar cálculo de sobrevivência/mortalidade somente a partir de situação cadastral e data de abertura.
+
+## Próximo experimento do aluno
+
+Criar uma consulta de leitura pequena no Laravel: obter a lista de municípios, localizar o código `3304557`, consultar o SIDRA e mostrar nome, código, população, unidade e ano. Tratar falha HTTP, resposta vazia, cabeçalho do SIDRA e valor não numérico. Não gravar no banco nem produzir score neste primeiro teste. Depois, revisar o resultado antes de decidir importação ou nova estrutura para indicadores.

@@ -15,7 +15,7 @@ Estas instruções se aplicam a todo o repositório RightPoint. Instruções mai
 
 ## Estado atual conhecido
 
-Estado verificado neste computador em 01/10/2026:
+Estado do repositório e do notebook do trabalho verificado em 05/10/2026; o estado atual da escola continua a confirmar em `docs/STATUS.md`:
 
 - backend declarado com PHP `^8.2` e Laravel `^12.0`;
 - aplicação ainda próxima do esqueleto inicial do Laravel;
@@ -23,8 +23,8 @@ Estado verificado neste computador em 01/10/2026:
 - nenhuma funcionalidade de domínio do RightPoint foi confirmada como implementada;
 - as migrations padrão do Laravel e as migrations iniciais de municípios e atividades econômicas foram executadas no banco local;
 - o banco pretendido é o serviço MySQL compatível do XAMPP, administrado pelo phpMyAdmin;
-- este computador usa MariaDB 10.4.32 e banco local `rightpoint`; o nome lógico obrigatório para os demais computadores permanece `A CONFIRMAR`;
-- o `.env.example` aponta para MySQL com a configuração mantida pelo usuário; não trate seus valores como configuração obrigatória de outro computador;
+- o nome padronizado do banco de desenvolvimento é `rightpoint` (minúsculas); neste notebook, MariaDB 10.4.32 em `127.0.0.1:3306`, usuário `root` e senha vazia; confirme a conexão em cada computador antes de executar migrations;
+- o `.env` e o `.env.example` apontam para essa configuração local; outra máquina pode precisar de credenciais ou porta diferentes sem alterar o nome lógico do banco;
 - O `.env` foi incluído no Git por decisão explícita do usuário em 01/10/2026; banco local, `vendor/` e `node_modules/` não são sincronizados.
 
 Não trate este resumo como prova do estado atual. Confirme código, Git e ambiente antes de agir, especialmente no computador da escola.
@@ -44,6 +44,7 @@ Não trate este resumo como prova do estado atual. Confirme código, Git e ambie
 ## Roteamento de contexto
 
 - Regras e conceitos do domínio: `docs/contexto/`.
+- Fontes candidatas e testes iniciais de APIs: `docs/FONTES_DADOS`.
 - Arquitetura e modelo conceitual: `docs/arquitetura/`.
 - Continuidade da implementação: `docs/planos/implementacao-inicial.md`.
 - Troca entre computadores e preparação local: `docs/procedimentos/ambiente-multiplos-computadores.md`.
@@ -75,7 +76,7 @@ Não clone por cima da pasta antiga, não sobrescreva o `.env` e não descarte m
 - No PowerShell, use `npm.cmd` se `npm.ps1` estiver bloqueado pela política de execução.
 - Se `php` não estiver no `PATH` e o XAMPP estiver em seu caminho padrão, verifique o executável `C:\xampp\php\php.exe` antes de concluir que o PHP não está instalado.
 - Não presuma que Composer, PHP, Node, MySQL ou Apache estejam configurados apenas porque o projeto foi clonado.
-- Não altere `.env.example` com valores reais ou credenciais.
+- Mantenha o nome `rightpoint` no `.env.example`; há uma alteração intencional pendente que preenche `APP_KEY`. Preserve-a, trate-a como sensível e não acrescente outras senhas, chaves ou tokens sem decisão explícita do usuário.
 
 ## Banco de dados e migrations
 
