@@ -25,6 +25,7 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 - [Visão geral](./arquitetura/visao-geral.md)
 - [Mapa de serviços](./arquitetura/mapa-de-servicos.md)
 - [Fluxo de dados](./arquitetura/fluxo-de-dados.md)
+- [Matriz de dados e fluxograma do diagnóstico](./arquitetura/matriz-dados-diagnostico.md)
 - [Modelo inicial de classes](./arquitetura/modelo-de-classes.md)
 
 ### Evolução e governança
@@ -45,7 +46,7 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 
 ## Estado atual
 
-Atualizado em 05/10/2026. A pasta Laravel foi renomeada intencionalmente para `Right_Point/`, e as migrations iniciais do domínio foram aplicadas no notebook do trabalho e confirmadas na escola. Na escola, a tabela `fontes_dados` também foi criada para rastrear a origem dos dados futuros. O fluxo de consulta do RightPoint ainda não foi implementado. O grupo registrou [fontes candidatas](./FONTES_DADOS.md), e existe um comando experimental de leitura de dois endpoints do IBGE no Laravel, sem importação para o banco nem cálculo de score. Para retomar o desenvolvimento, consulte o [plano de continuidade](./planos/implementacao-inicial.md), que registra o estado verificado, as decisões pendentes e a próxima etapa.
+Atualizado em 06/10/2026 quanto à documentação. A pasta Laravel foi renomeada intencionalmente para `Right_Point/`, e as migrations iniciais do domínio foram aplicadas no notebook do trabalho e confirmadas na escola. Na escola, a tabela `fontes_dados` também foi criada para rastrear a origem dos dados futuros. A [matriz e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) agora registram o recorte inicial dos **92 municípios do RJ**, critérios propostos e a separação entre atualização e consulta. O fluxo de consulta, o mapa, o CRUD e o score ainda não foram implementados. O grupo registrou [fontes candidatas](./FONTES_DADOS.md), e existe um comando experimental de leitura de dois endpoints do IBGE no Laravel, sem importação para o banco nem cálculo de score. Para retomar o desenvolvimento, consulte o [plano de continuidade](./planos/implementacao-inicial.md), que registra o estado verificado, as decisões pendentes e a próxima etapa.
 
 O desenvolvimento ocorrerá em mais de um computador. Por decisão explícita do usuário, o `.env` desta aplicação está versionado e será recebido em outro clone; as dependências instaladas e o banco do XAMPP continuam locais. Antes de configurar ou atualizar um ambiente, siga o [procedimento para múltiplos computadores](./procedimentos/ambiente-multiplos-computadores.md), especialmente ao retornar ao computador da escola, onde podem existir arquivos ou migrations ainda não enviados ao GitHub.
 

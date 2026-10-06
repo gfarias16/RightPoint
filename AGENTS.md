@@ -100,6 +100,14 @@ Não clone por cima da pasta antiga, não sobrescreva o `.env` e não descarte m
 - Escreva documentação em português claro.
 - Comentários de código devem explicar intenção, regra de negócio ou decisão não óbvia, e não repetir a sintaxe.
 
+### Acompanhamento do aprendizado
+
+- O usuário é iniciante em PHP e Laravel e quer escrever o código para conseguir explicar o projeto à professora. Oriente primeiro; não assuma a implementação de uma etapa de código sem pedido explícito.
+- Ao propor uma tarefa de programação, explique **para que ela serve**, onde se encaixa no fluxo do RightPoint e **como começar**, em passos pequenos, com os conceitos de PHP/Laravel necessários.
+- Quando o usuário mostrar código ou erro, revise o que ele realmente fez, indique acertos e problemas com exemplos concretos e explique a correção. Não trate sugestão como implementação concluída.
+- Ao concluir cada etapa verificada, atualize `docs/STATUS.md` com o que foi feito, por quem, em qual ambiente quando conhecido, validações executadas, pendências e ponto de retomada para escola/casa/trabalho. Não registre como concluído algo apenas planejado.
+- Na entrega de cada etapa, informe o **próximo passo prático** para o usuário continuar. Diferencie passos que ele pode executar agora de decisões ainda dependentes do grupo ou da professora.
+
 ## Segurança
 
 - Nunca leia ou publique o conteúdo completo do `.env` sem necessidade específica.

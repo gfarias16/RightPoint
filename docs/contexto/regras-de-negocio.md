@@ -6,13 +6,15 @@ Este documento registra a primeira versao das regras de negocio do sistema Right
 
 O objetivo do RightPoint e auxiliar um empreendedor a avaliar o potencial comercial de uma atividade economica em uma determinada regiao ou localizacao, considerando dados publicos, concorrencia existente e indicadores relevantes para o tipo de negocio analisado.
 
-Documentos relacionados: [minimundo estruturado](./minimundo.md), [restricoes de integridade](./restricoes-de-integridade.md), [glossario](./glossario.md) e [limitacoes conhecidas](./limitacoes-conhecidas.md).
+Documentos relacionados: [minimundo estruturado](./minimundo.md), [restricoes de integridade](./restricoes-de-integridade.md), [glossario](./glossario.md), [limitacoes conhecidas](./limitacoes-conhecidas.md) e [matriz de dados e fluxograma](../arquitetura/matriz-dados-diagnostico.md).
 
 ## Escopo desta versao
 
 Esta versao descreve somente regras de negocio, ou seja, condicoes que orientam como a realidade representada pelo sistema deve funcionar.
 
 Restricoes de integridade, classes, atributos e relacionamentos estao detalhados em documentos proprios e permanecem sujeitos a validacao do grupo.
+
+O **recorte inicial escolhido** e o conjunto dos 92 municipios do estado do Rio de Janeiro, selecionados por nome ou pelo mapa e identificados pelo codigo IBGE. A atividade sera identificada por CNAE. As regras gerais sobre bairro, ponto e raio permanecem como possibilidades futuras, nao como requisitos da primeira entrega. Os criterios de fontes e concorrencia abaixo sao **propostas para validacao academica**, nao uma formula de score aprovada.
 
 ## Conceitos principais
 
@@ -44,7 +46,7 @@ Quando a analise for feita por localizacao pontual, o sistema deve usar essa loc
 
 As atividades economicas analisadas pelo sistema devem estar relacionadas a CNAEs ou a fontes comerciais equivalentes que permitam identificar estabelecimentos comparaveis.
 
-A CONFIRMAR: se o trabalho exigira explicitamente o uso de CNAE como classificacao principal ou se a atividade podera ser mantida como categoria interna do sistema.
+Na primeira versao, a atividade escolhida sera identificada por CNAE. A relacao com categorias internas ou CNAEs equivalentes continua `A CONFIRMAR`.
 
 ### RN-004 - Uso de dados publicos da regiao
 
@@ -52,7 +54,7 @@ O sistema deve considerar informacoes socioeconomicas da regiao analisada, obtid
 
 Indicadores iniciais previstos no minimundo incluem populacao, densidade populacional, renda media, faixa etaria e clima.
 
-A CONFIRMAR: quais indicadores serao obrigatorios na primeira versao da modelagem.
+Proposta para a primeira analise: populacao municipal do IBGE como dado regional minimo. Renda, densidade e faixa etaria dependem da validacao das tabelas e da pertinencia para a atividade. Ver [matriz de dados](../arquitetura/matriz-dados-diagnostico.md).
 
 ### RN-005 - Uso de dados publicos de empresas existentes
 
@@ -66,11 +68,15 @@ Para calcular a concorrencia, o sistema deve considerar como concorrentes os est
 
 A CONFIRMAR: quais atividades serao consideradas equivalentes entre si quando nao tiverem exatamente o mesmo CNAE.
 
+Proposta inicial: contar somente estabelecimentos com CNAE **principal exatamente igual** ao consultado. CNAEs secundarios ou equivalentes nao entram nessa primeira contagem.
+
 ### RN-007 - Identificacao de concorrentes por area analisada
 
 O sistema deve identificar concorrentes existentes dentro da regiao ou do raio geografico definido para a analise.
 
 Quando o usuario informar um raio, a concorrencia deve ser calculada a partir da distancia entre a localizacao analisada e os estabelecimentos encontrados.
+
+Na primeira versao, a area de concorrencia e o municipio selecionado pelo codigo IBGE; raio e ponto ficam para etapa posterior. Uma contagem zero so significa ausencia de concorrentes apos verificar a cobertura da base para o municipio e a atividade.
 
 ### RN-008 - Raio geografico definido pelo usuario
 
@@ -80,7 +86,7 @@ A CONFIRMAR: valores minimo e maximo permitidos para o raio.
 
 ### RN-009 - Calculo de score entre 0 e 100
 
-Cada analise de potencial deve gerar um score numerico entre 0 e 100.
+Cada analise **com dados minimos suficientes e formula aprovada** deve gerar um score numerico entre 0 e 100. Uma consulta pode retornar indicadores e avisos sem score quando essas condicoes nao forem atendidas.
 
 Quanto maior o score, maior deve ser o potencial comercial estimado para a atividade naquela localizacao ou regiao.
 
@@ -102,7 +108,7 @@ A CONFIRMAR: peso de cada fator no calculo do score.
 
 ### RN-011 - Justificativa obrigatoria para o resultado
 
-Toda analise de potencial deve apresentar uma justificativa compreensivel junto com o score.
+Toda analise que apresentar score deve trazer uma justificativa compreensivel. Quando nao houver score, deve explicar a limitacao.
 
 A justificativa deve indicar os principais fatores que influenciaram o resultado, como baixa concorrencia, renda compativel, alta densidade populacional ou outros fatores relevantes para a atividade consultada.
 
@@ -134,17 +140,17 @@ Nesse caso, o novo resultado deve ser tratado como uma nova analise, preservando
 
 A situacao cadastral do estabelecimento deve ser considerada na interpretacao dos dados de concorrencia.
 
-A CONFIRMAR: se estabelecimentos inativos, baixados ou suspensos serao excluidos da concorrencia ou apenas exibidos com classificacao diferente.
+Proposta inicial: somente estabelecimentos com situacao cadastral **ativa** participam da contagem de concorrentes. Situacoes desconhecidas nao devem ser convertidas em ativas. Exibicao separada de inativos, baixados ou suspensos continua `A CONFIRMAR`.
 
 ### RN-017 - Atividades sem dados suficientes
 
 Quando nao houver dados suficientes para calcular uma analise confiavel, o sistema deve indicar essa limitacao ao usuario.
 
-A CONFIRMAR: se nesses casos o sistema deixara de gerar score ou se gerara um score com aviso de baixa confiabilidade.
+Para a primeira versao, sem populacao municipal, sem cobertura validada de CNPJ ou sem formula/pesos aprovados, a consulta **nao apresenta score**; mostra os dados disponiveis e o motivo da insuficiencia. Quando um dado opcional faltar, indicar a ausencia e somente calcular com fatores cuja regra de uso tenha sido aprovada. A validade temporal de cada fonte continua `A CONFIRMAR`.
 
 ### RN-018 - Resultado orientativo
 
-O score do RightPoint deve ser interpretado como apoio a decisao do empreendedor, nao como garantia de sucesso comercial.
+O score do RightPoint deve ser interpretado como apoio a decisao do empreendedor, nao como garantia de sucesso comercial nem como probabilidade estatistica de sucesso.
 
 O sistema deve orientar a analise, mas a decisao final de abrir ou nao o negocio pertence ao usuario.
 
@@ -163,10 +169,9 @@ Os itens abaixo parecem importantes, mas pertencem melhor ao documento de restri
 ## Pontos para validar com o grupo
 
 - Quais tipos de negocio serao exemplos oficiais do trabalho?
-- O sistema vai trabalhar inicialmente por bairro, municipio, coordenada geografica ou todos esses recortes?
-- O CNAE sera obrigatorio ou apenas uma referencia?
-- Quais indicadores socioeconomicos serao obrigatorios na primeira modelagem?
+- A professora/grupo validam o recorte dos 92 municipios do RJ, a populacao como dado regional minimo e a proposta de concorrencia por CNAE principal exato e situacao ativa?
+- Quais indicadores adicionais tem cobertura e pertinencia comprovadas para cada atividade?
 - Como o score sera calculado em alto nivel?
-- Estabelecimentos inativos devem contar como concorrencia?
+- Como identificar e apresentar estabelecimentos inativos fora da contagem inicial?
 - O historico de analise sera obrigatorio ou opcional na modelagem final?
 - O usuario precisa estar cadastrado para realizar analises ou isso ficara fora do escopo?

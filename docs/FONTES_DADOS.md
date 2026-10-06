@@ -1,6 +1,6 @@
 # Fontes de dados candidatas — RightPoint
 
-Registro inicial do grupo, atualizado em 05/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados.
+Registro inicial do grupo, atualizado em 06/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam os critérios **propostos** para a primeira versão, limitada aos 92 municípios do RJ.
 
 | Fonte candidata | Dados pretendidos | Possível uso | Estado |
 | --- | --- | --- | --- |
@@ -21,6 +21,7 @@ Estas referências mostram caminhos possíveis de obtenção de dados. Seus arqu
 - **INMET:** [BDMEP e dados históricos](https://portal.inmet.gov.br/servicos/bdmep-dados-historicos). As medições são de estações; decidir como relacioná-las a municípios antes de usar um indicador municipal.
 - **Investimento público:** [API de dados contábeis do SICONFI](https://www.tesourotransparente.gov.br/consultas/consultas-siconfi/siconfi-api-de-dados-abertos) e [API de obras do Obrasgov](https://www.gov.br/obrasgov/pt-br/ferramentas-de-gestao-e-transparencia/api-de-dados-abertos-obrasgov.br). São conjuntos distintos; selecionar uma medida concreta antes de criar indicador.
 - **Geocodificação:** [política de uso do Nominatim público, ligado ao OpenStreetMap](https://operations.osmfoundation.org/policies/nominatim/). O recorte inicial por município não exige geocodificação nem Mapbox.
+- **Mapa municipal:** [Malha Municipal do IBGE](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/15774-malhas.html) como candidata para os limites dos municípios. Edição, arquivo do RJ e forma de uso no navegador ainda precisam ser escolhidos e testados.
 
 A migration `create_fonte_dados_table` cria `fontes_dados` para registrar a origem dos dados efetivamente usados. Ela não importa as fontes candidatas nem substitui este documento de pesquisa.
 
@@ -54,4 +55,4 @@ O usuário reservou esta seção, mas ainda não forneceu endpoint ou arquivo pa
 
 Em 05/10/2026, o comando `php artisan ibge:consultar-rio` consultou as duas APIs, associou as respostas pelo código `3304557` e exibiu Rio de Janeiro, população `6211223` pessoas e ano `2022`. O comando verifica falha de conexão, resposta HTTP sem sucesso, formato inesperado e valor não numérico. A execução com acesso à rede foi bem-sucedida; a execução em ambiente de ferramentas com rede restrita não conseguiu conectar, sem indicar defeito no código.
 
-Este experimento não grava dados no banco nem produz score. Antes de importar municípios ou armazenar indicadores, definir a fonte aprovada, o recorte, a periodicidade de atualização e como registrar a procedência dos dados.
+Este experimento não grava dados no banco nem produz score. O recorte da primeira versão foi definido como os **92 municípios do RJ**; a consulta de população acima cobre somente **um** deles. Antes de importar municípios ou armazenar indicadores, confirmar cobertura, método de carga, periodicidade e procedência. A direção aprovada para o futuro é atualização **agendada, de uma fonte por vez**, com frequência e retentativas ainda `A CONFIRMAR`; consultas dos usuários deverão usar dados locais já validados, não chamar todas as fontes externas a cada análise.

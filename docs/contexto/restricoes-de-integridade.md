@@ -20,6 +20,8 @@ Relacionada a: `RN-001`.
 
 Toda análise deve possuir pelo menos uma referência geográfica válida: uma região ou uma localização.
 
+Na primeira versão, essa referência será um dos 92 municípios do RJ, identificado por código IBGE válido; nome digitado ou geometria do mapa não substituem o código.
+
 Relacionada a: `RN-002`.
 
 ### RI-004 - Faixa do score
@@ -52,7 +54,7 @@ A situação cadastral deve usar valores reconhecidos pela fonte de dados adotad
 
 ### RI-010 - Origem do indicador
 
-Todo indicador regional usado em uma análise deve registrar tipo, valor, unidade quando aplicável, fonte e data de referência.
+Todo indicador regional usado em uma análise deve registrar tipo, valor, unidade quando aplicável, código IBGE do município, fonte, período de referência, versão/data da base e data da atualização local. O período do dado e a data da importação não são a mesma informação.
 
 ### RI-011 - Valor compatível com o indicador
 
@@ -76,9 +78,7 @@ Cada fator citado na justificativa deve corresponder a um fator registrado na an
 
 ### RI-015 - Resultado sem dados suficientes
 
-Uma análise classificada como sem dados suficientes não pode ser apresentada como resultado confiável.
-
-A CONFIRMAR: se essa situação impedirá a geração do score ou produzirá um score acompanhado de nível de confiança.
+Uma análise classificada como sem dados suficientes não pode ser apresentada como resultado confiável. Na primeira versão, a falta de população, de cobertura validada de CNPJ ou de fórmula aprovada impede a apresentação do score; dados disponíveis e o motivo da insuficiência podem ser mostrados. Zero concorrentes exige cobertura verificada; dado ausente não pode virar zero.
 
 ## Pontos para validação
 

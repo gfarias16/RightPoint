@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        /*criacao da tabela fontes_dados */
         Schema::create('fontes_dados', function (Blueprint $table) {
             $table->id();
 
