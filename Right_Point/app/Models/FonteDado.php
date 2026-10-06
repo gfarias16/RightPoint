@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Municipio extends Model
+class FonteDado extends Model
 {
-    protected $table = 'municipios';
+    protected $table = 'fontes_dados';
+
     protected $fillable = [
-        'codigo_ibge',
+        'codigo',
         'nome',
-        'uf',
+        'url_referencia',
     ];
 }

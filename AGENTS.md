@@ -37,14 +37,15 @@ Não trate este resumo como prova do estado atual. Confirme código, Git e ambie
    - `docs/STATUS.md`
    - `docs/README.md`;
    - `docs/planos/implementacao-inicial.md`;
-   - `docs/procedimentos/ambiente-multiplos-computadores.md`.
+   - `docs/procedimentos/ambiente-multiplos-computadores.md`;
+   - `docs/FONTES_DADOS.md`.
 4. Leia apenas a documentação adicional necessária para a tarefa atual.
 5. Verifique se o ambiente observado concorda com a documentação. Registre divergências em vez de escolher automaticamente uma fonte como correta.
 
 ## Roteamento de contexto
 
 - Regras e conceitos do domínio: `docs/contexto/`.
-- Fontes candidatas e testes iniciais de APIs: `docs/FONTES_DADOS`.
+- Fontes candidatas e testes iniciais de APIs: `docs/FONTES_DADOS.md`.
 - Arquitetura e modelo conceitual: `docs/arquitetura/`.
 - Continuidade da implementação: `docs/planos/implementacao-inicial.md`.
 - Troca entre computadores e preparação local: `docs/procedimentos/ambiente-multiplos-computadores.md`.

@@ -2,14 +2,14 @@
 
 ## Estado da modelagem
 
-O RightPoint está em fase de definição do domínio, com a base Laravel em `Right_Point/`. Ainda não existem fluxo de consulta, integração com fontes públicas ou fórmula validada para o score. Neste computador, a conexão com MariaDB foi verificada e as migrations padrão do Laravel, de municípios e de atividades econômicas foram aplicadas. As demais estruturas do domínio seguem pendentes. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
+O RightPoint está em fase de definição do domínio, com a base Laravel em `Right_Point/`. Ainda não existem fluxo de consulta, importação de fontes públicas ou fórmula validada para o score. Na escola, as migrations padrão do Laravel, de municípios, de atividades econômicas e de fontes de dados foram aplicadas ao banco local. As demais estruturas do domínio seguem pendentes. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
 
 ## Limitações funcionais
 
 | Limitação | Impacto | Tratamento atual |
 | --- | --- | --- |
 | Fórmula e pesos do score indefinidos | Ainda não é possível reproduzir um cálculo real. | `A CONFIRMAR` com o grupo. |
-| Fontes candidatas indicadas, ainda não validadas para integração | Disponibilidade, cobertura, atualização, licença e formato da maioria dos dados ainda são desconhecidos. | Conferir cada fonte em [FONTES_DADOS](../FONTES_DADOS) e manter a arquitetura independente de um fornecedor específico. |
+| Fontes candidatas indicadas, ainda não validadas para integração | Disponibilidade, cobertura, atualização, licença e formato da maioria dos dados ainda são desconhecidos. | Conferir cada fonte em [FONTES_DADOS](../FONTES_DADOS.md) e manter a arquitetura independente de um fornecedor específico. |
 | Equivalência entre atividades indefinida | A contagem de concorrentes pode variar conforme o critério. | Registrar como regra pendente. |
 | Escopo geográfico indefinido | Não está decidido se a primeira versão cobrirá bairro, município, coordenadas ou todos. | Validar antes da modelagem física. |
 | Tratamento de empresas inativas indefinido | A concorrência pode ser superestimada. | Não presumir que todo CNPJ encontrado é concorrente ativo. |

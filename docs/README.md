@@ -18,7 +18,7 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 - [Restrições de integridade](./contexto/restricoes-de-integridade.md)
 - [Glossário](./contexto/glossario.md)
 - [Limitações conhecidas](./contexto/limitacoes-conhecidas.md)
-- [Fontes de dados candidatas e primeiros testes do IBGE](./FONTES_DADOS)
+- [Fontes de dados candidatas e primeiros testes do IBGE](./FONTES_DADOS.md)
 
 ### Arquitetura conceitual
 
@@ -45,7 +45,7 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 
 ## Estado atual
 
-Atualizado em 05/10/2026. A pasta Laravel foi renomeada intencionalmente para `Right_Point/`, e as migrations iniciais do domínio foram aplicadas no notebook do trabalho. O fluxo de consulta do RightPoint ainda não foi implementado. O grupo registrou [fontes candidatas](./FONTES_DADOS) e dois endpoints do IBGE foram testados em modo leitura; isso não constitui integração com o Laravel. Para retomar o desenvolvimento, consulte o [plano de continuidade](./planos/implementacao-inicial.md), que registra o estado verificado, as decisões pendentes e a próxima etapa.
+Atualizado em 05/10/2026. A pasta Laravel foi renomeada intencionalmente para `Right_Point/`, e as migrations iniciais do domínio foram aplicadas no notebook do trabalho e confirmadas na escola. Na escola, a tabela `fontes_dados` também foi criada para rastrear a origem dos dados futuros. O fluxo de consulta do RightPoint ainda não foi implementado. O grupo registrou [fontes candidatas](./FONTES_DADOS.md), e existe um comando experimental de leitura de dois endpoints do IBGE no Laravel, sem importação para o banco nem cálculo de score. Para retomar o desenvolvimento, consulte o [plano de continuidade](./planos/implementacao-inicial.md), que registra o estado verificado, as decisões pendentes e a próxima etapa.
 
 O desenvolvimento ocorrerá em mais de um computador. Por decisão explícita do usuário, o `.env` desta aplicação está versionado e será recebido em outro clone; as dependências instaladas e o banco do XAMPP continuam locais. Antes de configurar ou atualizar um ambiente, siga o [procedimento para múltiplos computadores](./procedimentos/ambiente-multiplos-computadores.md), especialmente ao retornar ao computador da escola, onde podem existir arquivos ou migrations ainda não enviados ao GitHub.
 

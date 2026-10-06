@@ -1,4 +1,3 @@
-
 # Fontes de dados candidatas — RightPoint
 
 Registro inicial do grupo, atualizado em 05/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados.
@@ -11,6 +10,19 @@ Registro inicial do grupo, atualizado em 05/10/2026. Uma fonte listada aqui não
 | INMET | Temperatura, chuva e histórico climático | Avaliar influência climática conforme a atividade | A CONFIRMAR |
 | Portal da Transparência / SICONFI | Obras e investimentos públicos | Investigar investimento regional; não presumir valorização como consequência | A CONFIRMAR |
 | OpenStreetMap / Mapbox | Coordenadas, ruas, bairros, pontos de interesse e geocodificação | Consulta espacial e mapa | A CONFIRMAR |
+
+## Referências oficiais identificadas em 05/10/2026
+
+Estas referências mostram caminhos possíveis de obtenção de dados. Seus arquivos, campos, licença de reutilização, cobertura e adequação ao RightPoint ainda precisam ser avaliados antes de qualquer importação.
+
+- **CNAE:** [busca oficial da CONCLA/IBGE](https://concla.ibge.gov.br/busca-online-cnae.html) e [leiaute dos dados abertos de CNPJ da Receita Federal](https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf), que descreve arquivo de códigos e descrições de CNAE. Definir qual arquivo e versão alimentarão `atividades_economicas`.
+- **Estabelecimentos/CNPJ:** [catálogo de dados abertos da Receita Federal](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/cadastros) e [leiaute de CNPJ](https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf). O arquivo efetivo, o método de obtenção e o mapeamento do município da Receita para o código IBGE seguem A CONFIRMAR. A Receita [iniciou a emissão de CNPJs alfanuméricos em 2026](https://www.gov.br/receitafederal/pt-br/assuntos/noticias/2026/julho/receita-federal-gera-o-primeiro-cnpj-em-formato-alfanumerico): armazenar o identificador como texto de 14 posições, quando essa tabela for criada.
+- **ANP:** [série histórica de preços de combustíveis em CSV](https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/serie-historica-de-precos-de-combustiveis). Preço pesquisado não equivale diretamente a fluxo de pessoas nem a potencial comercial.
+- **INMET:** [BDMEP e dados históricos](https://portal.inmet.gov.br/servicos/bdmep-dados-historicos). As medições são de estações; decidir como relacioná-las a municípios antes de usar um indicador municipal.
+- **Investimento público:** [API de dados contábeis do SICONFI](https://www.tesourotransparente.gov.br/consultas/consultas-siconfi/siconfi-api-de-dados-abertos) e [API de obras do Obrasgov](https://www.gov.br/obrasgov/pt-br/ferramentas-de-gestao-e-transparencia/api-de-dados-abertos-obrasgov.br). São conjuntos distintos; selecionar uma medida concreta antes de criar indicador.
+- **Geocodificação:** [política de uso do Nominatim público, ligado ao OpenStreetMap](https://operations.osmfoundation.org/policies/nominatim/). O recorte inicial por município não exige geocodificação nem Mapbox.
+
+A migration `create_fonte_dados_table` cria `fontes_dados` para registrar a origem dos dados efetivamente usados. Ela não importa as fontes candidatas nem substitui este documento de pesquisa.
 
 ## 1. IBGE — municípios do estado do Rio de Janeiro
 
@@ -38,6 +50,8 @@ O código IBGE `3304557` permite associar a resposta do SIDRA ao município da A
 
 O usuário reservou esta seção, mas ainda não forneceu endpoint ou arquivo para teste. Acesso, licença, campos, cobertura e atualização permanecem A CONFIRMAR. Não afirmar cálculo de sobrevivência/mortalidade somente a partir de situação cadastral e data de abertura.
 
-## Próximo experimento do aluno
+## Experimento de leitura no Laravel
 
-Criar uma consulta de leitura pequena no Laravel: obter a lista de municípios, localizar o código `3304557`, consultar o SIDRA e mostrar nome, código, população, unidade e ano. Tratar falha HTTP, resposta vazia, cabeçalho do SIDRA e valor não numérico. Não gravar no banco nem produzir score neste primeiro teste. Depois, revisar o resultado antes de decidir importação ou nova estrutura para indicadores.
+Em 05/10/2026, o comando `php artisan ibge:consultar-rio` consultou as duas APIs, associou as respostas pelo código `3304557` e exibiu Rio de Janeiro, população `6211223` pessoas e ano `2022`. O comando verifica falha de conexão, resposta HTTP sem sucesso, formato inesperado e valor não numérico. A execução com acesso à rede foi bem-sucedida; a execução em ambiente de ferramentas com rede restrita não conseguiu conectar, sem indicar defeito no código.
+
+Este experimento não grava dados no banco nem produz score. Antes de importar municípios ou armazenar indicadores, definir a fonte aprovada, o recorte, a periodicidade de atualização e como registrar a procedência dos dados.

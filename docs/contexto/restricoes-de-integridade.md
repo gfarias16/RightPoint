@@ -40,7 +40,7 @@ Quando informadas, a latitude deve estar entre -90 e 90 e a longitude entre -180
 
 ### RI-007 - CNPJ único
 
-Cada CNPJ deve identificar no máximo um estabelecimento armazenado. O valor deve conter 14 dígitos e passar pela validação de CNPJ quando essa informação estiver disponível.
+Cada CNPJ deve identificar no máximo um estabelecimento armazenado. O valor deve conter 14 posições alfanuméricas e passar pela validação aplicável ao seu formato quando essa informação estiver disponível.
 
 ### RI-008 - Atividade do estabelecimento
 

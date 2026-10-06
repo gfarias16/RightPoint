@@ -32,7 +32,7 @@ O model `User` fornecido pelo Laravel não significa que login ou cadastro foram
 
 ## Próxima etapa imediata
 
-As migrations iniciais de municípios e atividades econômicas por CNAE estão versionadas e foram aplicadas no notebook do trabalho. A próxima etapa é validar os models e definir os dados de demonstração e as próximas estruturas do domínio; instalação npm e conferência da escola continuam pendentes.
+As migrations iniciais de municípios e atividades econômicas por CNAE estão versionadas, foram aplicadas no notebook do trabalho e aparecem como `Ran` na escola em 05/10/2026. Os dois models foram validados na escola. Um comando experimental consultou município e população no IBGE em modo leitura. A tabela `fontes_dados` foi criada e aplicada no banco local da escola para permitir rastrear a origem dos dados futuros; nenhuma fonte candidata foi importada. A instalação npm e as próximas estruturas do domínio continuam pendentes.
 
 ### Decisões a confirmar
 
@@ -45,7 +45,7 @@ As migrations iniciais de municípios e atividades econômicas por CNAE estão v
 | Histórico | Definir se análises serão persistidas na primeira versão. | Armazenamento de resultados e dados usados no cálculo. |
 | Identidade | Definir necessidade de login e de análises vinculadas ao usuário. | Autenticação e autorização. |
 | Interface | Escolher a abordagem de frontend compatível com Laravel. | Implementação das telas e ferramentas necessárias. |
-| Dados externos | Fontes candidatas registradas em [FONTES_DADOS](../FONTES_DADOS); verificar cobertura, acesso, licença, atualização e adequação de cada indicador antes de integrar. | Viabilidade dos indicadores e da concorrência. |
+| Dados externos | Fontes candidatas registradas em [FONTES_DADOS](../FONTES_DADOS.md); verificar cobertura, acesso, licença, atualização e adequação de cada indicador antes de integrar. | Viabilidade dos indicadores e da concorrência. |
 | Score | Validar fórmula, pesos, dados mínimos e tratamento de ausência de dados. | Cálculo reproduzível e justificativa. |
 
 Resolver cada pendência antes da etapa que depende dela. Fontes e fórmula podem permanecer pendentes durante um protótipo de consulta, desde que ele não apresente um score como validado.
@@ -65,6 +65,7 @@ Critério de conclusão: escopo inicial explícito e ambiente mínimo validado, 
 ### 2. Implementar a base de dados do domínio
 
 - [x] Versionar e aplicar no notebook do trabalho as migrations iniciais de municípios e atividades econômicas por CNAE.
+- [x] Criar a migration e o model de fontes de dados; aplicar a migration no banco local da escola.
 - [ ] Revisar atributos, cardinalidades e restrições do modelo conceitual.
 - [ ] Definir migrations e models para atividades econômicas, regiões, indicadores, fontes e estabelecimentos conforme o recorte aprovado.
 - [ ] Incluir relacionamentos necessários, sem converter automaticamente cada classe conceitual em tabela.
@@ -103,4 +104,4 @@ Critério de conclusão: resultado rastreável, cálculo reproduzível e limita�
 
 ## Ponto de retomada
 
-Na próxima sessão ou em outro computador, começar pela conferência do Git, do Laravel e do banco local conforme o [STATUS.md](../STATUS.md) e o [procedimento para múltiplos computadores](../procedimentos/ambiente-multiplos-computadores.md). As migrations de municípios e atividades econômicas estão versionadas e foram aplicadas no notebook do trabalho em 05/10/2026; a próxima tarefa de código é completar e validar os dois models. O fluxo de consulta continua pendente.
+Na próxima sessão ou em outro computador, começar pela conferência do Git, do Laravel e do banco local conforme o [STATUS.md](../STATUS.md) e o [procedimento para múltiplos computadores](../procedimentos/ambiente-multiplos-computadores.md). Na escola, a migration de `fontes_dados` foi aplicada em 05/10/2026; no outro computador, consultar `php artisan migrate:status` antes de aplicá-la. A próxima tarefa é selecionar e validar os conjuntos de dados das [fontes candidatas](../FONTES_DADOS.md), então definir as tabelas de indicadores municipais e estabelecimentos. O fluxo de consulta continua pendente.

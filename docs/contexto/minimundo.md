@@ -32,7 +32,7 @@ Pessoa interessada em abrir um negócio e consultar o potencial de uma atividade
 
 Fornecem dados socioeconômicos, geográficos e cadastrais usados na análise. Podem incluir bases de CNPJ, CNAE, população, renda, faixa etária, densidade demográfica e clima.
 
-O grupo indicou fontes candidatas em [FONTES_DADOS](../FONTES_DADOS), incluindo IBGE, dados de CNPJ, ANP, INMET, investimentos públicos e geodados. A adoção efetiva, os indicadores e a forma de acesso de cada fonte permanecem A CONFIRMAR.
+O grupo indicou fontes candidatas em [FONTES_DADOS](../FONTES_DADOS.md), incluindo IBGE, dados de CNPJ, ANP, INMET, investimentos públicos e geodados. A adoção efetiva, os indicadores e a forma de acesso de cada fonte permanecem A CONFIRMAR.
 
 ## Informações mantidas
 
