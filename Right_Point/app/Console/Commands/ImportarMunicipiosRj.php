@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use App\Models\Municipio;
+use Illuminate\Support\Facades\DB;
 
 class ImportarMunicipiosRj extends Command
 {
@@ -43,6 +45,7 @@ class ImportarMunicipiosRj extends Command
     }
 
     $codigosVistos = [];
+    $dadosParaGravar=[];
 
     /*aqui verificamos se os dados dos municípios são válidos   */
     foreach ($municipios as $indice => $municipio) {
@@ -53,6 +56,12 @@ class ImportarMunicipiosRj extends Command
 
         $id = $municipio['id'] ?? null;
         $nome = $municipio['nome'] ?? null;
+        $uf = $municipio['microrregiao']['mesorregiao']['UF']['sigla'] ?? null;
+
+        if ($uf !== 'RJ') {
+            $this->error("Registro {$indice} não pertence ao RJ ou não possui UF válida.");
+            return self::FAILURE;
+        }
 
         if (! is_int($id) && ! is_string($id)) {
             $this->error("Registro {$indice} não possui código IBGE válido.");
@@ -76,8 +85,15 @@ class ImportarMunicipiosRj extends Command
         }
 
         $codigosVistos[$codigoIbge] = true;
+
+        $dadosParaGravar[] = [
+            'codigo_ibge' => $codigoIbge,
+            'nome' => trim($nome),
+            'uf' => $uf,
+            ];
         }
 
+    $this->info('Registros preparados: ' . count($dadosParaGravar));
     $this->info('Consulta concluída: 92 municípios do RJ.');
     $this->line('Nenhum dado foi gravado no banco.');
 

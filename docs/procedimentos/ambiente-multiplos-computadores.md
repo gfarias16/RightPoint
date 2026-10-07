@@ -224,7 +224,9 @@ Ao retomar o RightPoint em qualquer computador, o agente deve:
 11. documentar somente verificações realmente executadas;
 12. marcar como `A CONFIRMAR` qualquer dado que não possa ser determinado.
 
-## Diagnóstico atual e próxima conferência
+## Retomada após o trabalho na escola em 06/10/2026
 
-No próximo acesso ao computador da escola, a prioridade é descobrir se há arquivos não enviados e registrar o estado real do banco. Depois de preservar esse trabalho, atualize o repositório, instale as dependências necessárias e aplique as migrations pendentes no banco local.
+O checkout ativo da escola fica em `C:\xampp\htdocs\RightPoint`. O comando `ibge:importar-municipios-rj` foi executado pelo usuário ali e preparou 92 registros, mas não gravou no banco; a última consulta local mostrou 0 linhas em `municipios`. Código e documentação seguirão pelo Git após o push do usuário, enquanto esse estado do banco não será transferido.
+
+Em casa, antes de qualquer `git pull`, confira a pasta existente, `git status --short --branch` e alterações locais, inclusive no `.env` rastreado. Depois da sincronização, entre em `Right_Point/`, confirme PHP e dependências, inicie o MySQL local e consulte `php artisan migrate:status` e o conteúdo da tabela `municipios` sem apagar dados. Se as dependências PHP estiverem ausentes, use `composer install` com o `composer.lock`. A etapa seguinte está detalhada em [STATUS.md](../STATUS.md): terminar e revisar a gravação idempotente dos 92 municípios, executar o comando duas vezes no banco local correto e verificar que não houve duplicação. O código ainda não realiza essa gravação.
 

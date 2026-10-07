@@ -33,7 +33,7 @@ O model `User` fornecido pelo Laravel não significa que login ou cadastro foram
 
 ## Próxima etapa imediata
 
-As migrations iniciais de municípios e atividades econômicas por CNAE estão versionadas, foram aplicadas no notebook do trabalho e aparecem como `Ran` na escola em 05/10/2026. Os dois models foram validados na escola. Um comando experimental consultou município e população no IBGE em modo leitura. A tabela `fontes_dados` foi criada e aplicada no banco local da escola para permitir rastrear a origem dos dados futuros; nenhuma fonte candidata foi importada. A [matriz e o fluxograma](../arquitetura/matriz-dados-diagnostico.md) agora documentam o recorte inicial dos 92 municípios do RJ e propostas de critério, sem validar a fórmula nem alterar código ou banco. A instalação npm e as próximas estruturas do domínio continuam pendentes.
+As migrations iniciais de municípios e atividades econômicas por CNAE estão versionadas e foram aplicadas no banco local da escola; os models iniciais foram validados. O comando `ibge:importar-municipios-rj` consultou, validou e preparou 92 municípios no terminal do usuário em 06/10/2026, mas ainda não grava no banco. Os imports de `Municipio` e `DB` já estão no arquivo como preparação para essa etapa. A tabela `fontes_dados` também foi criada e aplicada no banco local da escola para rastrear a origem dos dados futuros. A [matriz e o fluxograma](../arquitetura/matriz-dados-diagnostico.md) documentam o recorte inicial do RJ e critérios propostos, sem validar a fórmula. A instalação npm e as próximas estruturas do domínio continuam pendentes.
 
 ### Decisões a confirmar
 
@@ -69,6 +69,8 @@ Critério de conclusão: escopo inicial explícito e ambiente mínimo validado, 
 
 - [x] Versionar e aplicar no notebook do trabalho as migrations iniciais de municípios e atividades econômicas por CNAE.
 - [x] Criar a migration e o model de fontes de dados; aplicar a migration no banco local da escola.
+- [x] Validar e preparar em memória os 92 municípios do RJ retornados pelo IBGE no notebook da escola, sem gravar no banco.
+- [ ] Implementar a importação idempotente em `municipios`; revisar a primeira escrita e conferir 92 linhas após executar o comando duas vezes no banco local correto.
 - [ ] Revisar atributos, cardinalidades e restrições do modelo conceitual.
 - [ ] Definir migrations e models ainda necessários para indicadores municipais e estabelecimentos/CNAEs, conforme o recorte aprovado; preservar os catálogos e a tabela de fontes já criados.
 - [ ] Incluir relacionamentos necessários, sem converter automaticamente cada classe conceitual em tabela.
@@ -109,4 +111,4 @@ Critério de conclusão: resultado rastreável, cálculo reproduzível e limita�
 
 ## Ponto de retomada
 
-Na próxima sessão ou em outro computador, começar pela conferência do Git, do Laravel e do banco local conforme o [STATUS.md](../STATUS.md) e o [procedimento para múltiplos computadores](../procedimentos/ambiente-multiplos-computadores.md). Na escola, a migration de `fontes_dados` foi aplicada em 05/10/2026; no outro computador, consultar `php artisan migrate:status` antes de aplicá-la. A próxima tarefa é revisar com o grupo/professora as propostas da [matriz](../arquitetura/matriz-dados-diagnostico.md), selecionar conjuntos verificáveis das [fontes candidatas](../FONTES_DADOS.md) e só então definir as tabelas de indicadores municipais e estabelecimentos. O fluxo de consulta, o mapa, o CRUD e o score continuam pendentes.
+Na próxima sessão ou em outro computador, começar pela conferência do Git, do Laravel e do banco local conforme o [STATUS.md](../STATUS.md) e o [procedimento para múltiplos computadores](../procedimentos/ambiente-multiplos-computadores.md). Na escola, o comando preparou 92 municípios sem persistência. O próximo exercício é implementar a gravação idempotente, revisar o código antes da primeira escrita e testar duas execuções sem duplicatas; os imports do model e de `DB` já foram adicionados, mas ainda não são usados. Em outra máquina, consultar `php artisan migrate:status` e a tabela `municipios` antes de executar qualquer migration ou importação. Depois da carga, revisar com o grupo/professora as propostas da [matriz](../arquitetura/matriz-dados-diagnostico.md) e selecionar conjuntos verificáveis das [fontes candidatas](../FONTES_DADOS.md) antes de definir indicadores e estabelecimentos. O fluxo de consulta, o mapa, o CRUD e o score continuam pendentes.
