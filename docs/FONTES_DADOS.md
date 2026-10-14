@@ -1,6 +1,6 @@
 # Fontes de dados candidatas — RightPoint
 
-Registro inicial do grupo, atualizado em 06/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam os critérios **propostos** para a primeira versão, limitada aos 92 municípios do RJ.
+Registro inicial do grupo, atualizado em 13/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam os critérios **propostos** para a primeira versão, limitada aos 92 municípios do RJ.
 
 | Fonte candidata | Dados pretendidos | Possível uso | Estado |
 | --- | --- | --- | --- |
@@ -33,7 +33,9 @@ https://servicodados.ibge.gov.br/api/v1/localidades/estados/33/municipios?
 
 Consulta de leitura realizada em 05/10/2026: retornou 92 municípios. Cada item inclui `id` (código IBGE), `nome` e dados da divisão territorial; a sigla `RJ` aparece na estrutura aninhada da UF. O município do Rio de Janeiro tem código `3304557`. Esta resposta **não** traz população nem coordenadas. O `?` final da URL não adiciona nenhum parâmetro.
 
-Mapeamento possível para a tabela `municipios` já criada: `id` da API → `codigo_ibge` (guardar como texto de sete caracteres); `nome` → `nome`; sigla da UF → `uf`. O `id` interno da tabela Laravel é diferente do código IBGE.
+Mapeamento implementado para a tabela `municipios`: `id` da API → `codigo_ibge` (texto de sete caracteres); `nome` → `nome`; `microrregiao.mesorregiao.UF.sigla` → `uf`. O `id` interno da tabela Laravel é diferente do código IBGE.
+
+Em 13/10/2026, `php artisan ibge:importar-municipios-rj` gravou os 92 municípios no MySQL/MariaDB local do XAMPP. O comando valida a lista inteira e usa `upsert` dentro de uma transação. Duas execuções reais mantiveram 92 códigos distintos, UF `RJ`, IDs e datas de criação. Nome, UF e `updated_at` podem ser atualizados em execuções posteriores. A importação é manual; agendamento, periodicidade e registro da origem na tabela `fontes_dados` continuam pendentes.
 
 ## 2. IBGE SIDRA — população residente do Rio de Janeiro no Censo 2022
 
@@ -55,4 +57,4 @@ O usuário reservou esta seção, mas ainda não forneceu endpoint ou arquivo pa
 
 Em 05/10/2026, o comando `php artisan ibge:consultar-rio` consultou as duas APIs, associou as respostas pelo código `3304557` e exibiu Rio de Janeiro, população `6211223` pessoas e ano `2022`. O comando verifica falha de conexão, resposta HTTP sem sucesso, formato inesperado e valor não numérico. A execução com acesso à rede foi bem-sucedida; a execução em ambiente de ferramentas com rede restrita não conseguiu conectar, sem indicar defeito no código.
 
-Este experimento não grava dados no banco nem produz score. O recorte da primeira versão foi definido como os **92 municípios do RJ**; a consulta de população acima cobre somente **um** deles. Antes de importar municípios ou armazenar indicadores, confirmar cobertura, método de carga, periodicidade e procedência. A direção aprovada para o futuro é atualização **agendada, de uma fonte por vez**, com frequência e retentativas ainda `A CONFIRMAR`; consultas dos usuários deverão usar dados locais já validados, não chamar todas as fontes externas a cada análise.
+O experimento `ibge:consultar-rio` continua sem gravação ou score; o comando separado `ibge:importar-municipios-rj` já persiste o catálogo municipal. A consulta de população acima cobre somente **um** dos 92 municípios. Antes de armazenar indicadores, confirmar cobertura, método de carga, periodicidade e procedência. A direção aprovada para o futuro é atualização **agendada, de uma fonte por vez**, com frequência e retentativas ainda `A CONFIRMAR`; consultas dos usuários deverão usar dados locais já validados, não chamar todas as fontes externas a cada análise.

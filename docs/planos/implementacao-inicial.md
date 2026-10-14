@@ -1,6 +1,6 @@
 # Plano de implementação inicial — RightPoint
 
-Última atualização: 06/10/2026 (matriz e fluxo documentais; sem implementação nova).
+Última atualização: 13/10/2026 (importação dos 92 municípios implementada e verificada no MySQL/MariaDB local).
 
 ## Objetivo
 
@@ -33,7 +33,7 @@ O model `User` fornecido pelo Laravel não significa que login ou cadastro foram
 
 ## Próxima etapa imediata
 
-As migrations iniciais de municípios e atividades econômicas por CNAE estão versionadas e foram aplicadas no banco local da escola; os models iniciais foram validados. O comando `ibge:importar-municipios-rj` consultou, validou e preparou 92 municípios no terminal do usuário em 06/10/2026, mas ainda não grava no banco. Os imports de `Municipio` e `DB` já estão no arquivo como preparação para essa etapa. A tabela `fontes_dados` também foi criada e aplicada no banco local da escola para rastrear a origem dos dados futuros. A [matriz e o fluxograma](../arquitetura/matriz-dados-diagnostico.md) documentam o recorte inicial do RJ e critérios propostos, sem validar a fórmula. A instalação npm e as próximas estruturas do domínio continuam pendentes.
+As migrations iniciais e os models dos catálogos estão disponíveis. Em 13/10/2026, o comando `ibge:importar-municipios-rj` passou a gravar os dados com transação e `upsert`; duas execuções reais no MySQL/MariaDB do XAMPP mantiveram 92 municípios do RJ, sem duplicatas e com IDs e datas de criação preservados. O próximo exercício é revisar essa gravação e selecionar a consulta de população para os 92 municípios antes de modelar os indicadores. A tabela `fontes_dados` existe para rastrear a origem dos dados futuros, mas seu preenchimento continua pendente. A [matriz e o fluxograma](../arquitetura/matriz-dados-diagnostico.md) documentam o recorte inicial do RJ e critérios propostos, sem validar a fórmula. A instalação npm e as próximas estruturas do domínio continuam pendentes.
 
 ### Decisões a confirmar
 
@@ -70,7 +70,7 @@ Critério de conclusão: escopo inicial explícito e ambiente mínimo validado, 
 - [x] Versionar e aplicar no notebook do trabalho as migrations iniciais de municípios e atividades econômicas por CNAE.
 - [x] Criar a migration e o model de fontes de dados; aplicar a migration no banco local da escola.
 - [x] Validar e preparar em memória os 92 municípios do RJ retornados pelo IBGE no notebook da escola, sem gravar no banco.
-- [ ] Implementar a importação idempotente em `municipios`; revisar a primeira escrita e conferir 92 linhas após executar o comando duas vezes no banco local correto.
+- [x] Implementar a importação sem duplicatas em `municipios`; duas execuções reais no MySQL local em 13/10/2026 mantiveram 92 linhas, códigos distintos, IDs e datas de criação.
 - [ ] Revisar atributos, cardinalidades e restrições do modelo conceitual.
 - [ ] Definir migrations e models ainda necessários para indicadores municipais e estabelecimentos/CNAEs, conforme o recorte aprovado; preservar os catálogos e a tabela de fontes já criados.
 - [ ] Incluir relacionamentos necessários, sem converter automaticamente cada classe conceitual em tabela.
@@ -111,4 +111,4 @@ Critério de conclusão: resultado rastreável, cálculo reproduzível e limita�
 
 ## Ponto de retomada
 
-Na próxima sessão ou em outro computador, começar pela conferência do Git, do Laravel e do banco local conforme o [STATUS.md](../STATUS.md) e o [procedimento para múltiplos computadores](../procedimentos/ambiente-multiplos-computadores.md). Na escola, o comando preparou 92 municípios sem persistência. O próximo exercício é implementar a gravação idempotente, revisar o código antes da primeira escrita e testar duas execuções sem duplicatas; os imports do model e de `DB` já foram adicionados, mas ainda não são usados. Em outra máquina, consultar `php artisan migrate:status` e a tabela `municipios` antes de executar qualquer migration ou importação. Depois da carga, revisar com o grupo/professora as propostas da [matriz](../arquitetura/matriz-dados-diagnostico.md) e selecionar conjuntos verificáveis das [fontes candidatas](../FONTES_DADOS.md) antes de definir indicadores e estabelecimentos. O fluxo de consulta, o mapa, o CRUD e o score continuam pendentes.
+Na próxima sessão ou em outro computador, começar pela conferência do Git, do Laravel e do banco local conforme o [STATUS.md](../STATUS.md) e o [procedimento para múltiplos computadores](../procedimentos/ambiente-multiplos-computadores.md). A gravação dos 92 municípios já está implementada e foi validada no XAMPP em 13/10/2026. Cada máquina precisa executar o comando no próprio banco após conferir conexão, migrations e dados existentes. Retomar pela explicação da transação e do `upsert` e pela inspeção dos dados no phpMyAdmin. Em seguida, selecionar e verificar a fonte de população com cobertura dos 92 municípios antes de definir indicadores. As propostas da [matriz](../arquitetura/matriz-dados-diagnostico.md) ainda dependem de validação com o grupo/professora. O fluxo de consulta, o mapa, o CRUD e o score continuam pendentes.

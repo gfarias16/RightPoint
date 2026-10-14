@@ -224,9 +224,25 @@ Ao retomar o RightPoint em qualquer computador, o agente deve:
 11. documentar somente verificações realmente executadas;
 12. marcar como `A CONFIRMAR` qualquer dado que não possa ser determinado.
 
-## Retomada após o trabalho na escola em 06/10/2026
+## Retomada após a importação em 13/10/2026
 
-O checkout ativo da escola fica em `C:\xampp\htdocs\RightPoint`. O comando `ibge:importar-municipios-rj` foi executado pelo usuário ali e preparou 92 registros, mas não gravou no banco; a última consulta local mostrou 0 linhas em `municipios`. Código e documentação seguirão pelo Git após o push do usuário, enquanto esse estado do banco não será transferido.
+O checkout ativo fica em `C:\xampp\htdocs\RightPoint`. Em 13/10/2026, o agente implementou e executou a importação a pedido do usuário: o MySQL/MariaDB local passou de 0 para 92 municípios do RJ. A segunda execução preservou a quantidade, os códigos únicos, os IDs e as datas de criação. O comando usa transação e atualiza nome e UF pelo código IBGE, além de `updated_at`. Código e documentação podem seguir pelo Git, enquanto as linhas do banco continuam locais.
 
-Em casa, antes de qualquer `git pull`, confira a pasta existente, `git status --short --branch` e alterações locais, inclusive no `.env` rastreado. Depois da sincronização, entre em `Right_Point/`, confirme PHP e dependências, inicie o MySQL local e consulte `php artisan migrate:status` e o conteúdo da tabela `municipios` sem apagar dados. Se as dependências PHP estiverem ausentes, use `composer install` com o `composer.lock`. A etapa seguinte está detalhada em [STATUS.md](../STATUS.md): terminar e revisar a gravação idempotente dos 92 municípios, executar o comando duas vezes no banco local correto e verificar que não houve duplicação. O código ainda não realiza essa gravação.
+Em casa, antes de qualquer `git pull`, confira a pasta existente, `git status --short --branch` e alterações locais, inclusive no `.env` rastreado. Depois da sincronização, entre em `Right_Point/`, confirme PHP e dependências, inicie o MySQL local e consulte `php artisan migrate:status` e o conteúdo da tabela `municipios` sem apagar dados. Se as dependências PHP estiverem ausentes, use `composer install` com o `composer.lock`; aplique somente migrations pendentes no banco correto.
+
+Depois de conferir que a conexão aponta para o MySQL local `rightpoint`, execute dentro de `Right_Point/`:
+
+```powershell
+php artisan ibge:importar-municipios-rj
+```
+
+No phpMyAdmin, selecione o banco `rightpoint` e execute na aba SQL:
+
+```sql
+SELECT COUNT(*) AS total, COUNT(DISTINCT codigo_ibge) AS codigos_distintos
+FROM municipios
+WHERE uf = 'RJ';
+```
+
+O resultado esperado é 92 em ambas as colunas para o catálogo atual do RJ. Repita a importação e a consulta para confirmar que não surgem duplicatas. Os IDs existentes devem permanecer; `updated_at` pode mudar a cada importação. Se já houver registros extras, investigue a origem antes de excluir qualquer dado. A falha de gravação retorna erro e registra a exceção no log do Laravel. Consulte o [STATUS.md](../STATUS.md) para o próximo exercício e registre as verificações feitas nessa máquina.
 
