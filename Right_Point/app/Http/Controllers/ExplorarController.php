@@ -22,6 +22,26 @@ class ExplorarController extends Controller
         return view('explorar', ['municipios' => $municipios]);
     }
 
+    public function buscarCnaes(Request $request): JsonResponse
+    {
+        $dados = $request->validate([
+            'busca' => ['required', 'string', 'min:2', 'max:80'],
+        ]);
+
+        $busca = trim($dados['busca']);
+
+        $atividades = AtividadeEconomica::query()
+            ->where(function ($query) use ($busca) {
+                $query->where('nome', 'like', '%' . $busca . '%')
+                    ->orWhere('codigo_cnae', 'like', $busca . '%');
+            })
+            ->orderBy('nome')
+            ->limit(20)
+            ->get(['codigo_cnae', 'nome']);
+
+        return response()->json($atividades);
+    }
+
     public function consultar(Request $request): JsonResponse
     {
         $dados = $request->validate([
