@@ -246,3 +246,33 @@ WHERE uf = 'RJ';
 
 O resultado esperado é 92 em ambas as colunas para o catálogo atual do RJ. Repita a importação e a consulta para confirmar que não surgem duplicatas. Os IDs existentes devem permanecer; `updated_at` pode mudar a cada importação. Se já houver registros extras, investigue a origem antes de excluir qualquer dado. A falha de gravação retorna erro e registra a exceção no log do Laravel. Consulte o [STATUS.md](../STATUS.md) para o próximo exercício e registre as verificações feitas nessa máquina.
 
+## Acesso HTTPS ao IBGE com cadeia incompleta
+
+Em 14/10/2026, no computador da escola, o PHP/cURL retornou erro 60 ao consultar `servicodados.ibge.gov.br`. O OpenSSL recebeu apenas o certificado do servidor e não o intermediário. O pacote CA padrão do XAMPP é de 2022. A solução abaixo funcionou para verificar CNAEs e permitiu importar municípios e CNAEs nesse banco. Em outros ambientes, confirme primeiro o emissor e a cadeia observados, pois podem ser diferentes.
+
+No PowerShell, dentro de `Right_Point/`, consulte o emissor do certificado recebido:
+
+```powershell
+'' | & 'C:\xampp\apache\bin\openssl.exe' s_client -connect servicodados.ibge.gov.br:443 -servername servicodados.ibge.gov.br 2>$null |
+    & 'C:\xampp\apache\bin\openssl.exe' x509 -noout -subject -issuer
+```
+
+Se o emissor for `Sectigo Public Server Authentication CA DV R36`, baixe o [pacote CA do curl](https://curl.se/ca/cacert.pem) e o [intermediário R36 indicado pela Sectigo](https://www.sectigo.com/knowledge-base/detail/Sectigo-Public-Intermediates-and-Roots). Os arquivos ficam em `storage/app/`, ignorada pelo Git:
+
+```powershell
+Invoke-WebRequest 'https://curl.se/ca/cacert.pem' -UseBasicParsing -OutFile 'storage/app/cacert.pem'
+Invoke-WebRequest 'https://crt.sh/?d=4267304690' -UseBasicParsing -OutFile 'storage/app/sectigo-r36.pem'
+& 'C:\xampp\apache\bin\openssl.exe' x509 -in 'storage/app/sectigo-r36.pem' -noout -subject -issuer
+& 'C:\xampp\apache\bin\openssl.exe' verify -CAfile 'storage/app/cacert.pem' 'storage/app/sectigo-r36.pem'
+```
+
+Prossiga apenas se o certificado baixado tiver o sujeito `Sectigo Public Server Authentication CA DV R36`, o emissor `Sectigo Public Server Authentication Root R46` e a última verificação terminar em `OK`. Em caso de falha, investigue a origem do certificado; não desabilite a validação TLS nem instale uma autoridade desconhecida.
+
+```powershell
+Get-Content 'storage/app/cacert.pem','storage/app/sectigo-r36.pem' |
+    Set-Content 'storage/app/ibge-ca-bundle.pem' -Encoding ascii
+php artisan ibge:verificar-cnaes
+```
+
+O código em `app/Support/IbgeHttp.php` detecta esse arquivo e o usa apenas nas requisições ao IBGE; se ele estiver ausente, mantém a verificação TLS padrão. Em 14/10/2026, a verificação de CNAEs com o mesmo pacote, passado manualmente por opções `php -d`, exibiu `CNAEs conferidos: 1332`, com acentos corretos e `Nenhum dado foi gravado.` O usuário confirmou depois que a forma curta `php artisan ibge:verificar-cnaes` também funcionou, mas não compartilhou a saída detalhada. O comando de verificação **não importa CNAEs**. Depois de conferir o banco local, `php artisan ibge:importar-municipios-rj` e `php artisan ibge:importar-cnaes` usam o mesmo pacote automaticamente e gravam nos catálogos; na escola, foram observados 92 municípios e 1.332 CNAEs distintos após repetições informadas pelo usuário. Em outro computador, confira a contagem local antes e depois de importar. Não modifique o `php.ini` global para contornar este serviço; a correção definitiva cabe ao servidor que deve fornecer a cadeia completa.
+
