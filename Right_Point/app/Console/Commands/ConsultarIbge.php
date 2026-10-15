@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Support\IbgeHttp;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Console\Command;
 
 /*arquivo que realiza consulta diretamnete na API do IBGE sem gravar dados no banco*/
@@ -24,11 +24,11 @@ class ConsultarIbge extends Command
 
         /* aqui faremos a consulta */
         try {
-            $respostaMunicipios= Http::timeout(10)->get(
+            $respostaMunicipios= IbgeHttp::request()->timeout(10)->get(
                 'https://servicodados.ibge.gov.br/api/v1/localidades/estados/33/municipios'
             );
 
-            $respostaPopulacao= Http::timeout(10)->get(
+            $respostaPopulacao= IbgeHttp::request()->timeout(10)->get(
                  "https://apisidra.ibge.gov.br/values/t/4714/n6/{$codigoIbge}/v/93/p/2022"
             );
         } catch (ConnectionException $e) {

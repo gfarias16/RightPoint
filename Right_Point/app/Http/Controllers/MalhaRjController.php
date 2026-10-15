@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Municipio;
+use App\Support\IbgeHttp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
@@ -18,7 +18,7 @@ class MalhaRjController extends Controller
             // A API do IBGE fornece a malha simplificada para uso em aplicações web.
             // O cache evita uma chamada externa a cada visita à página.
             $malha = Cache::remember('rightpoint:malha-rj:v1', now()->addDay(), function (): array {
-                $resposta = Http::timeout(25)->get(
+                $resposta = IbgeHttp::request()->timeout(25)->get(
                     'https://servicodados.ibge.gov.br/api/v3/malhas/estados/33',
                     [
                         'intrarregiao' => 'municipio',

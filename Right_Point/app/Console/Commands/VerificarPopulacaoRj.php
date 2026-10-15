@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Municipio;
+use App\Support\IbgeHttp;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 
 class VerificarPopulacaoRj extends Command
 {
@@ -25,7 +25,7 @@ class VerificarPopulacaoRj extends Command
     {
         // Consulta a população de 2022 dos municípios do RJ antes de qualquer gravação.
         try {
-            $resposta = Http::timeout(45)->get(
+            $resposta = IbgeHttp::request()->timeout(45)->get(
                 'https://servicodados.ibge.gov.br/api/v3/agregados/4714/periodos/2022/variaveis/93',
                 ['localidades' => 'N6[N3[33]]']
             );

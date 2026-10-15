@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Support\IbgeHttp;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 
 class VerificarCnaes extends Command
 {
@@ -15,7 +15,7 @@ class VerificarCnaes extends Command
     public function handle(): int
     {
         try {
-            $resposta = Http::timeout(30)->get(
+            $resposta = IbgeHttp::request()->timeout(30)->get(
                 'https://servicodados.ibge.gov.br/api/v2/cnae/subclasses'
             );
         } catch (ConnectionException $e) {

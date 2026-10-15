@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\Municipio;
+use App\Support\IbgeHttp;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 
 class ImportarMunicipiosRj extends Command
 {
@@ -17,7 +17,7 @@ class ImportarMunicipiosRj extends Command
     public function handle(): int
     {
         try {
-            $resposta = Http::timeout(10)->get(
+            $resposta = IbgeHttp::request()->timeout(10)->get(
                 'https://servicodados.ibge.gov.br/api/v1/localidades/estados/33/municipios'
             );
         } catch (ConnectionException $e) {
