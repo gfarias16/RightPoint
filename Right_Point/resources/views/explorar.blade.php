@@ -15,6 +15,7 @@
             'municipios' => $municipios,
             'consultaUrl' => route('consulta.demonstrativa', [], false),
             'malhaUrl' => route('malha.rj', [], false),
+            'cnaeUrl' => route('cnaes.buscar', [], false),
         ]) }};
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
@@ -84,9 +85,25 @@
                     </div>
 
                     <div class="field">
+                        <label for="cnae-busca">Buscar atividade por nome ou código</label>
+                        <input id="cnae-busca" type="search" autocomplete="off" maxlength="80"
+                            aria-describedby="cnae-busca-status" placeholder="Ex.: transporte">
+                        <small id="cnae-busca-status" role="status" aria-live="polite">
+                            Digite pelo menos 2 caracteres.
+                        </small>
+                    </div>
+
+                    <div class="field" id="cnae-opcoes-campo" hidden>
+                        <label for="cnae-opcoes">Atividades encontradas</label>
+                        <select id="cnae-opcoes">
+                            <option value="">Selecione uma atividade</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
                         <label for="cnae">Código CNAE da atividade <span aria-hidden="true">*</span></label>
                         <input id="cnae" name="cnae" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" pattern="[0-9]{7}" minlength="7" maxlength="7" placeholder="Ex.: 5611201" required>
-                        <small>É a classificação da atividade do negócio. O código é temporário nesta demonstração: depois você poderá buscar pelo nome. Por enquanto, use 7 dígitos. <a href="https://concla.ibge.gov.br/busca-online-cnae.html" target="_blank" rel="noopener noreferrer">Buscar CNAE no IBGE (nova aba)</a>.</small>
+                        <small>É a classificação da atividade do negócio.<a href="https://concla.ibge.gov.br/busca-online-cnae.html" target="_blank" rel="noopener noreferrer">Buscar CNAE no IBGE (nova aba)</a>.</small>
                     </div>
 
                     <p id="form-error" class="field-error" role="alert" hidden></p>
@@ -122,7 +139,7 @@
                     <p id="mapa-estado" class="map-status" role="status" aria-live="polite">Carregando limites municipais…</p>
                     <p id="municipio-atual" class="selected-city">Nenhum município selecionado</p>
                 </div>
-                <p class="map-panel__help">Clique em um município ou use a busca e a lista. A roda do mouse aproxima ou afasta o mapa; para rolar a página, mova o cursor para fora dele. Se a malha falhar, a lista continua disponível.</p>
+                <p class="map-panel__help">Clique em um município ou use a busca e a lista.</p>
             </div>
         </section>
 

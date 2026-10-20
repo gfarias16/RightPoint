@@ -25,15 +25,16 @@
     let profiles = [];
     let editingId = null;
 
+    //funcao para normalizar strings, removendo acentos e convertendo para minusculo
     function normalize(value) {
         return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     }
-
+    //funcao para exibir mensagens de erro no formulario
     function showError(element, message) {
         element.textContent = message;
         element.hidden = !message;
     }
-
+    //funcao para renderizar a lista de municipios filtrados pelo input de busca
     function renderMunicipalOptions() {
         const previous = select.value;
         const term = normalize(search.value.trim());
@@ -42,14 +43,14 @@
         matching.forEach((item) => select.add(new Option(item.nome, String(item.codigo_ibge))));
         if (matching.some((item) => String(item.codigo_ibge) === previous)) select.value = previous;
     }
-
+    //funcao para definir o estilo do poligono do municipio selecionado
     function polygonStyle(isSelected = false) {
         if (isSelected) return { color: '#f4b846', weight: 3, fillColor: '#f4b846', fillOpacity: .27 };
         if (baseStyle === 'claro') return { color: '#186855', weight: 1.2, fillColor: '#179a75', fillOpacity: .035 };
         if (baseStyle === 'satelite') return { color: '#f5f5e9', weight: 1.2, fillColor: '#a9d9d0', fillOpacity: .07 };
         return { color: '#8acfc2', weight: 1.2, fillColor: '#67bba9', fillOpacity: .075 };
     }
-
+    //funcao para destacar o municipio selecionado no mapa
     function highlightCity() {
         if (!boundaryLayer) return;
         if (selectedPolygon) selectedPolygon.setStyle(polygonStyle());
@@ -63,7 +64,7 @@
             }
         });
     }
-
+    //funcao para selecionar um municipio e dar zoom no mapa
     function selectCity(code, zoomToCity = true) {
         const city = byCode.get(String(code));
         if (!city) return;
@@ -76,7 +77,7 @@
             map.fitBounds(selectedPolygon.getBounds(), { padding: [25, 25], maxZoom: 11 });
         }
     }
-
+    //funcao para alterar o estilo do mapa (claro, escuro ou satélite)
     function setBaseStyle(style) {
         if (!map || !['escuro', 'claro', 'satelite'].includes(style)) return;
         baseStyle = style;
@@ -98,7 +99,7 @@
         });
         boundaryLayer?.eachLayer((layer) => layer.setStyle(polygonStyle(layer === selectedPolygon)));
     }
-
+    //funcao para inicializar o mapa e carregar a malha municipal do RJ
     async function initializeMap() {
         if (!window.L) {
             showError(mapStatus, 'O mapa não carregou. A busca por município continua disponível.');
@@ -106,7 +107,7 @@
             return;
         }
 
-        // O usuário pediu zoom direto pela roda; os botões +/- continuam como alternativa.
+        // zoom direto pelo scroll; os botões +/- continuam como alternativa.
         map = L.map('municipio-mapa', {
             scrollWheelZoom: true,
             wheelPxPerZoomLevel: 120,
@@ -123,6 +124,7 @@
         });
         document.getElementById('mapa-ver-rj').addEventListener('click', () => map.fitBounds(rjBounds));
 
+        // Carrega a malha municipal do RJ e adiciona os polígonos ao mapa.
         try {
             const response = await fetch(config.malhaUrl, { headers: { Accept: 'application/json' } });
             if (!response.ok) throw new Error('Malha indisponível');
@@ -150,20 +152,20 @@
             mapStatus.classList.add('is-error');
         }
     }
-
+    //funcao para criar elementos HTML com tag, classe e conteudo
     function makeElement(tag, className, content) {
         const element = document.createElement(tag);
         if (className) element.className = className;
         if (content !== undefined) element.textContent = String(content);
         return element;
     }
-
+    //funcao para criar um item de fato (label e valor) para exibir no resultado da consulta
     function makeFact(label, value) {
         const item = makeElement('div', 'result-fact');
         item.append(makeElement('span', '', label), makeElement('strong', '', value));
         return item;
     }
-
+    //funcao para renderizar o resultado da consulta demonstrativa
     function renderResult(data) {
         const report = makeElement('div', 'result-report');
         const summary = makeElement('div', 'result-card');
@@ -224,7 +226,7 @@
             button.disabled = false;
         }
     });
-
+    //funcao para salvar os perfis no localStorage do navegador
     function saveProfiles() {
         try {
             localStorage.setItem(storageKey, JSON.stringify(profiles));
@@ -235,7 +237,7 @@
             return false;
         }
     }
-
+    //funcao para carregar os perfis salvos no localStorage do navegador
     function loadProfiles() {
         try {
             const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -246,7 +248,7 @@
             storageNote.hidden = false;
         }
     }
-
+    //funcao para sair do modo de edicao de perfil
     function exitEdit() {
         editingId = null;
         profileForm.reset();
@@ -255,7 +257,7 @@
         document.getElementById('perfil-cancelar').hidden = true;
         showError(profileError, '');
     }
-
+    //funcao para renderizar a lista de perfis salvos no navegador
     function renderProfiles() {
         const list = document.getElementById('perfis-lista');
         document.getElementById('perfis-contagem').textContent = profiles.length + (profiles.length === 1 ? ' perfil' : ' perfis');
@@ -330,6 +332,85 @@
     });
 
     document.getElementById('perfil-cancelar').addEventListener('click', exitEdit);
+
+    const cnaeSearch = document.getElementById('cnae-busca');
+    const cnaeStatus = document.getElementById('cnae-busca-status');
+    const cnaeOptionsField = document.getElementById('cnae-opcoes-campo');
+    const cnaeOptions = document.getElementById('cnae-opcoes');
+    let cnaeSearchTimer = null;
+    let activeCnaeRequest = null;
+    let cnaeSearchVersion = 0;
+
+    cnaeSearch.addEventListener('input', () => {
+        clearTimeout(cnaeSearchTimer);
+        activeCnaeRequest?.abort();
+
+        const version = ++cnaeSearchVersion;
+        const term = cnaeSearch.value.trim();
+
+        cnaeOptions.replaceChildren(new Option('Selecione uma atividade', ''));
+        cnaeOptionsField.hidden = true;
+        cnae.value = '';
+
+        if (term.length < 2) {
+            cnaeStatus.textContent = 'Digite pelo menos 2 caracteres.';
+            return;
+        }
+
+        cnaeStatus.textContent = 'Buscando atividades…';
+
+        // Espera uma pausa na digitação para evitar uma requisição por tecla.
+        cnaeSearchTimer = setTimeout(async () => {
+            const request = new AbortController();
+            activeCnaeRequest = request;
+
+            try {
+                const url = new URL(config.cnaeUrl, window.location.href);
+                url.searchParams.set('busca', term);
+
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                    signal: request.signal,
+                });
+                if (!response.ok) throw new Error('Falha na busca');
+
+                const activities = await response.json();
+                if (version !== cnaeSearchVersion) return;
+                if (!Array.isArray(activities)) throw new Error('Resposta inválida');
+
+                if (activities.length === 0) {
+                    cnaeStatus.textContent = 'Nenhuma atividade encontrada. Tente outro termo.';
+                    return;
+                }
+
+                activities.forEach((activity) => {
+                    cnaeOptions.add(new Option(
+                        `${activity.codigo_cnae} — ${activity.nome}`,
+                        String(activity.codigo_cnae)
+                    ));
+                });
+
+                cnaeOptionsField.hidden = false;
+                cnaeStatus.textContent = activities.length === 20
+                    ? 'Mostrando até 20 atividades. Refine a busca se necessário.'
+                    : `${activities.length} atividade(s) encontrada(s).`;
+            } catch (error) {
+                if (error.name === 'AbortError' || version !== cnaeSearchVersion) return;
+                cnaeStatus.textContent = 'Não foi possível buscar. Tente novamente ou digite o código CNAE.';
+            } finally {
+                if (activeCnaeRequest === request) activeCnaeRequest = null;
+            }
+        }, 350);
+    });
+
+    cnaeOptions.addEventListener('change', () => {
+        cnae.value = cnaeOptions.value;
+    });
+
+    cnae.addEventListener('input', () => {
+        if (cnae.value.trim() !== cnaeOptions.value) cnaeOptions.value = '';
+    });
+
     search.addEventListener('input', renderMunicipalOptions);
     select.addEventListener('change', () => {
         if (select.value) selectCity(select.value);
