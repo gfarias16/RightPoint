@@ -29,6 +29,8 @@ Estado do repositório e do notebook do trabalho verificado em 05/10/2026; o est
 
 Não trate este resumo como prova do estado atual. Confirme código, Git e ambiente antes de agir, especialmente no computador da escola.
 
+Atualização de 20/10/2026: o resumo acima é histórico. A rota principal já mostra o protótipo com mapa, consulta demonstrativa e perfis locais no navegador. No notebook do trabalho, foram carregados 92 municípios, 1.332 CNAEs e 92 valores de população do Censo 2022; a consulta HTTP de Maricá retornou população, fonte e data. A tela após essa carga ainda precisa de conferência visual. **O banco e os perfis do navegador não acompanham o Git**: na escola, confira migrations e contagens locais antes de repetir qualquer importação. O estado verificável e os próximos passos estão em `docs/STATUS.md` e `docs/procedimentos/ambiente-multiplos-computadores.md`. Não há concorrentes calculados nem score aprovado.
+
 ## Primeiras ações em toda retomada
 
 1. Execute `git status --short --branch` antes de alterar qualquer arquivo.

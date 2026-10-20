@@ -9,12 +9,13 @@ As consultas ao IBGE usam automaticamente `storage/app/ibge-ca-bundle.pem` quand
 - `php artisan serve` — inicia a interface local.
 - `php artisan migrate:status` — mostra quais migrations foram aplicadas neste banco.
 - `php artisan test` — executa os testes automatizados.
-- `GET /cnaes?busca=4929902` — busca até 20 CNAEs por código ou trecho do nome no banco local. A rota ainda não está ligada ao formulário.
+- `GET /cnaes?busca=4929902` — busca até 20 CNAEs por código ou trecho do nome no banco local; o formulário já usa essa rota.
 
 ## Dados do IBGE
 
 - `php artisan ibge:consultar-rio` — consulta município e população do Rio de Janeiro; não grava dados.
 - `php artisan ibge:importar-municipios-rj` — valida e grava/atualiza os 92 municípios do RJ no banco local.
 - `php artisan ibge:verificar-populacao-rj` — confere a população de 2022 dos 92 municípios; não grava dados.
+- `php artisan ibge:importar-populacao-rj` — valida e grava/atualiza a população do Censo 2022 para os 92 municípios no banco local, com fonte e data de coleta.
 - `php artisan ibge:verificar-cnaes` — confere os códigos e nomes de CNAE do IBGE; não grava dados. Requer acesso à API.
 - `php artisan ibge:importar-cnaes` — valida as 1.332 subclasses CNAE recebidas do IBGE e grava/atualiza `atividades_economicas` no banco local; requer acesso à API.

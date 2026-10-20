@@ -1,6 +1,6 @@
 # Matriz de dados e fluxograma do diagnóstico — RightPoint
 
-Atualizado em 14/10/2026. Este documento orienta a implementação futura; **não descreve uma integração de população ou um score já funcionando**. As fontes pesquisadas e os testes exploratórios do IBGE estão em [FONTES_DADOS.md](../FONTES_DADOS.md).
+Atualizado em 20/10/2026. A população do Censo 2022 já foi importada no notebook do trabalho e retornou na consulta demonstrativa; **não há score ou contagem de concorrentes funcionando**. As fontes pesquisadas e os testes do IBGE estão em [FONTES_DADOS.md](../FONTES_DADOS.md).
 
 ## Recorte e critérios da primeira versão
 
@@ -12,13 +12,13 @@ Atualizado em 14/10/2026. Este documento orienta a implementação futura; **nã
 
 ## Matriz de fontes e indicadores
 
-`Proposto` significa que a fonte, o indicador ou sua regra ainda dependem de validação. `Validado` exigirá fonte, licença/acesso, recorte, período, unidade, cobertura, vínculo municipal e regra de uso conferidos. `Integrado` exigirá importação e consulta testadas no sistema. As consultas exploratórias do IBGE **não** validam por si só a cobertura completa dos indicadores nem tornam a população integrada.
+`Proposto` significa que a fonte, o indicador ou sua regra ainda dependem de validação. `Validado` exigirá fonte, licença/acesso, recorte, período, unidade, cobertura, vínculo municipal e regra de uso conferidos. `Integrado` exige importação e consulta testadas no sistema; isso **não** significa que o indicador entre automaticamente no score. As consultas exploratórias do IBGE, sozinhas, não validam cobertura completa.
 
 | ID | Fonte e dado | Unidade | Município/associação | Período de referência | Atualização local | Uso no score proposto | Estado atual |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | M-01 | IBGE Localidades: código e nome | Não se aplica | 92 códigos IBGE do RJ | Data/versão da consulta a registrar | Carga manual realizada; procedência/data por carga ainda não registradas em `fontes_dados` | Não; catálogo e seleção | 92 municípios importados no MySQL local; rastreabilidade da carga pendente |
 | M-02 | IBGE Malha Municipal: limites | Geometria | Associar polígono ao código IBGE | Edição da malha a selecionar | Sem carga; registrar edição e data/hora | Não; mapa | Proposto |
-| M-03 | IBGE Censo/SIDRA: população residente | Pessoas (variável 93 do agregado 4714) | Um valor por código IBGE do RJ | Censo 2022 confirmado nos metadados | Sem carga; registrar data/hora e período | Sim; dado mínimo proposto | Proposto; 92 códigos e valores numéricos de 2022 conferidos na execução do usuário, nome/unidade confirmados por captura; persistência pendente |
+| M-03 | IBGE Censo/SIDRA: população residente | Pessoas (variável 93 do agregado 4714) | Um valor por código IBGE do RJ | Censo 2022 confirmado nos metadados | Carga manual em 20/10/2026 no notebook do trabalho, com fonte, período e data de coleta registrados | Sim; dado mínimo proposto, mas ainda não calculado | Integrado à consulta demonstrativa: 92 registros para 92 municípios distintos; Maricá retornou população e procedência. Tela atualizada e repetição da carga ainda a conferir |
 | M-04 | IBGE: densidade populacional | Habitantes/km² | Mesmo código e períodos compatíveis para população e área | Tabela/edição a confirmar | Sem carga; registrar data/hora | Condicional, após validação | Proposto |
 | M-05 | IBGE: renda | Conceito e unidade a escolher | Um valor por código IBGE, se houver cobertura municipal | Tabela/período a confirmar | Sem carga; registrar data/hora | Condicional à atividade e à regra aprovada | Proposto |
 | M-06 | IBGE: perfil etário | Faixas e unidade a escolher | Um valor por código IBGE, se houver cobertura municipal | Tabela/período a confirmar | Sem carga; registrar data/hora | Condicional à atividade e à regra aprovada | Proposto |
@@ -92,3 +92,4 @@ O ramo `A5 → C3` **não** autoriza pontuação com base defasada: a verificaç
 | --- | --- | --- |
 | 06/10/2026 | Matriz e fluxograma iniciais para 92 municípios do RJ, com critérios de concorrência e dados mínimos propostos | A validar com o grupo/professora; sem implementação |
 | 14/10/2026 | Atualizado o estado observado das fontes IBGE: catálogo municipal importado, 92 séries de população de 2022 conferidas no terminal do usuário e variável 93 identificada como `População residente` em `Pessoas` por captura dos metadados | Fonte de população ainda não persistida; critérios de score continuam propostos |
+| 20/10/2026 | Importação local da população de 2022 confirmada para 92 municípios distintos; fonte e data presentes; consulta HTTP de Maricá devolveu o indicador | Sem integração CNPJ, sem score aprovado; carga não acompanha o Git |

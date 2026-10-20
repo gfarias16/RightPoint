@@ -246,6 +246,28 @@ WHERE uf = 'RJ';
 
 O resultado esperado é 92 em ambas as colunas para o catálogo atual do RJ. Repita a importação e a consulta para confirmar que não surgem duplicatas. Os IDs existentes devem permanecer; `updated_at` pode mudar a cada importação. Se já houver registros extras, investigue a origem antes de excluir qualquer dado. A falha de gravação retorna erro e registra a exceção no log do Laravel. Consulte o [STATUS.md](../STATUS.md) para o próximo exercício e registre as verificações feitas nessa máquina.
 
+## População do Censo 2022 em outra máquina
+
+Em 20/10/2026, o notebook do trabalho recebeu 92 indicadores de população de 2022, um por município do RJ, com fonte e data. **O Git transporta o importador, não as linhas do MySQL.** Na escola ou em casa, preserve mudanças locais antes do pull, confirme a conexão com o banco correto e execute `php artisan migrate:status` dentro de `Right_Point/`. A migration de `indicadores_municipais` deve aparecer como `Ran`; aplique somente migrations pendentes após conferir seu conteúdo. Não use `migrate:fresh`.
+
+Antes de importar, confira no phpMyAdmin do banco `rightpoint`:
+
+```sql
+SELECT COUNT(*) AS total, COUNT(DISTINCT municipio_id) AS municipios
+FROM indicadores_municipais
+WHERE codigo_indicador = 'populacao_residente'
+  AND periodo_referencia = '2022';
+```
+
+Se a tabela estiver vazia, mas os 92 municípios já estiverem carregados, execute no terminal da aplicação:
+
+```powershell
+php artisan ibge:verificar-populacao-rj
+php artisan ibge:importar-populacao-rj
+```
+
+O primeiro comando consulta e valida sem gravar. Só execute o segundo se o primeiro confirmar os 92 municípios. Confira novamente a consulta SQL: o esperado é `total = 92` e `municipios = 92`. Se já houver dados, examine-os antes de reimportar; o importador usa `upsert`, mas a repetição ainda não foi observada neste notebook. Registre o resultado local em `docs/STATUS.md`. O pacote CA local do IBGE, se necessário, é tratado na seção de HTTPS abaixo e também não acompanha o Git.
+
 ## Acesso HTTPS ao IBGE com cadeia incompleta
 
 Em 14/10/2026, no computador da escola, o PHP/cURL retornou erro 60 ao consultar `servicodados.ibge.gov.br`. O OpenSSL recebeu apenas o certificado do servidor e não o intermediário. O pacote CA padrão do XAMPP é de 2022. A solução abaixo funcionou para verificar CNAEs e permitiu importar municípios e CNAEs nesse banco. Em outros ambientes, confirme primeiro o emissor e a cadeia observados, pois podem ser diferentes.
