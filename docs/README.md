@@ -30,6 +30,7 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 
 ### Evolução e governança
 
+- [Roteiro simples para a apresentação acadêmica](./APRESENTACAO.md).
 - [Decisões arquiteturais](./decisoes-arquiteturais/README.md)
 - [Planos](./planos/README.md)
 - [Procedimentos](./procedimentos/README.md)

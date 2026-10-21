@@ -53,6 +53,7 @@ Atualização de 20/10/2026: o resumo acima é histórico. A rota principal já 
 - Troca entre computadores e preparação local: `docs/procedimentos/ambiente-multiplos-computadores.md`.
 - Segurança: `docs/seguranca/README.md`.
 - Interface: `docs/interface/README.md`.
+- Roteiro acadêmico para os slides: `docs/APRESENTACAO.md`.
 - Enunciado e minimundo originais: arquivos PDF e DOCX em `docs/`.
 
 Não carregue toda a documentação automaticamente. Use divulgação progressiva de contexto conforme a tarefa.
@@ -139,6 +140,7 @@ Se dependências ou configuração impedirem a validação, informe o bloqueio c
 
 ## Atualização documental
 
+- Ao concluir uma etapa relevante, atualizar também `docs/APRESENTACAO.md` quando ela trouxer conteúdo para a apresentação: fonte e uso, estratégia, ferramenta, regra, validação ou imagem. Manter tópicos curtos e distinguir implementado, em teste e planejado; não copiar logs, dados pessoais ou credenciais para os slides.
 - Atualize o plano quando uma etapa for realmente concluída.
 - Atualize limitações quando uma pendência for resolvida ou uma nova limitação surgir.
 - Registre decisões relevantes de banco, arquitetura, integração ou score em `docs/decisoes-arquiteturais/` quando forem aprovadas.
