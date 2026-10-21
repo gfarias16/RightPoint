@@ -22,4 +22,7 @@ As consultas ao IBGE usam automaticamente `storage/app/ibge-ca-bundle.pem` quand
 
 ## Preparação dos dados CNPJ
 
+- `php artisan cnpj:verificar-busca 3302700 5611201` — consulta uma página de até 2 registros da Minha Receita; confere campos, CNPJ textual preenchido, duplicatas e filtros, sem gravar ou calcular concorrentes.
+- `php artisan cnpj:verificar-busca 3302700 5611201 --paginas=2` — percorre até 2 páginas com os mesmos filtros; aceita de 1 a 3 e para em fim, erro, HTTP 429 ou repetição de CNPJ/cursor. O resultado é uma amostra.
+- `php artisan cnpj:verificar-busca 3302700 5611201 --cursor='CURSOR_RECEBIDO'` — consulta a próxima página usando o cursor completo da resposta anterior e os mesmos filtros; uma chamada por execução. Substitua `CURSOR_RECEBIDO` pelo valor real.
 - `php artisan cnpj:verificar-estabelecimentos "caminho/do/arquivo"` — confere arquivo existente/legível, lê uma linha CSV separada por `;`, fecha o arquivo e mostra a quantidade de campos. Caminho inválido ou primeira linha vazia retorna falha. Ainda não valida o leiaute da Receita nem grava no banco. Para a amostra técnica movida pelo usuário, o caminho é `storage/teste-leitura.csv`, relativo a `Right_Point/`; a execução retornou 2 campos.
