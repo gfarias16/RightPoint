@@ -4,7 +4,7 @@ Registro inicial do grupo, atualizado em 14/10/2026. Uma fonte listada aqui não
 
 | Fonte candidata | Dados pretendidos | Possível uso | Estado |
 | --- | --- | --- | --- |
-| CNPJ Aberto / Receita Federal | CNPJ, CNAE, situação, endereço e abertura | Identificação de estabelecimentos e concorrência; sobrevivência/mortalidade exige critério e dados históricos apropriados | Endpoint e viabilidade A CONFIRMAR |
+| CNPJ / Receita Federal e APIs derivadas | CNPJ, CNAE, situação, endereço e abertura | Identificação de estabelecimentos e concorrência; sobrevivência/mortalidade exige critério e dados históricos apropriados | Minha Receita e Casa dos Dados em avaliação; teste gratuito retornou HTTP 429; nenhuma integração de concorrência implementada |
 | IBGE — Localidades e Censo/SIDRA | Municípios, população, renda, densidade e perfil etário, conforme tabela disponível | Delimitação municipal e indicadores socioeconômicos | Localidades e duas consultas de população testadas abaixo; os demais indicadores não foram testados |
 | ANP | Preços de combustíveis por região | Possível indicador indireto, cuja relação com fluxo/movimento ainda precisa ser justificada | A CONFIRMAR |
 | INMET | Temperatura, chuva e histórico climático | Avaliar influência climática conforme a atividade | A CONFIRMAR |
@@ -57,7 +57,32 @@ Uma captura enviada pelo usuário do [endpoint oficial de metadados do agregado 
 
 ## 3. Receita Federal — CNPJ
 
-O usuário reservou esta seção, mas ainda não forneceu endpoint ou arquivo para teste. Acesso, licença, campos, cobertura e atualização permanecem A CONFIRMAR. Não afirmar cálculo de sobrevivência/mortalidade somente a partir de situação cadastral e data de abertura.
+### APIs candidatas para simplificar a obtenção
+
+Em 20/10/2026, o usuário questionou a necessidade de arquivos grandes e pediu alternativa por API. A próxima avaliação deve priorizar busca por município e CNAE, antes de definir um fornecedor. O leitor CSV continua como exercício concluído e alternativa; nenhum ZIP foi baixado.
+
+- **Minha Receita:** a [documentação de busca paginada](https://docs.minhareceita.org/como-usar/#busca-paginada) aceita `uf`, `municipio` (IBGE ou SIAFI), `cnae_fiscal`, `limit` e `cursor`. O parâmetro `cnae` também inclui atividades secundárias; para o critério proposto de atividade principal exata, avaliar `cnae_fiscal`. A [apresentação do serviço](https://docs.minhareceita.org/) informa acesso gratuito sem chave; a busca paginada é experimental e pode responder HTTP 429. Uma consulta real com `uf=RJ`, `municipio=3302700`, `cnae_fiscal=5611201` e `limit=2` retornou 429, sem resultados empresariais. Não foi repetida automaticamente. Filtro de situação ativa, paginação completa, atualização e cobertura continuam a validar; a resposta documentada usa `data` e `cursor`.
+- **Casa dos Dados:** a [pesquisa avançada v5](https://docs.casadosdados.com.br/pesquisa-avan%C3%A7ada-de-empresas-16579062e0) documenta UF, município, CNAE principal, situação cadastral e paginação. As [informações de acesso](https://docs.casadosdados.com.br/informa%C3%A7%C3%B5es-b%C3%A1sicas-1278846m0) exigem chave e saldo para pesquisa. Nenhuma conta, contratação ou requisição autenticada foi feita; custo e condições do projeto ainda precisam ser avaliados.
+- **BrasilAPI:** o [endpoint documentado de CNPJ](https://github.com/BrasilAPI/BrasilAPI/blob/main/pages/docs/doc/cnpj.json) consulta um identificador conhecido. Esse recurso sozinho não encontra todos os estabelecimentos de uma cidade/atividade.
+
+Para o próximo exercício, propor um comando de consulta somente de leitura, com timeout e tratamento de 429, antes de gravar no MySQL. Uma única página ou falha de requisição não representa o total de concorrentes. Confirmar o retorno real e a cobertura antes de exibir contagens. A consulta a serviços derivados não implica dados em tempo real da Receita nem dispensa o registro de procedência.
+
+### Arquivos da base completa como alternativa
+
+Em 20/10/2026, o agente consultou o [leiaute oficial de dados abertos de CNPJ](https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf) e confirmou a pasta `2026-10` no repositório da Receita/SERPRO. O ponto de entrada público é o [catálogo oficial do CNPJ](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/cadastros/cnpj), que direciona ao Portal Brasileiro de Dados Abertos. Foram consultados somente nomes e tamanhos; nenhum ZIP de dados foi baixado ou extraído. O endereço antigo `/dados/cnpj/dados_abertos_cnpj/` retornou 404 nesta conferência.
+
+| Arquivos confirmados na pasta `2026-10` | Uso proposto no RightPoint |
+| --- | --- |
+| `Municipios.zip` (43.443 bytes) | Conferir códigos e nomes usados pela Receita e estudar a correspondência com o catálogo IBGE. |
+| `Cnaes.zip` (22.078 bytes) | Conferir compatibilidade dos códigos e descrições com o catálogo já carregado. |
+| `Estabelecimentos0.zip` a `Estabelecimentos9.zip` | Fonte principal para identificação de estabelecimentos, situação cadastral, CNAE principal, UF e município. |
+| `Empresas0.zip` a `Empresas9.zip` | Possível complemento posterior para razão social e porte; não é necessário para o primeiro leitor de estabelecimentos. |
+
+As dez partes de estabelecimentos listadas somam 5.416.929.969 bytes compactados (cerca de 5,42 GB); `Estabelecimentos1.zip` tem 341.948.627 bytes e pode servir como candidato para um exercício posterior de amostra. Não foi validado o conteúdo de nenhuma parte nem a cobertura de um município. Uma amostra isolada não sustenta contagem completa ou resultado zero de concorrentes. Para uma carga completa futura, planejar o processamento das partes da mesma edição e o filtro de UF/município, antes de anunciar cobertura.
+
+Próxima ação sugerida ao usuário: começar pelos pacotes pequenos `Municipios.zip` e `Cnaes.zip` da mesma pasta, extrair e examinar seus arquivos. Armazenamento local proposto: `Right_Point/storage/app/receita/2026-10/`, confirmado como ignorado pelo Git. O leitor deve receber o arquivo extraído, não o ZIP. O formato descrito no leiaute usa ponto e vírgula; o exemplo de dois campos em `storage/teste-leitura.csv` é somente um teste de leitura, sem representar um estabelecimento real.
+
+Licença, codificação e leiaute efetivo da edição, cobertura, atualização, compatibilidade dos CNAEs e correspondência municipal continuam a conferir nos dados e metadados antes de importar. Não afirmar cálculo de sobrevivência/mortalidade somente a partir de situação cadastral e data de abertura.
 
 ## Experimento de leitura no Laravel
 

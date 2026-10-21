@@ -270,6 +270,8 @@ O primeiro comando consulta e valida sem gravar. Só execute o segundo se o prim
 
 ## Acesso HTTPS ao IBGE com cadeia incompleta
 
+Na preparação da escola em 20/10/2026, os verificadores e as cargas de CNAEs e população funcionaram com a verificação TLS padrão, sem criar um pacote CA adicional. A solução abaixo é histórica e deve ser usada somente após confirmar a necessidade no ambiente atual.
+
 Em 14/10/2026, no computador da escola, o PHP/cURL retornou erro 60 ao consultar `servicodados.ibge.gov.br`. O OpenSSL recebeu apenas o certificado do servidor e não o intermediário. O pacote CA padrão do XAMPP é de 2022. A solução abaixo funcionou para verificar CNAEs e permitiu importar municípios e CNAEs nesse banco. Em outros ambientes, confirme primeiro o emissor e a cadeia observados, pois podem ser diferentes.
 
 No PowerShell, dentro de `Right_Point/`, consulte o emissor do certificado recebido:
@@ -297,4 +299,16 @@ php artisan ibge:verificar-cnaes
 ```
 
 O código em `app/Support/IbgeHttp.php` detecta esse arquivo e o usa apenas nas requisições ao IBGE; se ele estiver ausente, mantém a verificação TLS padrão. Em 14/10/2026, a verificação de CNAEs com o mesmo pacote, passado manualmente por opções `php -d`, exibiu `CNAEs conferidos: 1332`, com acentos corretos e `Nenhum dado foi gravado.` O usuário confirmou depois que a forma curta `php artisan ibge:verificar-cnaes` também funcionou, mas não compartilhou a saída detalhada. O comando de verificação **não importa CNAEs**. Depois de conferir o banco local, `php artisan ibge:importar-municipios-rj` e `php artisan ibge:importar-cnaes` usam o mesmo pacote automaticamente e gravam nos catálogos; na escola, foram observados 92 municípios e 1.332 CNAEs distintos após repetições informadas pelo usuário. Em outro computador, confira a contagem local antes e depois de importar. Não modifique o `php.ini` global para contornar este serviço; a correção definitiva cabe ao servidor que deve fornecer a cadeia completa.
+
+## Configuração local do Apache na escola
+
+Em 20/10/2026, uma requisição apresentou `MissingAppKeyException` apesar de a chave existente ser reconhecida pelo Laravel no terminal. Executar `php artisan config:cache` resolveu a falha na rodada de verificação seguinte: página, JavaScript, busca de CNAEs e consulta responderam HTTP 200 em paralelo. A causa não foi comprovada; acompanhar se a falha retorna. Não foi necessário gerar outra chave ou alterar o `.env`.
+
+O cache em `bootstrap/cache/config.php` é local, ignorado pelo Git e pode conter valores sensíveis. Depois de mudar o `.env` neste ambiente, execute dentro de `Right_Point/`:
+
+```powershell
+php artisan config:cache
+```
+
+Esse comando reconstrói o cache com os valores atuais. Para voltar a carregar diretamente o `.env`, use `php artisan config:clear`. Confirme a conexão do banco novamente antes de futuras cargas. A aplicação da escola está acessível pelo Apache em `http://127.0.0.1/RightPoint/Right_Point/public/`.
 
