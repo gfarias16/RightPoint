@@ -22,6 +22,8 @@ As consultas ao IBGE usam automaticamente `storage/app/ibge-ca-bundle.pem` quand
 
 ## Preparação dos dados CNPJ
 
+- `php artisan cnpj:verificar-amostra` — confere a lista JSON local `storage/app/amostras/cnpj-marica-5611201.json`, campos textuais, CNPJ numérico de 14 dígitos, filtros RJ/Receita `5853`/CNAE principal `5611201`/`Ativa` e duplicatas. Não valida dígitos verificadores nem total de concorrentes; não usa API ou grava no banco. O arquivo local não acompanha o Git.
+- `php artisan cnpj:verificar-amostra "caminho/do/arquivo.json"` — confere outro arquivo local, sem alterar a amostra padrão. Com `storage/app/amostras/teste-duplicado.json`, o teste fictício foi rejeitado no registro 2 com código de saída 1; `$LASTEXITCODE` no PowerShell mostra esse código logo após a execução.
 - `php artisan cnpj:verificar-busca 3302700 5611201` — consulta uma página de até 2 registros da Minha Receita; confere campos, CNPJ textual preenchido, duplicatas e filtros, sem gravar ou calcular concorrentes.
 - `php artisan cnpj:verificar-busca 3302700 5611201 --paginas=2` — percorre até 2 páginas com os mesmos filtros; aceita de 1 a 3 e para em fim, erro, HTTP 429 ou repetição de CNPJ/cursor. O resultado é uma amostra.
 - `php artisan cnpj:verificar-busca 3302700 5611201 --cursor='CURSOR_RECEBIDO'` — consulta a próxima página usando o cursor completo da resposta anterior e os mesmos filtros; uma chamada por execução. Substitua `CURSOR_RECEBIDO` pelo valor real.
