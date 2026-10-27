@@ -268,6 +268,28 @@ php artisan ibge:importar-populacao-rj
 
 O primeiro comando consulta e valida sem gravar. Só execute o segundo se o primeiro confirmar os 92 municípios. Confira novamente a consulta SQL: o esperado é `total = 92` e `municipios = 92`. Se já houver dados, examine-os antes de reimportar; o importador usa `upsert`, mas a repetição ainda não foi observada neste notebook. Registre o resultado local em `docs/STATUS.md`. O pacote CA local do IBGE, se necessário, é tratado na seção de HTTPS abaixo e também não acompanha o Git.
 
+## Amostras CNPJ na retomada da escola — 27/10/2026
+
+O Git leva o comando `cnpj:verificar-amostra {arquivo?}`, não os arquivos locais de `Right_Point/storage/app/amostras/`. Não é preciso consultar novamente o BigQuery para continuar esse exercício.
+
+1. Antes de sair do trabalho, transporte por meio de sua escolha os arquivos `cnpj-marica-5611201.json` (amostra real de 10 registros) e `teste-duplicado.json` (teste fictício). Não os acrescente ao Git nem envie credenciais da conta Google.
+2. Na escola, confira a pasta existente, `git status --short --branch` e a branch antes de fazer pull. Preserve mudanças locais e o `.env`. Depois confira dependências e migrations conforme as seções anteriores; não repita cargas ou migrations sem verificar o banco dessa máquina.
+3. Coloque as cópias em `Right_Point/storage/app/amostras/`, criando a pasta se necessário. Não sobrescreva arquivos existentes sem conferir se são a mesma amostra. O arquivo real conferido tem 1.400 bytes e SHA-256 `92f484634c3eeda2d503c2655750f997591e8d3ada04d646a710714af00d1ba9`.
+4. Dentro de `Right_Point/`, confira a leitura e a duplicata:
+
+```powershell
+php artisan cnpj:verificar-amostra
+$LASTEXITCODE
+php artisan cnpj:verificar-amostra storage/app/amostras/teste-duplicado.json
+$LASTEXITCODE
+```
+
+O primeiro deve aprovar 10 registros e retornar 0; o segundo deve rejeitar o registro 2 e retornar 1. Ambos são somente leitura, sem API e sem gravação no MySQL. Sem os arquivos, o comando informa ausência: isso não significa perda de dados do banco. Se as cópias não estiverem disponíveis, alinhar recuperação ou uma fixture fictícia; não executar nova consulta paga automaticamente.
+
+**Ponto de continuidade:** teste de UF divergente e demais testes adicionais do novo comando foram adiados pelo usuário. Não estão aprovados nem devem ser retomados automaticamente. Alinhar a próxima etapa de aquisição completa/mapeamento Receita↔IBGE antes de importar ou contar concorrentes. O arquivo padrão é lista JSON completa, não NDJSON; os filtros ainda estão fixos no exercício Maricá/RJ/Receita `5853`/CNAE `5611201`/`Ativa`.
+
+**Validação de entrega:** a suíte existente retornou 15 testes aprovados e uma falha em `ExampleTest`, cuja leitura da página inicial recebeu conexão MySQL recusada. Os testes de domínio/paginação usam SQLite em memória; o teste genérico da página ainda depende do banco configurado. Conferir o MySQL local antes de repetir a suíte; não modificar o banco ou afirmar que todos os testes passaram com base nos 15 aprovados.
+
 ## Acesso HTTPS ao IBGE com cadeia incompleta
 
 Na preparação da escola em 20/10/2026, os verificadores e as cargas de CNAEs e população funcionaram com a verificação TLS padrão, sem criar um pacote CA adicional. A solução abaixo é histórica e deve ser usada somente após confirmar a necessidade no ambiente atual.

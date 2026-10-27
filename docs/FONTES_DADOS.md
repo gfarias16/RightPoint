@@ -1,6 +1,6 @@
 # Fontes de dados candidatas — RightPoint
 
-Registro do grupo, atualizado em 21/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam os critérios **propostos** para a primeira versão, limitada aos 92 municípios do RJ.
+Registro do grupo, atualizado em 27/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam os critérios **propostos** para a primeira versão, limitada aos 92 municípios do RJ.
 
 | Fonte candidata | Dados pretendidos | Possível uso | Estado |
 | --- | --- | --- | --- |
@@ -88,7 +88,138 @@ Comparação documental feita pelo agente em 21/10/2026 para a proposta inicial 
 
 **Direção provisória:** testar manualmente no Mapa de Empresas Maricá (`3302700`), CNAE `5611201` e CNPJs ativos, anotando se o código de sete dígitos e a exportação são possíveis. Se o painel não sustentar esse recorte ou se for necessária a identidade de cada estabelecimento, avaliar o processamento filtrado dos arquivos oficiais; a API paga fica condicionada à aceitação de custo e à validação da cobertura. Um total agregado não substitui a lista de concorrentes prevista para etapas posteriores. Nenhuma fonte de estabelecimentos foi escolhida nem houve nova migration.
 
+#### Checklist de validação do Mapa de Empresas — 22/10/2026
+
+A [página oficial](https://www.gov.br/empresas-e-negocios/pt-br/mapa-de-empresas/painel-mapa-de-empresas) consultada nesta data informa setembro/2026 para Registro de Empresas. O [manual de junho/2026](https://www.gov.br/empresas-e-negocios/pt-br/mapa-de-empresas/arquivos/MANUALMAPADEEMPRESASv2.pdf/@@display-file/file) descreve CNPJs ativos e exportação de objetos por “Baixar como...” → “Dados”; tabelas detalhadas de aberturas/fechamentos não devem ser confundidas com o estoque ativo. A interação com os filtros ainda precisa de evidência.
+
+- Selecionar RJ, Maricá (código de referência IBGE `3302700`) e atividade `5611201`/`5611-2/01`, sem aceitar categoria mais ampla como equivalente.
+- Conferir se o filtro considera CNAE principal ou inclui secundários; se o painel não explicar, marcar **A CONFIRMAR**.
+- Identificar a medida de CNPJs ativos, os filtros efetivos e o período; não usar número de aberturas no lugar de estabelecimentos ativos.
+- Capturar filtros/total/período e tentar exportar os dados do objeto correspondente. Conferir o arquivo antes de definir um importador; exportação manual não comprova API pública.
+- Resultado pendente: ainda não há total confiável, arquivo aprovado ou escolha definitiva da fonte. Um total municipal não identifica estabelecimentos individuais nem concorrentes por raio.
+
+### OpenCNPJ — avaliação autorizada em 27/10/2026
+
+**Situação final desta sessão:** usuário executou duas consultas autorizadas no BigQuery e baixou uma amostra de 10 registros. O comando local `cnpj:verificar-amostra {arquivo?}` foi implementado e conferiu campos/filtros/duplicatas da lista JSON; também rejeitou duplicata fictícia. Nada importado no MySQL e nenhum total de concorrentes validado. Testes adicionais foram adiados pelo usuário para preparar a troca de computador. As amostras são ignoradas pelo Git; ver [procedimento de transporte](./procedimentos/ambiente-multiplos-computadores.md#amostras-cnpj-na-retomada-da-escola--27102026). Os registros seguintes preservam a evolução da investigação: frases de etapas iniciais como “não executado” ou “a confirmar” não anulam os resultados posteriores. Custos efetivos dos jobs, cobertura e condições dos dados continuam pendentes; as autorizações anteriores não abrangem novas consultas.
+
+O usuário autorizou avaliar **[opencnpj.org](https://opencnpj.org/)**, associado ao [repositório Hitmasu/OpenCNPJ](https://github.com/Hitmasu/OpenCNPJ), sem aprovar ainda importação ou integração definitiva. Não confundir com serviços homônimos em outros domínios. Foram lidos documentação, contrato OpenAPI, JSON Schema e metadados públicos; nenhum registro empresarial foi consultado nem ZIP baixado nesta avaliação.
+
+#### Publicação observada, não cobertura local comprovada
+
+Valores lidos diretamente de [GET /info](https://api.opencnpj.org/info), no dataset `receita`:
+
+| Informação | Valor observado |
+| --- | --- |
+| Identificador da publicação | `932348faccac622c` |
+| `updated_at` | `2026-10-14T09:48:02.8167836Z` |
+| `record_count` declarado pelo serviço | 73.797.761 |
+| ZIP nacional | `https://file.opencnpj.org/releases/receita/data.zip` |
+| Tamanho compactado | 14.390.081.139 bytes: 14,39 GB decimais / 13,40 GiB |
+| MD5 declarado | `24235cf2f7fcd087d347aba3d430456f` |
+| Formato informado em `/info` | `ndjson+binary-index`; distribuição por prefixo de CNPJ, não por UF |
+
+Uma requisição **HEAD**, sem corpo, retornou HTTP 200, `Content-Type: application/zip` e o mesmo `Content-Length`. Isso confirma disponibilidade e tamanho naquele momento, não integridade do conteúdo: o checksum não foi calculado e os membros do ZIP não foram inspecionados. O espaço descompactado ainda é **A CONFIRMAR**. O timestamp de publicação não comprova a competência da extração original da Receita nem atualização individual de cada CNPJ. A URL do ZIP pode mudar de conteúdo; guardar identificador, metadados e hash ao obter uma carga efetiva.
+
+#### Adequação ao RightPoint
+
+- O [JSON Schema público](https://api.opencnpj.org/schema) documenta `cnpj` textual de 14 caracteres (inclusive alfanumérico), `cnae_principal` textual, `situacao_cadastral`, `uf`, `municipio`, nome e endereço. O exemplo de situação ativa é `Ativa`; não reutilizar sem adaptação a comparação numérica `2` da Minha Receita.
+- O esquema consultado traz **nome do município**, sem campo explícito de código IBGE. Precisaremos mapear UF + nome ao catálogo local, rejeitando ambiguidades e municípios não reconhecidos; não associar por aproximação silenciosa. Confirmar o mesmo contrato nos arquivos antes de implementar o leitor.
+- O [OpenAPI publicado](https://github.com/Hitmasu/OpenCNPJ/blob/main/src/Page/assets/openapi.json) lista consulta `/{cnpj}`, metadados `/info` e esquema `/schema`; não documenta descoberta por UF/CNAE. Selecionar `datasets=receita` escolhe uma fonte de dados, não um estado ou atividade.
+- O catálogo consultado publica um ZIP Receita nacional; **não foi identificado download separado do RJ**. Filtrar localmente após obter o ZIP continua exigindo transferir o volume nacional. Não carregar o arquivo inteiro em memória.
+- O projeto indica a tabela [BigQuery `opencnpj-bigquery.public.receita`](https://github.com/Hitmasu/OpenCNPJ/blob/main/src/Page/src/data/bigquery.ts). É candidata a extrair apenas as colunas e linhas do RJ, mas acesso efetivo, esquema da tabela, edição, bytes processados, custos/limites e exportação ainda não foram validados. Nenhuma conta/projeto foi criado, credencial utilizada ou consulta BigQuery executada.
+- O [código é MIT](https://github.com/Hitmasu/OpenCNPJ/blob/main/LICENSE); essa licença de software não comprova automaticamente os termos de reutilização dos dados de origem. Confirmar atribuição e condições dos arquivos antes da importação. Evitar coletar QSA, CPF, e-mail e telefone para o critério inicial de concorrência.
+
+**Conclusão e próximo passo:** o contrato tem campos pertinentes, mas a carga nacional direta de 14,39 GB não está aprovada para os notebooks. Primeiro avaliar se é possível obter um recorte pequeno pelo BigQuery, conferindo acesso e estimativa de processamento antes de qualquer execução potencialmente paga. Se não for viável, discutir outra forma de aquisição; não trocar a fonte nem baixar a base inteira automaticamente. Depois de obter uma amostra autorizada, validar formato/codificação, vínculo municipal, atividade principal, situação e procedência. Amostra não comprova cobertura dos 92 municípios. Migration, leitor/importador, persistência e contagem de concorrentes continuam pendentes.
+
+#### BigQuery — verificação de acesso em 27/10/2026
+
+- **Atualização posterior do usuário:** informou upgrade para cobrança por uso e mostrou a página de orçamentos sem orçamento listado. Não presumir mais sandbox sem faturamento. Antes de continuar, orientar orçamento de alertas no projeto, teto de bytes por consulta sob demanda e validação/estimativa do SQL. A autorização para investigar não é autorização para gerar despesas. Não houve acesso do agente à conta nem confirmação de custos atuais.
+- A tentativa anônima de `GET https://bigquery.googleapis.com/bigquery/v2/projects/opencnpj-bigquery/datasets/public/tables/receita` retornou **HTTP 401**, sem metadados. Essa operação é somente leitura de estrutura ([tables.get](https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tables/get)), não uma consulta SQL. O retorno não demonstra inexistência da tabela nem confirma as permissões de um usuário autenticado; não foram feitas tentativas com credenciais.
+- O [sandbox oficial](https://docs.cloud.google.com/bigquery/docs/sandbox) permite avaliação sem cartão nem conta de faturamento, mediante conta Google e projeto. Isso é uma possibilidade de acesso, não confirmação de gratuidade de qualquer operação nem de acesso à tabela do OpenCNPJ. Nenhum projeto foi criado ou faturamento ativado pelo agente.
+- **Próximo passo do usuário:** abrir `https://console.cloud.google.com/bigquery`, fazer login por conta própria e informar se já há projeto em sandbox/sem faturamento. Se aparecer pedido de cartão, upgrade ou ativação de cobrança, não avançar. Não enviar senha, token ou chave ao agente. Depois conferir no Explorador se o projeto externo `opencnpj-bigquery`, dataset `public`, tabela `receita` pode ser aberto; enviar os campos do esquema e os detalhes de atualização/localização, omitindo dados da conta. Não executar SQL ainda. Sem projeto existente, alinhar a criação de sandbox antes de continuar.
+- O [dry run](https://docs.cloud.google.com/bigquery/docs/running-queries#dry-run) valida SQL e estima processamento sem executar a consulta e sem cobrança pelo dry run. Ainda **não foi possível realizar um dry run**: faltam acesso autenticado autorizado e confirmação do esquema real. Só então preparar SQL com as colunas mínimas e filtros do RJ e revisar a estimativa antes de executar.
+- O [controle de custos](https://docs.cloud.google.com/bigquery/docs/best-practices-costs) recomenda `maximum bytes billed` no modelo sob demanda. `LIMIT 10` por si só não é proteção de custo: em tabelas não clusterizadas, pode continuar lendo todos os bytes das colunas consultadas. Não inferir bytes processados a partir do tamanho do ZIP ou do número de linhas retornadas.
+- [Orçamentos de alertas](https://docs.cloud.google.com/billing/docs/how-to/budgets) ajudam a monitorar, mas não são um bloqueio de gastos do BigQuery. Os [spend caps](https://docs.cloud.google.com/billing/docs/how-to/budgets-spend-caps) consultados em 27/10/2026 cobrem serviços específicos, sem BigQuery na lista; a presença de “Budgets & caps” na tela não comprova proteção para consultas. Mesmo em serviços elegíveis, a aplicação do cap não é instantânea. Confirmar o produto e o escopo, sem prometer teto financeiro absoluto.
+- **Resultado da tentativa anônima (histórico):** naquele momento, existência/permissão efetiva, esquema vivo, edição, volume processado, quota disponível, custo e exportação permaneciam a confirmar. Nenhuma consulta SQL, criação de recurso, extração ou transferência de registros foi realizada. O esquema JSON da API não deve ser presumido equivalente ao esquema da tabela BigQuery.
+
+#### Acesso autenticado e esquema vistos em capturas — 27/10/2026
+
+O usuário abriu a tabela externa `opencnpj-bigquery.public.receita` e enviou capturas de **Esquema** e **Detalhes**. Isso confirma existência e acesso aos metadados nessa sessão, não execução autorizada de consultas ou cobertura municipal. As capturas mostram:
+
+- 73.797.761 linhas; 44,82 GB lógicos e 5,09 GB físicos, conforme unidades exibidas pelo console. Não confundir esses valores com bytes faturáveis de uma consulta ou tamanho do ZIP.
+- Localização `us-east1`; última modificação em **14/10/2026, 06:44:25 UTC−3**. Essa data da tabela não comprova a competência da Receita ou atualização individual.
+- `cnpj`, `cnae_principal`, `situacao_cadastral`, `uf`, `municipio` e **`codigo_municipio`** como STRING/NULLABLE. Portanto, diferente do JSON Schema público antes lido, a tabela BigQuery contém um código municipal. Ainda não está confirmado se é código Receita, IBGE ou outra referência; não comparar diretamente com `3302700`.
+- Datas como DATE, `capital_social` NUMERIC, opções Simples/MEI BOOLEAN e campos aninhados RECORD. Não reutilizar o leitor do JSON sem adaptar o contrato; não selecionar QSA/contatos para o exercício municipal.
+
+O usuário foi orientado a configurar `1073741824` bytes (1 GiB) em **Máximo de bytes cobrados** no editor original. A captura enviada anteriormente mostrou o campo ainda vazio; não há evidência visual do valor salvo. Conferir a configuração no editor utilizado antes de qualquer execução. As telas de orçamento mostraram alertas de 50%, 90% e 100% para R$ 15, mas não houve captura de confirmação de salvamento; não declarar orçamento ativo apenas pelo formulário.
+
+**Próximo exercício, somente proposta para validação/estimativa no editor:**
+
+```sql
+SELECT DISTINCT
+  municipio,
+  codigo_municipio,
+  uf
+FROM `opencnpj-bigquery.public.receita`
+WHERE uf = 'RJ'
+  AND UPPER(TRIM(municipio)) IN ('MARICA', 'MARICÁ')
+LIMIT 10;
+```
+
+Esse SQL usa somente campos observados e as duas grafias de Maricá para investigar a chave municipal; não conta concorrentes, não filtra CNAE/situação e não valida cobertura. Colar no editor para observar a mensagem de validação e os bytes estimados, **sem clicar em Executar**. Manter o teto e, se a estimativa ultrapassá-lo, revisar antes de propor qualquer aumento. `LIMIT` limita saída, não garante leitura pequena. Se o console exigir localização, usar `us-east1`, correspondente à tabela ([regra de localização](https://docs.cloud.google.com/bigquery/docs/locations)). Ainda não há validação do SQL, estimativa recebida ou resultado de consulta; depois revisar a possibilidade de uma execução pequena e autorizada para conferir valores e mapeamento.
+
+**Evidência posterior do validador (27/10/2026):** captura do usuário mostrou SQL válido, estimativa **1,53 GB** e teto salvo no editor de **1.073.741.824 bytes (1 GiB)**. Não apareceu resultado de execução. A proposta acima está validada pelo console, mas excede o teto; não executar nem aumentá-lo sem decisão do usuário. A [tabela de preços oficial](https://cloud.google.com/bigquery/pricing?hl=es-419) consultada publica referência de **US$ 6,25/TiB** para consultas sob demanda e primeiro 1 TiB mensal gratuito, sujeito às condições. Como ordem de grandeza, 1,53 GB nessa referência representa aproximadamente **US$ 0,01 somente de processamento**, antes de franquias e tributos; isso não é orçamento em reais nem confirmação da cobrança efetiva. A própria página informa que contas em outra moeda seguem os SKUs dessa moeda. Consumo prévio, modelo efetivo, preço local e benefícios da conta não foram verificados. Um teto de 2 GiB (2.147.483.648 bytes) é alternativa a submeter ao usuário para este teste, não autorização de consulta nem orçamento mensal. Enquanto não houver decisão, manter o teto atual e não executar. Não foi realizado dry run separado pela API: a evidência é a validação automática do editor.
+
+**Autorização posterior (27/10/2026):** o usuário aceitou expressamente o custo estimado e o teto de **2 GiB (2.147.483.648 bytes)** para **uma execução do SQL municipal acima**, sem mudar os filtros. O ajuste e a execução serão feitos pelo usuário; resultados ainda não recebidos. Isso não autoriza consultas adicionais, teto superior, extração ou importação. Se SQL/estimativa mudarem, reavaliar antes de executar. Manter o histórico anterior de teto de 1 GiB como evidência da etapa de validação, não como estado final já substituído.
+
+#### Resultado municipal recebido e próximo teste — 27/10/2026
+
+A captura de resultados do usuário mostrou sucesso do SQL autorizado e **`municipio=MARICA`, `codigo_municipio=5853`, `uf=RJ`**, com teto de 2 GiB visível. É uma combinação distinta, não o total de estabelecimentos. O [construtor de projeção do OpenCNPJ](https://github.com/Hitmasu/OpenCNPJ/blob/main/src/ETL/Modules/Receita/Processors/ShardQueryBuilder.cs) usa `e.codigo_municipio` dos estabelecimentos e faz o vínculo com a tabela auxiliar da Receita; o [leitor do leiaute](https://github.com/Hitmasu/OpenCNPJ/blob/main/src/ETL/Modules/Receita/Processors/TableSchemas.cs) confirma essa origem. O [IBGE](https://www.ibge.gov.br/cidades-e-estados/rj/marica.html) identifica Maricá por `3302700`. Portanto, para esse município/RJ, o vínculo observado é **Receita `5853` ↔ IBGE `3302700`**; não inserir o código de quatro dígitos na coluna local `codigo_ibge`.
+
+Após o usuário iniciar o MySQL, consulta somente de leitura confirmou Maricá/RJ (`codigo_ibge=3302700`, id interno 41 nesta máquina) e atividade `5611201`/RESTAURANTES E SIMILARES. A tentativa anterior fora recusada pela conexão; o acesso foi restabelecido sem modificar banco/configuração pelo agente. O id 41 não é referência entre fontes e não deve ser fixado entre máquinas.
+
+Próxima proposta, **somente para validar e observar bytes estimados**, sem execução autorizada ainda:
+
+```sql
+SELECT
+  cnpj,
+  cnae_principal,
+  situacao_cadastral,
+  codigo_municipio,
+  uf
+FROM `opencnpj-bigquery.public.receita`
+WHERE uf = 'RJ'
+  AND codigo_municipio = '5853'
+  AND cnae_principal = '5611201'
+  AND situacao_cadastral = 'Ativa'
+LIMIT 10;
+```
+
+O gerador público mapeia situação `02` para `Ativa`; o contrato dessa amostra não depende de CNAEs secundários nem coleta QSA/contatos. A consulta pretende conferir identificadores/filtros de até 10 estabelecimentos, não um total confiável. Sua estimativa ainda não foi recebida; manter o teto de 2 GiB, não elevar ou executar automaticamente. A autorização anterior era de uma execução do SQL municipal e já foi utilizada. Nenhum leitor/importador, tabela ou alteração MySQL foi implementado. Próximas pendências: revisar a estimativa, obter autorização de nova execução se viável, conferir CNPJs/filtros e definir um mapeamento reproduzível dos 92 municípios antes da carga completa. Detalhes do job anterior e custo efetivo ainda não foram observados.
+
+**Estimativa da amostra recebida (27/10/2026):** o editor validou o SQL acima e estimou **2,96 GB**, mantendo teto de **2 GiB**. Não houve resultado de execução. O valor é superior ao teto; não usar `LIMIT 10` como proteção de custo. Um teto de **3 GiB (3.221.225.472 bytes)** é proposta para uma execução dessa amostra, ainda dependente de autorização do usuário. Pela referência oficial US$ 6,25/TiB, a ordem de grandeza é US$ 0,02 de processamento, não uma confirmação da fatura, da franquia restante ou do preço em reais. Não remover o teto nem autorizar outras consultas por consequência deste teste.
+
+**Autorização da amostra (27/10/2026):** o usuário autorizou expressamente teto de **3 GiB (3.221.225.472 bytes)** e uma execução do SQL de amostra já validado com estimativa de 2,96 GB. O usuário fará o ajuste e a execução na mesma aba; ainda não há evidência de salvamento do novo teto ou resultados. Se SQL/estimativa mudarem, reavaliar antes de executar. Essa autorização não inclui consultas adicionais, aumento posterior ou carga no MySQL.
+
+#### Resultado da amostra e próxima validação local — 27/10/2026
+
+- O usuário executou o SQL autorizado e enviou captura com sucesso e **10 linhas**. Os campos visíveis correspondem a CNAE principal `5611201`, situação `Ativa` e código Receita `5853`. UF não aparece no recorte da captura; o SQL anterior inclui `uf = 'RJ'`.
+- Pelo menos um CNPJ começa com zero. Identificadores devem permanecer texto; a imagem não substitui validação de formato, duplicatas e filtros no arquivo. O `LIMIT 10` não comprova total ou cobertura municipal.
+- Próximo passo proposto: **Salvar resultados → JSON → arquivo local**, usando o resultado já executado. A [documentação do BigQuery](https://docs.cloud.google.com/bigquery/docs/export-file) identifica esse formato como JSON delimitado por novas linhas (NDJSON), não necessariamente um array JSON. Não executar outra consulta para baixá-lo.
+- Destino local sugerido: `Right_Point/storage/app/amostras/cnpj-marica-5611201.json`; criar a pasta se necessário. Caminho confirmado como ignorado pelo Git. O arquivo não foi recebido/validado e não acompanha a troca de computador pelo pull; não versionar a amostra real automaticamente. Testes reproduzíveis podem usar dados sintéticos posteriormente.
+- Após receber o arquivo, orientar o usuário na leitura/validação PHP, sem gravar no MySQL. Aquisição completa, vínculo dos 92 municípios, termos dos dados e regra de concorrência continuam pendentes. Consultar informações do job para bytes processados/faturados e cache; estimativa anterior não comprova custo efetivo.
+
+#### Conferência do arquivo salvo — 27/10/2026
+
+- O usuário salvou um arquivo de 1.400 bytes em `Right_Point/storage/app/amostras/`, com nome automático do download. O agente fez leitura local e conferência avulsa em PHP, sem alterar o arquivo: **array JSON completo**, e não NDJSON. A orientação anterior sobre leitura por linha não se aplica a esta exportação; usar `json_decode` sobre o conteúdo completo.
+- Resultado: 10 objetos, 10 CNPJs distintos, campos `cnpj`, `cnae_principal`, `situacao_cadastral`, `codigo_municipio` e `uf` presentes como texto; todos correspondem aos filtros `5611201`/`Ativa`/`5853`/`RJ`. CNPJs têm 14 dígitos e um preserva zero inicial. Nenhuma divergência nessa conferência; dígitos verificadores, atualidade e cobertura não foram verificados.
+- SHA-256 local para identificar a cópia conferida: `92f484634c3eeda2d503c2655750f997591e8d3ada04d646a710714af00d1ba9`. O hash identifica o arquivo, não certifica procedência oficial ou autenticidade da fonte.
+- Evolução posterior: usuário implementou `VerificarAmostraCnpj`, assinatura `cnpj:verificar-amostra {arquivo?}`. Sintaxe passou; amostra padrão retornou 10 registros aprovados/saída 0 e arquivo fictício repetido retornou falha/saída 1. Sem consultas externas ou importação. O teste de filtro divergente e a automatização dos demais casos foram adiados pelo usuário. A amostra permanece ignorada pelo Git.
+
 ### Arquivos da base completa como alternativa
+
+
+
 
 Em 20/10/2026, o agente consultou o [leiaute oficial de dados abertos de CNPJ](https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf) e confirmou a pasta `2026-10` no repositório da Receita/SERPRO. O ponto de entrada público é o [catálogo oficial do CNPJ](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/cadastros/cnpj), que direciona ao Portal Brasileiro de Dados Abertos. Foram consultados somente nomes e tamanhos; nenhum ZIP de dados foi baixado ou extraído. O endereço antigo `/dados/cnpj/dados_abertos_cnpj/` retornou 404 nesta conferência.
 

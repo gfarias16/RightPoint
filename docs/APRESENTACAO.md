@@ -1,11 +1,11 @@
 # RightPoint — roteiro para a apresentação
 
-Atualizado em 21/10/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
+Atualizado em 27/10/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
 
 ## 1. Problema e objetivo
 
 - Problema: reunir informações dispersas para avaliar onde abrir um negócio.
-- Público: empreendedor interessado em um município e uma atividade econômica.
+- Público: empreendedor interessado em um município ou regiao especifica e uma atividade econômica.
 - Recorte inicial: **92 municípios do RJ**, identificados pelo código IBGE.
 - CNAE identifica a atividade; CNPJ identifica o estabelecimento.
 - Objetivo final: indicadores, concorrentes e justificativa; score orientativo somente após validar dados e fórmula.
@@ -21,6 +21,7 @@ Atualizado em 21/10/2026. Material de apoio para os slides da professora; amplia
 | [IBGE Malha Municipal](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/15774-malhas.html) | Limites dos municípios selecionáveis no mapa | Malha simplificada consultada e validada por código; edição a confirmar |
 | [Minha Receita](https://docs.minhareceita.org/como-usar/#busca-paginada), serviço independente baseado em dados públicos de CNPJ | Buscar estabelecimentos por município e CNAE principal | API em teste; comando com até 3 páginas e cursor automático; CNPJ ainda não importado |
 | [Mapa de Empresas](https://www.gov.br/empresas-e-negocios/pt-br/mapa-de-empresas/painel-mapa-de-empresas) | Candidato a total de CNPJs ativos por município e atividade | Filtro pela subclasse CNAE exata e exportação ainda a conferir; não fornece lista individual validada |
+| [OpenCNPJ — opencnpj.org](https://opencnpj.org/) | Candidato a dados de estabelecimentos para filtrar e guardar localmente | Amostra BigQuery baixada: 10 CNPJs distintos; formato e filtros conferidos em PHP. Não é total. Custo efetivo e cobertura pendentes; nada importado |
 | [Receita Federal, arquivos abertos](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/cadastros/cnpj) / [Casa dos Dados](https://docs.casadosdados.com.br/pesquisa-avan%C3%A7ada-de-empresas-16579062e0) | Alternativas para dados individuais de estabelecimentos | Receita exige processar arquivos grandes; Casa exige chave e saldo. Nenhuma integrada |
 | [OpenStreetMap](https://www.openstreetmap.org/copyright) / [Esri World Imagery](https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer) | Fundo cartográfico claro/escuro e satélite | Apoio visual; não calculam o score. Mapbox não foi integrado |
 | ANP, INMET e investimentos públicos | Possíveis indicadores complementares | Candidatas; sem integração ou uso no score. Referências em [FONTES_DADOS.md](./FONTES_DADOS.md) |
@@ -44,6 +45,11 @@ flowchart LR
 - Comparação documental: o Mapa de Empresas pode servir ao total municipal após validar os filtros; dados individuais exigem outra fonte. A escolha da fonte e a regra de concorrência seguem pendentes.
 - Paginação testada com respostas simuladas: teto de chamadas, cursor, duplicatas, fim antecipado e erros; confirmação do novo laço na API real ainda pendente.
 - O leitor CSV foi um exercício de leitura e permanece como alternativa; os resultados atuais vieram da API.
+- OpenCNPJ em avaliação: API documentada consulta um CNPJ conhecido; o teste de busca por município/atividade foi feito via **SQL no BigQuery**, não por essa API. Conferimos contrato, publicação, esquema e tamanho antes de adquirir dados. [Evidências](./FONTES_DADOS.md#opencnpj--avaliação-autorizada-em-27102026).
+- Segurança de custo: estimar → definir teto de bytes → obter autorização → executar uma vez. `LIMIT` não limita a leitura; orçamento de alertas não bloqueia gastos do BigQuery. Custo efetivo ainda a conferir.
+- Integração entre códigos: Maricá/RJ usa Receita `5853` e IBGE `3302700`. São referências diferentes; faltam os demais municípios.
+- Arquivo local conferido em PHP: lista JSON completa, 10 CNPJs distintos, todos com UF RJ, CNAE principal `5611201`, situação `Ativa` e código Receita `5853`. Um CNPJ tem zero inicial: manter como texto. Não é total de concorrentes nem validação cadastral atual.
+- Fluxo em teste: SQL BigQuery → baixar JSON → conferir formato, campos, filtros e duplicatas em PHP. Comando `cnpj:verificar-amostra` aprova a amostra de 10 registros (saída 0) e rejeita duplicata fictícia em arquivo separado (saída 1). Teste de filtro divergente e automatização dos demais casos foram adiados pelo usuário. Dígitos verificadores, cobertura, termos dos dados e aquisição completa pendentes; nada importado no MySQL.
 
 **Fluxo alvo para CNPJ — planejado, com atualização separada da consulta do usuário:**
 
