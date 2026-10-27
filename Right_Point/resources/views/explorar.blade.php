@@ -45,15 +45,14 @@
             <div>
                 <h1 id="titulo-pagina">Um ponto de partida<br>para o seu negócio.</h1>
                 <p class="intro__text">
-                    Escolha um município e uma atividade para explorar o que os dados públicos já permitem dizer —
-                    e o que ainda precisa ser confirmado.
+                    Escolha um município e uma atividade para explorar
                 </p>
             </div>
-            <div class="intro__aside" aria-label="Escopo da demonstração">
+            <!-- <div class="intro__aside" aria-label="Escopo da demonstração">
                 <span class="intro__number">{{ $municipios->count() }}</span>
                 <span>municípios do RJ<br>no catálogo local</span>
                 <span class="intro__aside-note">Sem promessa de sucesso. Com transparência sobre os dados.</span>
-            </div>
+            </div> -->
         </section>
 
         <section id="explorar" class="explorer-grid" aria-label="Exploração de município e atividade">
