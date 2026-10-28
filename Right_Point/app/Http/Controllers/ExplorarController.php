@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AtividadeEconomica;
+use App\Models\ContagemEstabelecimento;
 use App\Models\IndicadorMunicipal;
 use App\Models\Municipio;
 use Illuminate\Http\JsonResponse;
@@ -69,6 +70,17 @@ class ExplorarController extends Controller
             ->orderByDesc('coletado_em')
             ->first();
 
+        // Não mistura fontes ou critérios diferentes na leitura do piloto.
+        $contagem = $atividade === null ? null : ContagemEstabelecimento::query()
+            ->with('fonteDado')
+            ->where('municipio_id', $municipio->id)
+            ->where('atividade_economica_id', $atividade->id)
+            ->where('criterio', 'ativos_cnae_principal_exato_v1')
+            ->whereHas('fonteDado', fn ($query) => $query->where('codigo', 'opencnpj-receita'))
+            ->orderByDesc('consultado_em')
+            ->orderByDesc('id')
+            ->first();
+
         $avisos = [];
 
         if ($atividade === null) {
@@ -79,7 +91,24 @@ class ExplorarController extends Controller
             $avisos[] = 'A população municipal ainda não foi importada para este município.';
         }
 
-        $avisos[] = 'A base de estabelecimentos/CNPJ ainda não foi integrada; não há contagem confiável de concorrentes.';
+        if ($contagem === null) {
+            $avisos[] = 'Não há coleta de estabelecimentos disponível para este município e CNAE. Dado indisponível não significa zero concorrentes.';
+        } else {
+            $avisos[] = 'A contagem inclui apenas CNPJs ativos com CNAE principal exato no município, na base consultada. Não comprova cobertura de todos os negócios ou concorrentes reais.';
+
+            if ($contagem->periodo_referencia === null || $contagem->versao_fonte === null) {
+                $avisos[] = 'Período de referência ou versão da base de estabelecimentos não confirmados. A data da consulta não substitui essas informações.';
+            }
+
+            if ($contagem->quantidade === 0) {
+                $avisos[] = 'Uma coleta com zero registros não comprova ausência real de concorrentes sem validação independente de cobertura.';
+            }
+
+            if ($populacao !== null) {
+                $avisos[] = 'As referências de população e estabelecimentos não foram compatibilizadas; estes dados não formam uma fotografia validada do mesmo período.';
+            }
+        }
+
         $avisos[] = 'A fórmula e os pesos do score ainda não foram aprovados pelo grupo e pela professora.';
 
         return response()->json([
@@ -99,7 +128,16 @@ class ExplorarController extends Controller
                 'fonte' => $populacao->fonteDado?->nome,
                 'coletado_em' => $populacao->coletado_em,
             ],
-            'concorrentes' => null,
+            'concorrentes' => $contagem === null ? null : [
+                'quantidade' => $contagem->quantidade,
+                'criterio' => $contagem->criterio,
+                'fonte' => $contagem->fonteDado->nome,
+                'codigo_fonte' => $contagem->fonteDado->codigo,
+                'url_referencia' => $contagem->fonteDado->url_referencia,
+                'consultado_em' => $contagem->consultado_em,
+                'periodo_referencia' => $contagem->periodo_referencia,
+                'versao_fonte' => $contagem->versao_fonte,
+            ],
             'score' => null,
             'avisos' => $avisos,
         ]);

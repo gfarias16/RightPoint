@@ -184,11 +184,29 @@
         } else {
             facts.append(makeFact('População', 'Ainda não importada'));
         }
+
+        // O agregado da fonte não equivale a um censo de todos os concorrentes reais.
+        if (data.concorrentes) {
+            const count = data.concorrentes.quantidade;
+            const collectedAt = data.concorrentes.consultado_em ? new Date(data.concorrentes.consultado_em) : null;
+            const collectedLabel = collectedAt && !Number.isNaN(collectedAt.getTime())
+                ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' }).format(collectedAt) + ' UTC'
+                : 'Data não informada';
+
+            facts.append(makeFact('Estabelecimentos na base · ativos / CNAE principal exato',
+                Number.isInteger(count) && count >= 0 ? new Intl.NumberFormat('pt-BR').format(count) : 'Dado inválido'));
+            facts.append(makeFact('Fonte dos estabelecimentos', data.concorrentes.fonte || 'Fonte não informada'));
+            facts.append(makeFact('Consulta à fonte · não é a competência', collectedLabel));
+            facts.append(makeFact('Período / versão da base',
+                (data.concorrentes.periodo_referencia || 'Período não confirmado') + ' · ' + (data.concorrentes.versao_fonte || 'Versão não confirmada')));
+        } else {
+            facts.append(makeFact('Estabelecimentos na base', 'Dados indisponíveis para este município e CNAE'));
+        }
         summary.append(facts);
 
         const warning = makeElement('div', 'result-card result-card--warning');
         warning.append(makeElement('p', 'result-card__eyebrow', 'AINDA NÃO É UM SCORE'), makeElement('h3', '', 'Análise incompleta'));
-        warning.append(makeElement('p', '', 'Concorrentes e chance de sucesso não são estimados sem bases e critérios validados.'));
+        warning.append(makeElement('p', '', 'Os indicadores descrevem os dados disponíveis. Não representam chance de sucesso nem um score validado.'));
         const list = makeElement('ul', 'result-warnings');
         (Array.isArray(data.avisos) ? data.avisos : []).forEach((message) => list.append(makeElement('li', '', message)));
         warning.append(list);

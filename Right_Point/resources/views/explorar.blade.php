@@ -208,7 +208,7 @@
     <footer class="site-footer">
         <div class="site-footer__inner">
             <span>RightPoint · Projeto acadêmico</span>
-            <span>Dados municipais: IBGE. Perfis desta demonstração: armazenamento local do navegador.</span>
+            <span>Dados: IBGE e contagem piloto OpenCNPJ. Perfis: armazenamento local do navegador.</span>
         </div>
     </footer>
 </body>
