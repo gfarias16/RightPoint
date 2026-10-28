@@ -1,7 +1,99 @@
 <?php
 
 return [
-    // Apenas correspondencias conferidas; a UF faz parte da identificacao.
-    // Evidencia de Marica: docs/FONTES_DADOS.md, teste municipal de 27/10/2026.
-    'RJ:5853' => '3302700',
+    // Pares conferidos no agregado RJ/5611201 e no catalogo local em 28/10/2026.
+    // Evidencias e hash: docs/procedimentos/comparacao-cnpj-municipios-rj.md.
+    // A UF faz parte da chave; zeros iniciais dos codigos Receita sao preservados.
+    'RJ:0770' => '3300233', // Armação dos Búzios
+    'RJ:0772' => '3300936', // Carapebus
+    'RJ:0774' => '3301876', // Iguaba Grande
+    'RJ:0776' => '3302452', // Macuco
+    'RJ:0778' => '3303955', // Pinheiral
+    'RJ:0780' => '3304110', // Porto Real
+    'RJ:0782' => '3304755', // São Francisco de Itabapoana
+    'RJ:0784' => '3305133', // São José de Ubá
+    'RJ:0786' => '3305554', // Seropédica
+    'RJ:0788' => '3305752', // Tanguá
+    'RJ:1116' => '3302858', // Mesquita
+    'RJ:2907' => '3301850', // Guapimirim
+    'RJ:2909' => '3300456', // Belford Roxo
+    'RJ:2911' => '3304144', // Queimados
+    'RJ:2913' => '3302270', // Japeri
+    'RJ:2915' => '3301157', // Cardoso Moreira
+    'RJ:2917' => '3306156', // Varre-Sai
+    'RJ:2919' => '3300159', // Aperibé
+    'RJ:2921' => '3304524', // Rio das Ostras
+    'RJ:2923' => '3304128', // Quatis
+    'RJ:2925' => '3300225', // Areal
+    'RJ:2927' => '3300951', // Comendador Levy Gasparian
+    'RJ:5801' => '3300100', // Angra dos Reis
+    'RJ:5803' => '3300209', // Araruama
+    'RJ:5805' => '3300308', // Barra do Piraí
+    'RJ:5807' => '3300407', // Barra Mansa
+    'RJ:5809' => '3300506', // Bom Jardim
+    'RJ:5811' => '3300605', // Bom Jesus do Itabapoana
+    'RJ:5813' => '3300704', // Cabo Frio
+    'RJ:5815' => '3300803', // Cachoeiras de Macacu
+    'RJ:5817' => '3300902', // Cambuci
+    'RJ:5819' => '3301009', // Campos dos Goytacazes
+    'RJ:5821' => '3301108', // Cantagalo
+    'RJ:5823' => '3301207', // Carmo
+    'RJ:5825' => '3301306', // Casimiro de Abreu
+    'RJ:5827' => '3301405', // Conceição de Macabu
+    'RJ:5829' => '3301504', // Cordeiro
+    'RJ:5831' => '3301603', // Duas Barras
+    'RJ:5833' => '3301702', // Duque de Caxias
+    'RJ:5835' => '3301801', // Engenheiro Paulo de Frontin
+    'RJ:5837' => '3301900', // Itaboraí
+    'RJ:5839' => '3302007', // Itaguaí
+    'RJ:5841' => '3302106', // Itaocara
+    'RJ:5843' => '3302205', // Itaperuna
+    'RJ:5845' => '3302304', // Laje do Muriaé
+    'RJ:5847' => '3302403', // Macaé
+    'RJ:5849' => '3302502', // Magé
+    'RJ:5851' => '3302601', // Mangaratiba
+    'RJ:5853' => '3302700', // Maricá
+    'RJ:5855' => '3302809', // Mendes
+    'RJ:5857' => '3302908', // Miguel Pereira
+    'RJ:5859' => '3303005', // Miracema
+    'RJ:5861' => '3303104', // Natividade
+    'RJ:5863' => '3303203', // Nilópolis
+    'RJ:5865' => '3303302', // Niterói
+    'RJ:5867' => '3303401', // Nova Friburgo
+    'RJ:5869' => '3303500', // Nova Iguaçu
+    'RJ:5871' => '3303609', // Paracambi
+    'RJ:5873' => '3303708', // Paraíba do Sul
+    'RJ:5875' => '3303807', // Paraty: Receita usa PARATI; exceção documentada.
+    'RJ:5877' => '3303906', // Petrópolis
+    'RJ:5879' => '3304003', // Piraí
+    'RJ:5881' => '3304102', // Porciúncula
+    'RJ:5883' => '3304201', // Resende
+    'RJ:5885' => '3304300', // Rio Bonito
+    'RJ:5887' => '3304409', // Rio Claro
+    'RJ:5889' => '3304508', // Rio das Flores
+    'RJ:5891' => '3304607', // Santa Maria Madalena
+    'RJ:5893' => '3304706', // Santo Antônio de Pádua
+    'RJ:5895' => '3304805', // São Fidélis
+    'RJ:5897' => '3304904', // São Gonçalo
+    'RJ:5899' => '3305000', // São João da Barra
+    'RJ:5901' => '3305109', // São João de Meriti
+    'RJ:5903' => '3305208', // São Pedro da Aldeia
+    'RJ:5905' => '3305307', // São Sebastião do Alto
+    'RJ:5907' => '3305406', // Sapucaia
+    'RJ:5909' => '3305505', // Saquarema
+    'RJ:5911' => '3305604', // Silva Jardim
+    'RJ:5913' => '3305703', // Sumidouro
+    'RJ:5915' => '3305802', // Teresópolis
+    'RJ:5917' => '3305901', // Trajano de Moraes
+    'RJ:5919' => '3306008', // Três Rios
+    'RJ:5921' => '3306107', // Valença
+    'RJ:5923' => '3306206', // Vassouras
+    'RJ:5925' => '3306305', // Volta Redonda
+    'RJ:5927' => '3300258', // Arraial do Cabo
+    'RJ:5929' => '3302056', // Italva
+    'RJ:6001' => '3304557', // Rio de Janeiro
+    'RJ:6003' => '3302254', // Itatiaia
+    'RJ:6005' => '3303856', // Paty do Alferes
+    'RJ:6007' => '3304151', // Quissamã
+    'RJ:6009' => '3305158', // São José do Vale do Rio Preto
 ];
