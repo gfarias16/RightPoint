@@ -6,6 +6,25 @@ Este procedimento explica como manter o RightPoint utilizável no computador da 
 
 Leia este documento antes de instalar dependências, criar o `.env`, executar migrations ou atualizar um ambiente que já possua trabalho local.
 
+## Retomada da entrega CNPJ — 28/10/2026
+
+1. No trabalho, o usuário fará o push dos commits locais. **Levar também o JSON agregado original da pasta `Right_Point/storage/app/amostras/`** por meio seguro; não vai no Git. Para exercícios antigos, levar os outros JSON se precisar. Não transportar cache, `.env` adicional, `vendor/` ou banco como se fossem arquivos do código.
+2. Na escola, conferir `git status --short --branch` na pasta antiga, preservar trabalho local e só fazer pull quando a árvore estiver limpa/sem divergências. Não clonar por cima nem sobrescrever `.env`. Dependências ausentes: seguir preparação deste procedimento (`composer install`, não update).
+3. Dentro de `Right_Point/`, conferir `.env` sem mostrar conteúdo, MySQL local, migrations e catálogos. `php artisan migrate:status` deve incluir a migration `2026_10_28_165020_create_contagem_estabelecimentos_table`. Se Pending, revisar e aplicar **somente essa migration** ao decidir preparar o banco; se a tabela já existir sem registro da migration, parar e analisar, não apagar/resetar.
+4. Se o cache de configuração já estiver ativo, atualizar com `php artisan config:cache` após o pull; não copiar cache de outra máquina. Conferir 92 municípios RJ e CNAE 5611201. Catálogos ausentes devem ser diagnosticados, não substituídos por IDs do trabalho.
+5. Colocar o JSON transportado em `storage/app/amostras/`. Pode usar nome legível `contagem-rj-5611201.json` ou manter o original; passar o caminho correto entre aspas nos comandos. O importador reconhece conteúdo por hash normalizado, não pelo nome.
+
+Exemplo **se você salvou a cópia com o nome legível acima**:
+
+```powershell
+php artisan cnpj:verificar-contagens-rj "storage/app/amostras/contagem-rj-5611201.json"
+php artisan cnpj:importar-contagens-rj "storage/app/amostras/contagem-rj-5611201.json"
+```
+
+Ambos devem aprovar 92 municípios/soma 39.423 sem gravar. O segundo também mostra consulta UTC `2026-10-28 20:01:33`. Só ao decidir carregar aquele banco, acrescentar `--gravar` ao **importador plural**. Primeira carga cria 92 coletas; se já houver piloto, ficam 93. Repetição não duplica; divergência falha sem sobrescrever. Depois consultar outros municípios com CNAE 5611201 e conferir fonte/data/avisos; score continua NULL. Detalhes no [procedimento do lote](./comparacao-cnpj-municipios-rj.md#importação-local-do-lote).
+
+Estado observado no trabalho: oito migrations Ran, 92 municípios, 1.332 atividades, 92 populações, **uma coleta do piloto**. Lote só simulado no MySQL pelo agente; escrita/rollback exercitados em SQLite na memória. Escola a conferir; Git não transporta esses dados. Não repetir BigQuery para obter novamente o arquivo.
+
 ## Estado conhecido em 01/10/2026
 
 - O repositório Git está hospedado em `https://github.com/gfarias16/RightPoint.git`.

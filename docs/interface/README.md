@@ -36,3 +36,10 @@ Bairro, ponto e raio geográfico ficam para outra etapa. O perfil do negócio se
 - histórico vazio.
 
 Estados já presentes no protótipo: entrada inválida, consulta em processamento, resultado com dados insuficientes, score indisponível, malha indisponível e lista vazia de perfis. Fonte defasada, concorrentes com cobertura CNPJ validada, histórico e verificação de responsividade ainda estão pendentes.
+
+## Contagem piloto na consulta — 28/10/2026
+
+- Interface existente preservada: fatos no card de resultado, com rótulo de estabelecimentos na base, critério ativo/CNAE principal exato, fonte, consulta UTC e período/versão. Sem coleta, mostrar indisponibilidade; referência ausente não é preenchida com a data da consulta. Texto continua inserido com `textContent`, não HTML da fonte.
+- Avisos mantêm ausência de score e limites de cobertura/período; não representar 620 como chance de sucesso ou como estabelecimentos geolocalizados no mapa. UI/UX aplicada para clareza do estado vazio, sem redesenho ou dependências novas.
+- Consulta HTTP real e testes automatizados aprovados; renderização visual/responsividade ainda a conferir. A ferramenta do navegador negou acesso a localhost e o bloqueio não foi contornado. Não registrar esta etapa como teste visual concluído.
+- Captura posterior enviada pelo usuário confirmou o resultado de Maricá/5611201 no desktop: população 197.277/2022, 620 estabelecimentos na base, fontes/datas, referências desconhecidas e quatro avisos legíveis. Esta evidência cobre o resultado exibido, não mobile, recortes sem coleta ou todas as interações.

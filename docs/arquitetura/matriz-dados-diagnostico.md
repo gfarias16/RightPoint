@@ -1,6 +1,6 @@
 # Matriz de dados e fluxograma do diagnóstico — RightPoint
 
-Atualizado em 20/10/2026. A população do Censo 2022 já foi importada no notebook do trabalho e retornou na consulta demonstrativa; **não há score ou contagem de concorrentes funcionando**. As fontes pesquisadas e os testes do IBGE estão em [FONTES_DADOS.md](../FONTES_DADOS.md).
+Atualizado em 28/10/2026. População do Censo 2022 e agregado de Maricá/CNAE `5611201` (620) lidos pela consulta demonstrativa, com fontes/datas/avisos. **Não há score aprovado; conferência visual da contagem pendente.** As fontes e evidências estão em [FONTES_DADOS.md](../FONTES_DADOS.md).
 
 ## Recorte e critérios da primeira versão
 
@@ -8,6 +8,7 @@ Atualizado em 20/10/2026. A população do Censo 2022 já foi importada no noteb
 - Entrada da consulta: município e atividade identificada por CNAE. O mapa municipal deverá usar limites de uma edição identificada da [Malha Municipal do IBGE](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/15774-malhas.html); OpenStreetMap/Mapbox são apoios visuais possíveis, não fontes de limites nem fatores automáticos do score.
 - Dados mínimos **propostos** para um futuro score: população municipal do IBGE e cobertura validada de estabelecimentos/CNPJ no município. A contagem inicial de concorrentes proposta considera situação **ativa** e **CNAE principal idêntico** ao consultado, no mesmo município. CNAEs secundários/equivalentes e outras situações ficam fora dessa primeira contagem até decisão do grupo.
 - O score de 0 a 100 só poderá ser apresentado após aprovação da fórmula, pesos e critérios de atualização. É uma nota orientativa, **não** uma probabilidade estatística de sucesso. Enquanto faltarem dados mínimos ou fórmula aprovada, mostrar indicadores disponíveis e o motivo de não haver score.
+- Evolução sugerida em 28/10/2026: avaliar [células H3](../planos/analise-territorial-h3.md) dentro do município após obter coordenadas e dados censitários compatíveis. Não altera o recorte inicial, os fatores ou pesos atuais. H3 organiza agregações; não fornece dados nem valida uma probabilidade de sucesso. A [contagem agregada do piloto](../procedimentos/contagem-cnpj-piloto.md) foi executada, importada e ligada à consulta municipal, sem camada H3.
 - Dados condicionais podem ajudar a explicar o contexto, mas só entrarão no cálculo após validação da fonte, pertinência para a atividade e regra de uso. Nenhum dado ausente será substituído silenciosamente por zero.
 
 ## Matriz de fontes e indicadores
@@ -22,7 +23,7 @@ Atualizado em 20/10/2026. A população do Censo 2022 já foi importada no noteb
 | M-04 | IBGE: densidade populacional | Habitantes/km² | Mesmo código e períodos compatíveis para população e área | Tabela/edição a confirmar | Sem carga; registrar data/hora | Condicional, após validação | Proposto |
 | M-05 | IBGE: renda | Conceito e unidade a escolher | Um valor por código IBGE, se houver cobertura municipal | Tabela/período a confirmar | Sem carga; registrar data/hora | Condicional à atividade e à regra aprovada | Proposto |
 | M-06 | IBGE: perfil etário | Faixas e unidade a escolher | Um valor por código IBGE, se houver cobertura municipal | Tabela/período a confirmar | Sem carga; registrar data/hora | Condicional à atividade e à regra aprovada | Proposto |
-| M-07 | Receita Federal/CNPJ ou provedor validado: estabelecimentos e concorrentes | Estabelecimentos; CNPJ como identificador textual | Mapear código de município da fonte para código IBGE; deduplicar CNPJ | Data/versão da base CNPJ a registrar | Sem carga; registrar data/hora e versão | Sim; concorrência ativa com CNAE principal exato | Proposto; arquivo/endpoint não escolhido |
+| M-07 | OpenCNPJ/BigQuery: contagem agregada de estabelecimentos | Estabelecimentos (CNPJs distintos no recorte) | Maricá: Receita 5853 → IBGE 3302700; CNAE principal 5611201, Ativa | Período/versão desconhecidos; consulta em 28/10/2026 | Carga manual de uma coleta, controles 620/620/0, fonte e instante UTC registrados | Proposto, sem cálculo aprovado | Piloto importado e leitura HTTP testada; UI implementada, conferência visual pendente. Condições da fonte e cobertura independente pendentes |
 | M-08 | ANP: preços de combustíveis | Unidade da série escolhida a confirmar | Cobertura municipal a verificar | Série/período a escolher | Sem carga | Não inicialmente; contexto, sem inferir fluxo de pessoas | Proposto |
 | M-09 | INMET: temperatura | °C | Definir método para associar estação a município | Série/período a escolher | Sem carga | Condicional à atividade e à validação espacial | Proposto |
 | M-10 | INMET: chuva | mm | Definir método para associar estação a município | Série/período a escolher | Sem carga | Condicional à atividade e à validação espacial | Proposto |

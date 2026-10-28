@@ -1,6 +1,6 @@
 # RightPoint — roteiro para a apresentação
 
-Atualizado em 27/10/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
+Atualizado em 28/10/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
 
 ## 1. Problema e objetivo
 
@@ -17,11 +17,11 @@ Atualizado em 27/10/2026. Material de apoio para os slides da professora; amplia
 | --- | --- | --- |
 | [IBGE Localidades](https://servicodados.ibge.gov.br/api/v1/localidades/estados/33/municipios) | Código e nome dos municípios; ligação entre fontes | 92 municípios importados |
 | [IBGE CNAE](https://servicodados.ibge.gov.br/api/docs/CNAE?versao=2) | Catálogo de atividades e busca por nome/código | 1.332 códigos importados; versão da classificação ainda a confirmar |
-| [IBGE Censo 2022 / agregado 4714](https://sidra.ibge.gov.br/tabela/4714) | População residente, variável 93, unidade Pessoas | 92 valores importados no notebook do trabalho; banco deste computador ainda sem indicadores. Não são população atual |
+| [IBGE Censo 2022 / agregado 4714](https://sidra.ibge.gov.br/tabela/4714) | População residente, variável 93, unidade Pessoas | 92 valores no banco do trabalho e população de Maricá exibida; conferir banco da escola. Não são população atual |
 | [IBGE Malha Municipal](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/15774-malhas.html) | Limites dos municípios selecionáveis no mapa | Malha simplificada consultada e validada por código; edição a confirmar |
 | [Minha Receita](https://docs.minhareceita.org/como-usar/#busca-paginada), serviço independente baseado em dados públicos de CNPJ | Buscar estabelecimentos por município e CNAE principal | API em teste; comando com até 3 páginas e cursor automático; CNPJ ainda não importado |
 | [Mapa de Empresas](https://www.gov.br/empresas-e-negocios/pt-br/mapa-de-empresas/painel-mapa-de-empresas) | Candidato a total de CNPJs ativos por município e atividade | Filtro pela subclasse CNAE exata e exportação ainda a conferir; não fornece lista individual validada |
-| [OpenCNPJ — opencnpj.org](https://opencnpj.org/) | Candidato a dados de estabelecimentos para filtrar e guardar localmente | Amostra BigQuery baixada: 10 CNPJs distintos; formato e filtros conferidos em PHP. Não é total. Custo efetivo e cobertura pendentes; nada importado |
+| [OpenCNPJ — opencnpj.org](https://opencnpj.org/) | Contagem piloto via SQL no BigQuery → JSON → MySQL → consulta demonstrativa | Uma coleta com 620 CNPJs distintos ativos, CNAE principal `5611201`, Maricá/RJ; 0 ausentes. Reimportação sem duplicação conferida. Fonte/data disponíveis no resultado; versão/período desconhecidos e cobertura real não comprovada |
 | [Receita Federal, arquivos abertos](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/cadastros/cnpj) / [Casa dos Dados](https://docs.casadosdados.com.br/pesquisa-avan%C3%A7ada-de-empresas-16579062e0) | Alternativas para dados individuais de estabelecimentos | Receita exige processar arquivos grandes; Casa exige chave e saldo. Nenhuma integrada |
 | [OpenStreetMap](https://www.openstreetmap.org/copyright) / [Esri World Imagery](https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer) | Fundo cartográfico claro/escuro e satélite | Apoio visual; não calculam o score. Mapbox não foi integrado |
 | ANP, INMET e investimentos públicos | Possíveis indicadores complementares | Candidatas; sem integração ou uso no score. Referências em [FONTES_DADOS.md](./FONTES_DADOS.md) |
@@ -47,11 +47,22 @@ flowchart LR
 - O leitor CSV foi um exercício de leitura e permanece como alternativa; os resultados atuais vieram da API.
 - OpenCNPJ em avaliação: API documentada consulta um CNPJ conhecido; o teste de busca por município/atividade foi feito via **SQL no BigQuery**, não por essa API. Conferimos contrato, publicação, esquema e tamanho antes de adquirir dados. [Evidências](./FONTES_DADOS.md#opencnpj--avaliação-autorizada-em-27102026).
 - Segurança de custo: estimar → definir teto de bytes → obter autorização → executar uma vez. `LIMIT` não limita a leitura; orçamento de alertas não bloqueia gastos do BigQuery. Custo efetivo ainda a conferir.
-- Integração entre códigos **implementada para Maricá**: `config/municipios_receita.php` guarda `RJ:5853` → IBGE `3302700`. `cnpj:verificar-municipio 5853 RJ` localiza o município no MySQL, lendo seu ID local sem fixá-lo entre máquinas. Seis testes com consultas simuladas e conferência real aprovados; sem escrita no banco. Não é ainda relacionamento persistido de estabelecimentos; faltam os demais municípios.
+- Integração entre códigos **implementada para os 92 municípios do RJ**: configuração explícita Receita↔IBGE, preservando zeros iniciais; Parati/Paraty é exceção documentada. O vínculo usa códigos oficiais, nunca o ID interno fixo de outra máquina. `cnpj:verificar-municipio` verifica um par; `cnpj:verificar-contagens-rj` confere o lote inteiro, sem gravação. Não há associação por nome parecido.
 - Arquivo local conferido em PHP: lista JSON completa, 10 CNPJs distintos, todos com UF RJ, CNAE principal `5611201`, situação `Ativa` e código Receita `5853`. Um CNPJ tem zero inicial: manter como texto. Não é total de concorrentes nem validação cadastral atual.
-- Fluxo em teste: SQL BigQuery → baixar JSON → conferir formato, campos, filtros e duplicatas em PHP. Comando `cnpj:verificar-amostra` aprova a amostra de 10 registros (saída 0) e rejeita duplicata fictícia em arquivo separado (saída 1). Teste de filtro divergente e automatização dos demais casos foram adiados pelo usuário. Dígitos verificadores, cobertura, termos dos dados e aquisição completa pendentes; nada importado no MySQL.
+- Fluxo de amostra em teste: SQL BigQuery → baixar JSON → conferir formato, campos, filtros e duplicatas em PHP. Comando `cnpj:verificar-amostra` aprova 10 registros e rejeita duplicata fictícia. Testes adicionais adiados pelo usuário; dígitos verificadores, cobertura e termos dos dados pendentes. Essa amostra individual não foi importada; o agregado abaixo foi.
 
 **Fluxo alvo para CNPJ — planejado, com atualização separada da consulta do usuário:**
+
+Piloto implementado: [contagem agregada de Maricá/restaurantes](./procedimentos/contagem-cnpj-piloto.md), sem `LIMIT`: 620 registros, 620 CNPJs distintos, 0 ausentes. Fluxo realizado: **SQL BigQuery → JSON local → validação PHP → transação → MySQL**. Não são 620 cadastros individuais, nem prova de cobertura de todos os negócios reais.
+
+Persistência conferida: uma linha em `contagens_estabelecimentos` com quantidade 620, vinculada a município, atividade e fonte. Comando simula por padrão; `--gravar` autoriza a escrita local. Repetir a mesma coleta não duplica nem atualiza o registro (**idempotência**). Fonte e data UTC registradas; período/versão desconhecidos ficam NULL.
+
+- **Leitura implementada:** município + CNAE → coleta mais recente da fonte/critério do piloto → quantidade + procedência + avisos. A consulta só lê o banco local; não gera custo BigQuery a cada clique.
+- **Sem coleta:** dado indisponível, não zero. Zero registrado não comprova ausência real de concorrentes. População 2022 e coleta CNPJ não são automaticamente comparáveis no tempo; score ainda indisponível.
+- **Validação:** HTTP real de Maricá retornou 620; suíte completa com 30 testes/117 asserções aprovada. Captura do usuário confirmou no desktop população, contagem, fontes/datas e avisos. Mobile e recorte sem coleta ainda precisam de conferência visual; navegador da ferramenta sem permissão para localhost.
+- **Comparação municipal — arquivo/job conferidos, ainda sem carga:** [consulta agregada](./procedimentos/comparacao-cnpj-municipios-rj.md) trouxe 92 grupos RJ/5611201/Ativa, soma municipal 39.423 e ausentes 0. Maricá continua 620. Job de 28/10/2026: 3,81 GB processados/faturados; instante UTC registrado, sem credenciais/IDs privados. Os 92 vínculos estão em configuração, incluindo Parati/Paraty. Edição/competência e importador em lote pendentes; não comprova cobertura real nem gera score.
+- **Rastreabilidade da publicação:** Detalhes da tabela conferidos: última modificação em 14/10/2026; descrição sem edição/competência. Data de consulta, modificação da tabela e período dos dados são conceitos diferentes. Referência desconhecida permanece NULL; verificador local já entregue, importação em lote é a próxima etapa, sem nova consulta paga.
+- **Verificação em lote implementada:** arquivo → conferir contrato/filtros/contagens → resolver os 92 códigos → comparar nomes → tabela/soma/hash, sem gravar. Execução real aprovou 92 grupos e soma 39.423; banco preservado. Verificador coberto pela suíte; importador em lote entregue/testado conforme seção seguinte. Carga real pendente; só Maricá tem contagem persistida no diagnóstico.
 
 ```mermaid
 flowchart LR
@@ -65,7 +76,16 @@ flowchart LR
 - A consulta demonstrativa já lê população e catálogos locais. A integração CNPJ seguirá essa separação se a fonte for validada.
 - Nenhum conjunto parcial deve ser apresentado como cobertura completa. [Matriz e fluxo detalhado](./arquitetura/matriz-dados-diagnostico.md).
 
+### Evolução proposta: análise por células H3
+
+- H3 é um índice geográfico aberto desenvolvido para necessidades da Uber; agrupa pontos em células de diferentes resoluções. Não é uma fonte de população nem uma fórmula de sucesso. [Documentação oficial](https://h3geo.org/docs/).
+- Ideia para o RightPoint: estabelecimentos localizados → células H3 → concentração e contexto por entorno → diagnóstico explicável. É proposta, não funcionalidade entregue.
+- Requisitos: coordenadas verificadas e dados censitários intramunicipais compatíveis. População por célula pode exigir estimativa; maior detalhe no mapa não significa maior precisão.
+- Preservar limites oficiais e fontes/datas; célula pode cruzar bairros/municípios. Não usar dados operacionais internos de segurança no protótipo. [Plano e fontes](./planos/analise-territorial-h3.md).
+
 ## 4. Ferramentas e responsabilidades
+
+- **Importador em lote entregue:** validação compartilhada → conferir hash/job UTC → simular → `--gravar` → transação de fonte e 92 coletas. Repetição não duplica; divergência não sobrescreve; falha desfaz tudo. Piloto preservado. **85 testes/447 asserções aprovados**; simulação real conferida, primeira escrita MySQL do lote pendente.
 
 - **PHP / Laravel:** rotas, controllers, validação, models e comandos Artisan.
 - **Blade, HTML, CSS e JavaScript:** página, formulários, pesquisa e interação.
@@ -84,6 +104,8 @@ Comandos executados dentro de `Right_Point/`, com o prefixo `php artisan`:
 | Atividades | `ibge:verificar-cnaes` | `ibge:importar-cnaes` |
 | População 2022 | `ibge:verificar-populacao-rj` | `ibge:importar-populacao-rj` |
 | Estabelecimentos | `cnpj:verificar-busca` | Ainda não implementada |
+| Contagem agregada piloto | `cnpj:importar-contagem` | `cnpj:importar-contagem --gravar` |
+| Lote agregado RJ | `cnpj:verificar-contagens-rj "caminho/do/lote.json"` e importador sem opção | `cnpj:importar-contagens-rj "caminho/do/lote.json" --gravar` — disponível; carga real pendente |
 
 - **Migration** define a estrutura; **model** representa o acesso aos dados.
 - Os importadores validam a resposta antes de gravar. **Transação:** desfaz a carga se a gravação falhar. **Upsert:** insere ou atualiza pela chave, evitando duplicar o mesmo dado.
@@ -95,7 +117,7 @@ Comandos executados dentro de `Right_Point/`, com o prefixo `php artisan`:
 ## 6. Caso de uso, regras e integridade
 
 - **Caso de uso demonstrável:** empreendedor seleciona município no mapa/busca, escolhe atividade e consulta indicadores disponíveis; pode guardar um perfil no navegador.
-- **Entrada:** código IBGE e CNAE. **Saída atual:** identificação, população disponível, fonte/data e avisos sobre dados faltantes.
+- **Entrada:** código IBGE e CNAE. **Saída atual:** identificação, população e contagem agregada disponíveis, fontes/datas e avisos sobre recorte, referências e dados faltantes. Score NULL.
 - **RN-001/002/003:** análise vinculada a atividade e região válidas.
 - **RN-006/007/016 — proposta:** concorrentes ativos, no mesmo município e com CNAE principal exato; aguarda validação acadêmica.
 - **RN-011/012/017/018:** explicar fatores e limitações; score orientativo apenas com mínimos e fórmula aprovados.

@@ -15,3 +15,5 @@ Esta pasta armazenará planos de mudanças que precisem continuar por várias et
 O backend utiliza o projeto Laravel em `Right_Point/`. Município e CNAE foram escolhidos para a primeira versão; os demais detalhes do escopo ainda precisam ser validados.
 
 Consulte o [plano de implementação inicial](./implementacao-inicial.md) antes de retomar o desenvolvimento. Ele complementa as etapas de modelagem acima.
+
+- [Análise territorial com H3](./analise-territorial-h3.md): proposta de evolução intramunicipal, requisitos de dados, limites e etapas de avaliação; ainda não implementada.
