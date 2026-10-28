@@ -1,6 +1,6 @@
 # Plano de implementação inicial — RightPoint
 
-Última atualização: 27/10/2026 (amostra OpenCNPJ/BigQuery conferida localmente; comando próprio de validação, cobertura e persistência pendentes).
+Última atualização: 27/10/2026 (amostra JSON validada e vínculo Receita↔IBGE de Maricá implementado; cobertura e persistência de estabelecimentos pendentes).
 
 ## Objetivo
 
@@ -33,6 +33,8 @@ O model `User` fornecido pelo Laravel não significa que login ou cadastro foram
 7. [Roteiro para a apresentação acadêmica](../APRESENTACAO.md): atualizar com fontes, estratégias, evidências, imagens e limitações a cada etapa relevante.
 
 ## Próxima etapa imediata
+
+**Vínculo de Maricá implementado e validado — 27/10/2026, escola:** após autorização, o agente criou `config/municipios_receita.php` e `cnpj:verificar-municipio {codigo_receita} {uf=RJ}`. Par conferido `RJ:5853` → `3302700`; busca local somente por IBGE + UF, sem ID fixo. MySQL real retornou Maricá, ID 41 neste banco. Seis testes com consultas simuladas passaram (29 asserções), sem SQLite nem migrations. Sintaxe válida e validação JSON anterior preservada. Não houve mudança estrutural, vínculo persistido de estabelecimentos ou importação. Em outra máquina, conferir o catálogo e atualizar cache de configuração existente antes do comando. Próximo passo: planejar aquisição completa, procedência e ampliação do mapeamento com evidências; não executar novas consultas pagas ou importar por inferência. Testes adicionais do leitor JSON continuam adiados. Os parágrafos abaixo são históricos.
 
 **Entrega para a escola — 27/10/2026:** usuário pediu adiar o teste de filtro divergente e preparar documentação/commits. Comando local e teste de duplicata estão conferidos; demais testes do novo comando permanecem pendentes, sem implementação automática nesta entrega. Na escola, primeiro conferir Git/ambiente e transportar as amostras ignoradas conforme [procedimento](../procedimentos/ambiente-multiplos-computadores.md#amostras-cnpj-na-retomada-da-escola--27102026). Depois alinhar aquisição completa dos estabelecimentos e mapeamento Receita↔IBGE antes de criar importador ou usar totais no diagnóstico. Não executar nova consulta paga, importação ou migration por inferência. Os parágrafos seguintes são históricos e não exigem retomar imediatamente os exercícios adiados.
 

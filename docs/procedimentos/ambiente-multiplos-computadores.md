@@ -290,6 +290,17 @@ O primeiro deve aprovar 10 registros e retornar 0; o segundo deve rejeitar o reg
 
 **Validação de entrega:** a suíte existente retornou 15 testes aprovados e uma falha em `ExampleTest`, cuja leitura da página inicial recebeu conexão MySQL recusada. Os testes de domínio/paginação usam SQLite em memória; o teste genérico da página ainda depende do banco configurado. Conferir o MySQL local antes de repetir a suíte; não modificar o banco ou afirmar que todos os testes passaram com base nos 15 aprovados.
 
+## Conferência do vínculo municipal Receita–IBGE
+
+Para conferir o vínculo municipal implementado em 27/10/2026, depois do pull e com o catálogo de municípios disponível no MySQL local, execute dentro de `Right_Point/`:
+
+```powershell
+php artisan config:cache
+php artisan cnpj:verificar-municipio 5853 RJ
+```
+
+O primeiro atualiza o cache local (não entra no Git nem deve ser compartilhado). O segundo deve encontrar Maricá/RJ por IBGE `3302700`, sem gravar. O ID exibido pertence ao banco desta máquina e pode diferir de 41. Se o município estiver ausente ou o banco indisponível, o comando falha: investigar o ambiente, sem reset ou importação automática. O mapa versionado cobre somente Maricá e não comprova cobertura CNPJ. O leitor JSON continua independente do MySQL. Os seis testes específicos podem ser executados com o comando registrado em [COMANDOS.md](../COMANDOS.md).
+
 ## Acesso HTTPS ao IBGE com cadeia incompleta
 
 Na preparação da escola em 20/10/2026, os verificadores e as cargas de CNAEs e população funcionaram com a verificação TLS padrão, sem criar um pacote CA adicional. A solução abaixo é histórica e deve ser usada somente após confirmar a necessidade no ambiente atual.
