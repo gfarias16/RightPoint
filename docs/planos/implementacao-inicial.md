@@ -1,6 +1,6 @@
 # Plano de implementação inicial — RightPoint
 
-Última atualização: 28/10/2026 (verificador/importador do lote RJ implementados/testados; primeira carga real pendente; entrega para escola documentada; score e H3 não implementados).
+Última atualização: 28/10/2026 (lote RJ carregado e conferido no banco deste computador; população ainda ausente nele; score e H3 não implementados).
 
 ## Objetivo
 
@@ -33,6 +33,8 @@ O model `User` fornecido pelo Laravel não significa que login ou cadastro foram
 7. [Roteiro para a apresentação acadêmica](../APRESENTACAO.md): atualizar com fontes, estratégias, evidências, imagens e limitações a cada etapa relevante.
 
 ## Próxima etapa imediata
+
+**Carga local confirmada — 28/10/2026:** após `--gravar` executado pelo usuário, o agente encontrou 92 coletas em 92 municípios no MySQL `rightpoint`, soma 39.423, fonte OpenCNPJ, CNAE `5611201` e coleta UTC `2026-10-28 20:01:33`. A rota demonstrativa devolveu HTTP 200 com 308 para Barra Mansa e 620 para Maricá, procedência e avisos; score NULL. O banco deste computador ainda tem 0 indicadores de população. **Próximo passo:** o usuário conferir os dois diagnósticos no navegador; depois executar `ibge:verificar-populacao-rj` e, se confirmar os 92 municípios, `ibge:importar-populacao-rj` neste banco. Reavaliar a tela após essa carga. Cobertura real, edição/período da base CNPJ e fórmula do score permanecem A CONFIRMAR. A carga local e o JSON não acompanham o Git. Registros abaixo descrevem etapas anteriores.
 
 **Entrega do importador em lote — 28/10/2026:** implementação autorizada: `cnpj:importar-contagens-rj <arquivo> {--gravar}`, validador compartilhado e configuração hash/UTC da fotografia. Fonte/coletas na mesma transação, proteção de reimportação/divergência, piloto preservado e referências NULL. 85 testes/447 asserções aprovados; simulação real 92/39.423 preservou arquivo/MySQL. Banco do trabalho permanece com uma coleta. Na escola, conferir Git/ambiente/migration/catálogos, levar o JSON ignorado, simular e só gravar ao decidir carregar aquele banco. [Roteiro](../procedimentos/ambiente-multiplos-computadores.md#retomada-da-entrega-cnpj--28102026). Depois conferir carga real e diagnóstico em outros municípios; sem score/H3 ou nova consulta paga. Commits por assunto; push será do usuário. Registros abaixo são históricos.
 

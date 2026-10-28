@@ -21,7 +21,7 @@ Atualizado em 28/10/2026. Material de apoio para os slides da professora; amplia
 | [IBGE Malha Municipal](https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/15774-malhas.html) | Limites dos municípios selecionáveis no mapa | Malha simplificada consultada e validada por código; edição a confirmar |
 | [Minha Receita](https://docs.minhareceita.org/como-usar/#busca-paginada), serviço independente baseado em dados públicos de CNPJ | Buscar estabelecimentos por município e CNAE principal | API em teste; comando com até 3 páginas e cursor automático; CNPJ ainda não importado |
 | [Mapa de Empresas](https://www.gov.br/empresas-e-negocios/pt-br/mapa-de-empresas/painel-mapa-de-empresas) | Candidato a total de CNPJs ativos por município e atividade | Filtro pela subclasse CNAE exata e exportação ainda a conferir; não fornece lista individual validada |
-| [OpenCNPJ — opencnpj.org](https://opencnpj.org/) | Contagem piloto via SQL no BigQuery → JSON → MySQL → consulta demonstrativa | Uma coleta com 620 CNPJs distintos ativos, CNAE principal `5611201`, Maricá/RJ; 0 ausentes. Reimportação sem duplicação conferida. Fonte/data disponíveis no resultado; versão/período desconhecidos e cobertura real não comprovada |
+| [OpenCNPJ — opencnpj.org](https://opencnpj.org/) | SQL no BigQuery → JSON agregado → MySQL → consulta demonstrativa | Neste computador, 92 contagens municipais de CNPJs ativos/CNAE principal `5611201`, soma 39.423; fonte/data disponíveis. Versão/período desconhecidos e cobertura real não comprovada |
 | [Receita Federal, arquivos abertos](https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/cadastros/cnpj) / [Casa dos Dados](https://docs.casadosdados.com.br/pesquisa-avan%C3%A7ada-de-empresas-16579062e0) | Alternativas para dados individuais de estabelecimentos | Receita exige processar arquivos grandes; Casa exige chave e saldo. Nenhuma integrada |
 | [OpenStreetMap](https://www.openstreetmap.org/copyright) / [Esri World Imagery](https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer) | Fundo cartográfico claro/escuro e satélite | Apoio visual; não calculam o score. Mapbox não foi integrado |
 | ANP, INMET e investimentos públicos | Possíveis indicadores complementares | Candidatas; sem integração ou uso no score. Referências em [FONTES_DADOS.md](./FONTES_DADOS.md) |
@@ -55,14 +55,14 @@ flowchart LR
 
 Piloto implementado: [contagem agregada de Maricá/restaurantes](./procedimentos/contagem-cnpj-piloto.md), sem `LIMIT`: 620 registros, 620 CNPJs distintos, 0 ausentes. Fluxo realizado: **SQL BigQuery → JSON local → validação PHP → transação → MySQL**. Não são 620 cadastros individuais, nem prova de cobertura de todos os negócios reais.
 
-Persistência conferida: uma linha em `contagens_estabelecimentos` com quantidade 620, vinculada a município, atividade e fonte. Comando simula por padrão; `--gravar` autoriza a escrita local. Repetir a mesma coleta não duplica nem atualiza o registro (**idempotência**). Fonte e data UTC registradas; período/versão desconhecidos ficam NULL.
+No piloto do trabalho, a persistência foi conferida com uma linha em `contagens_estabelecimentos` e quantidade 620, vinculada a município, atividade e fonte. Comando simula por padrão; `--gravar` autoriza a escrita local. Repetir a mesma coleta não duplica nem atualiza o registro (**idempotência**). Fonte e data UTC registradas; período/versão desconhecidos ficam NULL.
 
 - **Leitura implementada:** município + CNAE → coleta mais recente da fonte/critério do piloto → quantidade + procedência + avisos. A consulta só lê o banco local; não gera custo BigQuery a cada clique.
 - **Sem coleta:** dado indisponível, não zero. Zero registrado não comprova ausência real de concorrentes. População 2022 e coleta CNPJ não são automaticamente comparáveis no tempo; score ainda indisponível.
 - **Validação:** HTTP real de Maricá retornou 620; suíte completa com 30 testes/117 asserções aprovada. Captura do usuário confirmou no desktop população, contagem, fontes/datas e avisos. Mobile e recorte sem coleta ainda precisam de conferência visual; navegador da ferramenta sem permissão para localhost.
-- **Comparação municipal — arquivo/job conferidos, ainda sem carga:** [consulta agregada](./procedimentos/comparacao-cnpj-municipios-rj.md) trouxe 92 grupos RJ/5611201/Ativa, soma municipal 39.423 e ausentes 0. Maricá continua 620. Job de 28/10/2026: 3,81 GB processados/faturados; instante UTC registrado, sem credenciais/IDs privados. Os 92 vínculos estão em configuração, incluindo Parati/Paraty. Edição/competência e importador em lote pendentes; não comprova cobertura real nem gera score.
-- **Rastreabilidade da publicação:** Detalhes da tabela conferidos: última modificação em 14/10/2026; descrição sem edição/competência. Data de consulta, modificação da tabela e período dos dados são conceitos diferentes. Referência desconhecida permanece NULL; verificador local já entregue, importação em lote é a próxima etapa, sem nova consulta paga.
-- **Verificação em lote implementada:** arquivo → conferir contrato/filtros/contagens → resolver os 92 códigos → comparar nomes → tabela/soma/hash, sem gravar. Execução real aprovou 92 grupos e soma 39.423; banco preservado. Verificador coberto pela suíte; importador em lote entregue/testado conforme seção seguinte. Carga real pendente; só Maricá tem contagem persistida no diagnóstico.
+- **Comparação municipal carregada neste computador:** [consulta agregada](./procedimentos/comparacao-cnpj-municipios-rj.md) trouxe 92 grupos RJ/5611201/Ativa, soma municipal 39.423 e ausentes 0. O MySQL contém 92 coletas; Maricá tem 620 e Barra Mansa 308. Job de 28/10/2026: 3,81 GB processados/faturados; instante UTC registrado, sem credenciais/IDs privados. Edição/competência continuam desconhecidas; a carga não comprova cobertura real nem gera score.
+- **Rastreabilidade da publicação:** Detalhes da tabela conferidos: última modificação em 14/10/2026; descrição sem edição/competência. Data de consulta, modificação da tabela e período dos dados são conceitos diferentes. Referência desconhecida permanece NULL mesmo após a carga local; nenhuma nova consulta paga foi necessária.
+- **Verificação em lote implementada:** arquivo → conferir contrato/filtros/contagens → resolver os 92 códigos → comparar nomes → tabela/soma/hash, sem gravar. Execução real aprovou 92 grupos e soma 39.423; verificador coberto pela suíte. A carga posterior foi conferida no MySQL deste computador e na rota demonstrativa para Maricá e Barra Mansa.
 
 ```mermaid
 flowchart LR
@@ -85,7 +85,7 @@ flowchart LR
 
 ## 4. Ferramentas e responsabilidades
 
-- **Importador em lote entregue:** validação compartilhada → conferir hash/job UTC → simular → `--gravar` → transação de fonte e 92 coletas. Repetição não duplica; divergência não sobrescreve; falha desfaz tudo. Piloto preservado. **85 testes/447 asserções aprovados**; simulação real conferida, primeira escrita MySQL do lote pendente.
+- **Importador em lote entregue:** validação compartilhada → conferir hash/job UTC → simular → `--gravar` → transação de fonte e 92 coletas. Repetição não duplica; divergência não sobrescreve; falha desfaz tudo. Piloto anterior preservado no banco do trabalho. **85 testes/447 asserções aprovados** na implementação; primeira carga deste lote no MySQL local conferida por contagens e rota, sem repetição da escrita pelo agente.
 
 - **PHP / Laravel:** rotas, controllers, validação, models e comandos Artisan.
 - **Blade, HTML, CSS e JavaScript:** página, formulários, pesquisa e interação.
@@ -105,7 +105,7 @@ Comandos executados dentro de `Right_Point/`, com o prefixo `php artisan`:
 | População 2022 | `ibge:verificar-populacao-rj` | `ibge:importar-populacao-rj` |
 | Estabelecimentos | `cnpj:verificar-busca` | Ainda não implementada |
 | Contagem agregada piloto | `cnpj:importar-contagem` | `cnpj:importar-contagem --gravar` |
-| Lote agregado RJ | `cnpj:verificar-contagens-rj "caminho/do/lote.json"` e importador sem opção | `cnpj:importar-contagens-rj "caminho/do/lote.json" --gravar` — disponível; carga real pendente |
+| Lote agregado RJ | `cnpj:verificar-contagens-rj "caminho/do/lote.json"` e importador sem opção | `cnpj:importar-contagens-rj "caminho/do/lote.json" --gravar` — 92 coletas conferidas neste computador |
 
 - **Migration** define a estrutura; **model** representa o acesso aos dados.
 - Os importadores validam a resposta antes de gravar. **Transação:** desfaz a carga se a gravação falhar. **Upsert:** insere ou atualiza pela chave, evitando duplicar o mesmo dado.

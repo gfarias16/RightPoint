@@ -1,8 +1,10 @@
 # Comparação municipal CNPJ — restaurantes no RJ
 
-Atualizado em 28/10/2026. **Verificador/importador implementados; simulação real aprovada: 92 grupos, soma 39.423. Agente não gravou o lote no MySQL.** Job confirmou SQL, instante e 3,81 GB processados/faturados. Teto/cache/custo monetário e versão/período não confirmados. Sem score. Etapas de aquisição abaixo são históricas: não repetir consultas.
+Atualizado em 28/10/2026. **Verificador/importador implementados; o usuário carregou o lote no MySQL deste computador e o agente conferiu 92 coletas, soma 39.423.** O agente não executou a escrita. Job confirmou SQL, instante e 3,81 GB processados/faturados. Teto/cache/custo monetário e versão/período não confirmados. Sem score. Etapas de aquisição abaixo são históricas: não repetir consultas.
 
 ## Importação local do lote
+
+Neste computador, a migration de contagens foi aplicada pelo usuário e o lote foi gravado após validação e simulação. Leitura posterior encontrou 92 coletas em 92 municípios, soma 39.423, fonte `opencnpj-receita`, CNAE `5611201`, critério `ativos_cnae_principal_exato_v1` e consulta UTC `2026-10-28 20:01:33`. A rota demonstrativa respondeu com 308 em Barra Mansa e 620 em Maricá, mantendo score NULL e avisos. As instruções abaixo continuam úteis em outro banco local; a escrita desta cópia já foi feita.
 
 Dentro de `Right_Point/`, substituindo o caminho pelo JSON transportado:
 
@@ -22,7 +24,7 @@ php artisan cnpj:importar-contagens-rj "caminho/do/lote.json" --gravar
 - Fonte e coletas na mesma transação. Bloqueio da fonte serializa importadores cooperantes; índice único protege a identificação. Compara todas as coletas existentes antes de inserir; divergência aborta sem sobrescrever. Falha posterior desfaz o lote/fonte nova.
 - Repetição idêntica preserva valores, timestamps e metadados enriquecidos; lote parcialmente existente com valores iguais recebe apenas coletas faltantes. O instante novo `2026-10-28 20:01:33` UTC preserva o piloto `15:08:25` UTC como histórico. Período/versão NULL em novas linhas.
 - Sem coletas, cria 92. Se o piloto já existir, cria 92 novas e totaliza 93. Repetição informa lote já cadastrado. Diagnóstico lê a coleta mais recente de cada município/CNAE, com avisos e score NULL.
-- **85 testes/447 asserções aprovados**, incluindo 14 novos do importador: preservação do piloto, repetição, divergência, rollback na 47ª inserção, metadados, hash/UTC/CRLF. SQLite na memória; concorrência/escrita MySQL real não testadas. Simulação real preservou JSON/banco (92 municípios, 1.332 atividades, 92 indicadores, uma coleta). **Primeira carga MySQL ainda pendente.**
+- **85 testes/447 asserções aprovados** na implementação, incluindo 14 novos do importador: preservação do piloto, repetição, divergência, rollback na 47ª inserção, metadados, hash/UTC/CRLF. Esses testes usaram SQLite na memória; concorrência entre escritores no MySQL real não foi testada. A simulação inicial preservou JSON/banco do trabalho; a carga posterior neste computador foi conferida por leitura do MySQL e pela rota.
 - `ValidadorContagensRj` é compartilhado pelos dois comandos, evitando regras divergentes. O comando singular `cnpj:importar-contagem` continua restrito ao piloto; usar o plural para o lote.
 
 Na escola, seguir [roteiro de ambiente](./ambiente-multiplos-computadores.md#retomada-da-entrega-cnpj--28102026). Git não transporta JSON, dependências, cache ou banco; levar o arquivo original separadamente. Sem novo SQL pago.
