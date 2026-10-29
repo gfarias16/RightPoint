@@ -55,6 +55,8 @@ Em 14/10/2026, o usuário executou um segundo experimento de leitura, sem gravar
 
 Uma captura enviada pelo usuário do [endpoint oficial de metadados do agregado 4714](https://servicodados.ibge.gov.br/api/v3/agregados/4714/metadados) confirmou a pesquisa `Censo Demográfico`, nível municipal `N6` e a variável 93 com nome **População residente** e unidade **Pessoas**. A periodicidade mostrada é anual, com início e fim em 2022; este indicador deve ser rotulado como população do **Censo 2022**, não como população atual. Em 20/10/2026, no notebook do trabalho, o usuário executou o verificador e o importador: a consulta posterior encontrou **92 registros em 92 municípios distintos**, fonte `ibge-censo-2022-populacao` vinculada e data de coleta preenchida. A rota local de consulta retornou o valor e a procedência para Maricá. `versao_fonte` identifica a edição/tabela/variável usada, não uma revisão oficial comprovada; a carga local não acompanha o Git.
 
+Em 28/10/2026, no computador em uso, o usuário repetiu a verificação e importou a população após confirmar os 92 municípios. Leitura posterior confirmou 92 indicadores em 92 municípios, fonte IBGE vinculada e unidade Pessoas. A consulta demonstrativa retornou 169.894 para Barra Mansa e 197.277 para Maricá, ambos do Censo 2022, junto das contagens CNPJ já carregadas para o CNAE `5611201`. A resposta preserva o aviso de que as duas referências temporais não foram compatibilizadas e não calcula score. O agente não repetiu a importação; a interface ainda precisa de conferência visual.
+
 ## 3. Receita Federal — CNPJ
 
 ### APIs candidatas para simplificar a obtenção

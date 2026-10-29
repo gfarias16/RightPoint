@@ -13,6 +13,11 @@ Atualizado em 28/10/2026. Este arquivo registra o ponto de retomada entre escola
 
 ## Retomada imediata em outra máquina
 
+### População local importada e diagnóstico combinado conferido — 28/10/2026
+
+- O usuário executou `ibge:verificar-populacao-rj` (92 municípios conferidos, sem gravação) e `ibge:importar-populacao-rj` (92 populações processadas) neste computador. Leitura posterior do MySQL `rightpoint` confirmou **92 indicadores de população residente/2022 em 92 municípios distintos**, vinculados à fonte `ibge-censo-2022-populacao`, com unidade Pessoas e data de coleta. Barra Mansa (`3300407`) tem 169.894 habitantes e Maricá (`3302700`) 197.277, ambos referentes ao Censo 2022. O agente não repetiu a importação.
+- A rota `/consulta-demonstrativa` devolveu, para o CNAE `5611201`, população e contagem com fontes/datas: Barra Mansa 169.894 pessoas/308 estabelecimentos na base; Maricá 197.277 pessoas/620 estabelecimentos na base. `score` continua NULL e a resposta avisa que as referências das duas fontes não foram compatibilizadas no tempo, que a cobertura CNPJ não está comprovada e que a fórmula não foi aprovada. **Próximo passo:** conferir essas duas telas no navegador e registrar qualquer diferença; depois validar com o grupo/professora o critério de concorrência, a cobertura necessária e a fórmula antes de programar score. Período/versão da base CNPJ continuam desconhecidos. Banco e JSON locais não acompanham o Git; os registros abaixo são históricos.
+
 ### Carga local do lote conferida — 28/10/2026
 
 - O usuário executou `cnpj:importar-contagens-rj ... --gravar` neste computador. Sem repetir a escrita, o agente conferiu no MySQL `rightpoint` **92 linhas para 92 municípios, soma 39.423**, todas com fonte `opencnpj-receita`, CNAE `5611201`, critério `ativos_cnae_principal_exato_v1` e consulta `2026-10-28 20:01:33` UTC. `registros_no_recorte` coincide com `quantidade` e `cnpjs_ausentes` é zero em todas as linhas. Maricá (`3302700`) tem 620 e Barra Mansa (`3300407`) tem 308. Período de referência e versão da base permanecem NULL; a contagem não comprova cobertura de todos os negócios ou concorrência real.

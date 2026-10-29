@@ -1,6 +1,6 @@
 # Plano de implementação inicial — RightPoint
 
-Última atualização: 28/10/2026 (lote RJ carregado e conferido no banco deste computador; população ainda ausente nele; score e H3 não implementados).
+Última atualização: 28/10/2026 (lote RJ e população do Censo 2022 carregados e conferidos no banco deste computador; score e H3 não implementados).
 
 ## Objetivo
 
@@ -33,6 +33,8 @@ O model `User` fornecido pelo Laravel não significa que login ou cadastro foram
 7. [Roteiro para a apresentação acadêmica](../APRESENTACAO.md): atualizar com fontes, estratégias, evidências, imagens e limitações a cada etapa relevante.
 
 ## Próxima etapa imediata
+
+**Diagnóstico combinado conferido — 28/10/2026:** o usuário verificou e importou a população do Censo 2022; leitura local confirmou 92 indicadores em 92 municípios distintos e a fonte IBGE vinculada. A rota demonstrativa devolveu Barra Mansa com população 169.894 e contagem 308, e Maricá com população 197.277 e contagem 620, para CNAE `5611201`. As duas fontes/datas e os avisos apareceram; score NULL. **Próximo passo prático:** conferir ambos os resultados no navegador. A próxima implementação de score depende de validar com grupo/professora a fórmula, pesos, critério de concorrência e cobertura da base, incluindo a incompatibilidade temporal entre Censo 2022 e consulta CNPJ. Nenhum score deve ser calculado por inferência. O banco deste computador e os JSONs locais não acompanham o Git. Registros abaixo descrevem etapas anteriores.
 
 **Carga local confirmada — 28/10/2026:** após `--gravar` executado pelo usuário, o agente encontrou 92 coletas em 92 municípios no MySQL `rightpoint`, soma 39.423, fonte OpenCNPJ, CNAE `5611201` e coleta UTC `2026-10-28 20:01:33`. A rota demonstrativa devolveu HTTP 200 com 308 para Barra Mansa e 620 para Maricá, procedência e avisos; score NULL. O banco deste computador ainda tem 0 indicadores de população. **Próximo passo:** o usuário conferir os dois diagnósticos no navegador; depois executar `ibge:verificar-populacao-rj` e, se confirmar os 92 municípios, `ibge:importar-populacao-rj` neste banco. Reavaliar a tela após essa carga. Cobertura real, edição/período da base CNPJ e fórmula do score permanecem A CONFIRMAR. A carga local e o JSON não acompanham o Git. Registros abaixo descrevem etapas anteriores.
 
