@@ -27,6 +27,10 @@ As consultas ao IBGE usam automaticamente `storage/app/ibge-ca-bundle.pem` quand
 
 ## Preparação dos dados CNPJ
 
+- `php artisan cnpj:importar-contagens-piloto "caminho/do/lote.json"` — novo fluxo dos quatro CNAEs de restaurantes/padarias/grupo de barbearias. Valida 1 a 368 grupos, mostra resumo por CNAE/hash e simula sem gravação. Pares ausentes não viram zero; padarias ficam separadas, e 9602501 não isola barbearias. Não acessa API/BigQuery. Ver [procedimento dos perfis](./procedimentos/contagens-perfis-piloto.md).
+- `php artisan cnpj:importar-contagens-piloto "caminho/do/lote.json" --gravar` — exige fotografia conferida em `config/contagens_piloto.php` (hash LF, instante UTC e referências explícitas/NULL). Registro começa vazio. Transação preserva histórico/reimportação idêntica e rejeita divergência; fonte e coletas são desfeitas em caso de falha. Nenhuma nova carga foi executada nesta implementação.
+- `php artisan test --compact` — na ampliação de 03/11/2026, suíte completa com **126 testes/701 asserções** aprovada; inclui 39 casos novos do importador piloto e dois do SQL em memória. Não é evidência de escrita/concorrência MySQL do novo comando ou execução GoogleSQL real.
+
 - `php artisan cnpj:importar-contagens-rj "caminho/do/lote.json"` — valida e simula, sem gravar. Compartilha `ValidadorContagensRj` com o verificador; exige hash LF/instante UTC da fotografia em `config/contagem_cnpj_rj.php`. Outro conteúdo não é associado ao job antigo. O JSON original é ignorado pelo Git e precisa ser transportado separadamente.
 - `php artisan cnpj:importar-contagens-rj "caminho/do/lote.json" --gravar` — grava fonte/coletas em uma transação; preserva piloto e metadados existentes. Mesma coleta/valores não duplica; divergência aborta sem sobrescrever. Testado em memória; primeira escrita no MySQL real fica com o usuário após conferir banco/migration/simulação. Sem API/BigQuery.
 - `php artisan test --compact tests/Feature/ImportarContagensRjTest.php` — 14 testes em memória de simulação, escrita, idempotência, rollback e validação. Suíte completa da entrega: **85 testes, 447 asserções aprovados**; não modifica o MySQL.

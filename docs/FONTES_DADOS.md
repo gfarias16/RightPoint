@@ -59,6 +59,8 @@ Em 28/10/2026, no computador em uso, o usuário repetiu a verificação e import
 
 ## 3. Receita Federal — CNPJ
 
+**Preparação implementada em 03/11/2026:** SQL para os quatro CNAEs `5611201`, `1091102`, `4721102` e `9602501`, e novo comando `cnpj:importar-contagens-piloto` disponíveis. Agrupa por município/CNAE, mantém ausências indisponíveis e exige fotografia conferida para gravar. O código não prova cobertura, não identifica exclusivamente barbearias e não soma subclasses de padarias. Suíte completa: 126 testes/701 asserções; simulação real com o arquivo antigo preservou MySQL/JSON. **Atualização da aquisição:** usuário informou execução e salvou o novo JSON; simulação real aprovou 368 pares e 92 municípios por CNAE, preservando banco/arquivo. Nenhuma contagem nova importada: faltam confirmação do início com fuso/UTC, SQL/completude e detalhes de processamento/faturamento do job existente. Não repetir a query; registrar a fotografia após a conferência conforme o [procedimento dos perfis](./procedimentos/contagens-perfis-piloto.md). Registros anteriores abaixo permanecem históricos.
+
 ### APIs candidatas para simplificar a obtenção
 
 Em 20/10/2026, o usuário questionou a necessidade de arquivos grandes e pediu alternativa por API. A próxima avaliação deve priorizar busca por município e CNAE, antes de definir um fornecedor. O leitor CSV continua como exercício concluído e alternativa; nenhum ZIP foi baixado.

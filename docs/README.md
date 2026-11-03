@@ -31,12 +31,12 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 ### Evolução e governança
 
 - [Roteiro simples para a apresentação acadêmica](./APRESENTACAO.md).
-- [Decisões arquiteturais](./decisoes-arquiteturais/README.md)
+- Decisões arquiteturais: diretório previsto, ainda não criado neste checkout.
 - [Planos](./planos/README.md)
 - [Procedimentos](./procedimentos/README.md)
 - [Ambiente local em múltiplos computadores](./procedimentos/ambiente-multiplos-computadores.md)
 - [Incidentes](./incidentes/README.md)
-- [Segurança](./seguranca/README.md)
+- Segurança: diretório documental previsto, ainda não criado neste checkout; orientações atuais em [AGENTS.md](../AGENTS.md).
 - [Interface](./interface/README.md)
 
 ## Convenções
@@ -47,7 +47,9 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 
 ## Estado atual
 
-Atualizado em 28/10/2026. No trabalho: **92 municípios, 1.332 CNAEs, 92 populações do Censo 2022 e uma coleta piloto CNPJ de Maricá/5611201 (620)**. Consulta demonstrativa com fontes/datas/avisos, desktop do piloto conferido pelo usuário. Verificador/importador em lote implementados, com hash/job UTC, transação e gravação explícita; simulação real aprovada (soma municipal 39.423), mas **carga do lote no MySQL real ainda pendente**. Suíte: 85 testes/447 asserções aprovados. Mapa e CRUD de perfis locais ao navegador; sem score aprovado ou H3 implementado. Consulte [STATUS.md](./STATUS.md), [plano](./planos/implementacao-inicial.md), [procedimento do lote](./procedimentos/comparacao-cnpj-municipios-rj.md) e [retomada na escola](./procedimentos/ambiente-multiplos-computadores.md#retomada-da-entrega-cnpj--28102026). O Git não transporta banco, JSON, dependências ou perfis do navegador.
+Atualizado em 03/11/2026. Banco local: 92 municípios, 1.332 CNAEs, 92 populações e 93 coletas de restaurantes (lote de 92 municípios/soma 39.423 e piloto preservado). Os exemplos com coleta e sem coleta foram conferidos por capturas/relato. Novo comando `cnpj:importar-contagens-piloto` preparado para os quatro CNAEs dos três perfis: valida grupos observados, mantém ausências indisponíveis e só grava fotografias conferidas por hash/UTC. Suíte completa: **126 testes/701 asserções aprovados**; simulações reais preservaram banco/JSON. O usuário já executou a query e exportou o novo JSON: simulação real aprovou 368 pares, 92 municípios por CNAE e somas 39.423/25.188/8.992/102.086, preservando banco e arquivo. **Próximo passo:** conferir início com fuso/UTC e SQL/completude do job existente, registrar hash/metadados e só depois decidir a carga; gravação ainda bloqueada. Não repetir BigQuery. Sem nova migration ou mudança visual. [Procedimento](./procedimentos/contagens-perfis-piloto.md), [STATUS](./STATUS.md) e [critérios propostos](./planos/criterios-diagnostico-piloto.md). Renda, indicadores derivados, união de padarias e score ainda pendentes. Git não transporta banco, JSON, dependências ou perfis do navegador.
+
+O enunciado original disponível trata da modelagem do 1º bimestre, não define a entrega posterior de implementação. Minimundo, regras, restrições e classes são a base acadêmica; planos e protótipo devem ser distinguidos de requisitos posteriores ainda a confirmar com o usuário.
 
 O desenvolvimento ocorrerá em mais de um computador. Por decisão explícita do usuário, o `.env` desta aplicação está versionado e será recebido em outro clone; as dependências instaladas e o banco do XAMPP continuam locais. Antes de configurar ou atualizar um ambiente, siga o [procedimento para múltiplos computadores](./procedimentos/ambiente-multiplos-computadores.md), especialmente ao retornar ao computador da escola, onde podem existir arquivos ou migrations ainda não enviados ao GitHub.
 

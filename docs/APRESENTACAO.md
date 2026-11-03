@@ -1,8 +1,16 @@
 # RightPoint — roteiro para a apresentação
 
-Atualizado em 28/10/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
+Atualizado em 03/11/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
+
+**Demonstração preparada — 03/11:** o usuário carregou o lote RJ neste banco. Leitura posterior confirmou 92 coletas/soma 39.423, igualdade de contagens/controles com o JSON e piloto preservado: 93 linhas de histórico. HTTP 200: Barra Mansa com população 169.894/2022 e contagem 308; Maricá com 197.277/2022 e 620. Fonte, consulta mais recente e score NULL conferidos; capturas/relato posteriores validaram os exemplos descritos abaixo. Na preparação, 25 testes/159 asserções do importador e da consulta passaram em memória. Nenhuma carga repetida ou consulta BigQuery pelo agente. Os relatos de 28/10 abaixo são históricos do ambiente então verificado; bancos não acompanham o Git. O enunciado original disponível é de modelagem do 1º bimestre; exigências posteriores de implementação/apresentação ainda precisam ser confirmadas.
 
 ## 1. Problema e objetivo
+
+**Ampliação técnica implementada — 03/11:** novo comando valida/simula quatro CNAEs e separa município/atividade; pares ausentes não viram zero. Gravação exige fotografia conferida por hash e instante UTC; transação preserva histórico e impede sobrescrita divergente. Suíte completa: 126 testes/701 asserções. Usuário executou a query e exportou o JSON; simulação real aprovou 368 pares, com 92 municípios por CNAE e somas 39.423/25.188/8.992/102.086. Nova carga bloqueada até conferir e registrar metadados do job; banco mantém somente restaurantes. Renda/indicadores derivados/score continuam planejados. [Procedimento dos perfis](./procedimentos/contagens-perfis-piloto.md).
+
+**Piloto ampliado em planejamento — 03/11:** usuário escolheu restaurantes, padarias e barbearias. Candidatos: 5611201; 1091102/4721102; 9602501. O código de barbearias também inclui cabeleireiros/manicure/pedicure; não é contagem exclusiva. Somente restaurantes têm carga CNPJ. [Critérios propostos](./planos/criterios-diagnostico-piloto.md): oferta registrada por habitante, renda a investigar e índice experimental a testar; não implementados nem fórmula final aprovada.
+
+Conferência visual de 03/11: captura confirmou Barra Mansa/5611201 com população 169.894/2022, contagem 308, fontes/datas, referências desconhecidas e avisos. Usuário confirmou Maricá por relato. Outra captura mostrou Paty do Alferes/7490104 com população 29.619/2022 e contagem indisponível, sem inventar zero ou score. Esses exemplos não comprovam mobile ou todas as interações. Próxima etapa: definir as regras do primeiro diagnóstico e confirmar critérios/fórmula com grupo/professora. A coleta atual cobre apenas restaurantes; catálogo CNAE não equivale a contagem disponível para toda atividade.
 
 - Problema: reunir informações dispersas para avaliar onde abrir um negócio.
 - Público: empreendedor interessado em um município ou regiao especifica e uma atividade econômica.

@@ -6,6 +6,22 @@ Este procedimento explica como manter o RightPoint utilizável no computador da 
 
 Leia este documento antes de instalar dependências, criar o `.env`, executar migrations ou atualizar um ambiente que já possua trabalho local.
 
+## Retomada dos perfis piloto — 03/11/2026
+
+Este é o ponto atual; o roteiro de 28/10 abaixo descreve a entrega anterior de restaurantes.
+
+1. Fazer pessoalmente o push dos commits preparados no computador de origem. Na escola/casa, localizar a pasta existente, executar `git status --short --branch` e preservar alterações, migrations e configurações locais antes de atualizar. Somente com árvore limpa e sem divergências, usar `git pull --ff-only`. Se houver divergência, analisar sem resetar ou sobrescrever trabalho.
+2. **Levar separadamente** `Right_Point/storage/app/amostras/contagens-perfis-piloto.json` e a exportação antiga de restaurantes, preservando seus conteúdos. A nova tem 83.756 bytes, 368 pares e SHA-256 LF `c6f18525e52c489384b8feaa9c6e700ccdf60acef3ee1b682facece2db6ce3b1`. Levar também data/hora/fuso e SQL/detalhes sanitizados do novo job; não repetir BigQuery para recuperar a exportação. JSONs não acompanham o Git.
+3. Conferir PHP, dependências e banco local. Usar `composer install` se faltar `vendor/`, respeitando o lockfile. O `.env` já é rastreado por decisão anterior; preservar configurações locais e revisar a conexão sem expor credenciais. Dependências, banco XAMPP, cache e perfis em localStorage não são transportados pelos commits.
+4. Executar `php artisan migrate:status` dentro de `Right_Point/`. Esta entrega não cria migrations novas; no computador conferido, as oito migrations estão `Ran`. Se houver pendências na outra máquina, revisar antes de aplicar; não usar reset destrutivo. Conferir os 92 municípios, os quatro CNAEs e população local; não presumir dados iguais. Os comandos já disponíveis de catálogo/IBGE constam em [COMANDOS](../COMANDOS.md).
+5. Colocar o novo JSON em `storage/app/amostras/` e executar apenas a simulação abaixo. Esperado: 92/92 em cada CNAE, totais 39.423, 25.188, 8.992 e 102.086, respectivamente. Banco de origem contém somente 93 coletas de restaurantes; a nova carga não foi realizada.
+
+```powershell
+php artisan cnpj:importar-contagens-piloto "storage/app/amostras/contagens-perfis-piloto.json"
+```
+
+**Pendência para prosseguir:** confirmar início com data/hora/fuso e SQL/completude do novo job; registrar hash/UTC em [contagens_piloto.php](../../Right_Point/config/contagens_piloto.php), mantendo período/versão desconhecidos como NULL. Atualmente o registro está vazio e a gravação fica bloqueada. Se já existir cache de configuração, reconstruí-lo localmente depois da atualização e conferir conexão; não transportar cache. Só depois de nova simulação decidir `--gravar`, conforme [procedimento dos perfis](./contagens-perfis-piloto.md). Conferir os resultados por CNAE após a carga; não somar padarias automaticamente nem apresentar `9602501` como exclusivo de barbearias. Renda, indicadores derivados e score continuam pendentes.
+
 ## Retomada da entrega CNPJ — 28/10/2026
 
 1. No trabalho, o usuário fará o push dos commits locais. **Levar também o JSON agregado original da pasta `Right_Point/storage/app/amostras/`** por meio seguro; não vai no Git. Para exercícios antigos, levar os outros JSON se precisar. Não transportar cache, `.env` adicional, `vendor/` ou banco como se fossem arquivos do código.
