@@ -11,6 +11,8 @@ class ValidadorContagensRj
 {
     private const MAX_BYTES = 1048576;
 
+    public const CNAES_PILOTO = ['5611201', '1091102', '4721102', '9602501'];
+
     /**
      * Retorna uma fotografia validada do arquivo e dos IDs locais.
      * O importador usa este conteúdo em memória, sem reabrir o arquivo.
@@ -18,6 +20,23 @@ class ValidadorContagensRj
      * @return array{linhas: list<array>, atividade_id: int, total: int, sha256: string}
      */
     public function validar(string $caminho): array
+    {
+        $lote = $this->validarArquivo($caminho, ['5611201'], true);
+        $lote['atividade_id'] = $lote['linhas'][0]['atividade_economica_id'];
+
+        return $lote;
+    }
+
+    /**
+     * A exportação agrupada pode omitir municípios sem registros.
+     * Ausências permanecem indisponíveis; não fabricamos linhas com zero.
+     */
+    public function validarPiloto(string $caminho): array
+    {
+        return $this->validarArquivo($caminho, self::CNAES_PILOTO, false);
+    }
+
+    private function validarArquivo(string $caminho, array $cnaes, bool $exigirTodosMunicipios): array
     {
         if (! is_file($caminho) || ! is_readable($caminho)) {
             throw new DomainException('Arquivo do lote não encontrado ou sem permissão de leitura.');
@@ -34,23 +53,33 @@ class ValidadorContagensRj
         }
 
         $registros = json_decode($conteudo, true, 512, JSON_THROW_ON_ERROR);
-        $this->validarRegistros($registros);
+        $this->validarRegistros($registros, $cnaes, $exigirTodosMunicipios);
         $mapa = $this->mapaConferido();
         $chaves = array_map(fn ($item) => 'RJ:'.$item['codigo_municipio'], $registros);
 
-        if (array_diff(array_keys($mapa), $chaves) || array_diff($chaves, array_keys($mapa))) {
-            throw new DomainException('O lote não corresponde aos 92 códigos Receita configurados.');
+        if (array_diff($chaves, array_keys($mapa))
+            || ($exigirTodosMunicipios && array_diff(array_keys($mapa), $chaves))) {
+            throw new DomainException($exigirTodosMunicipios
+                ? 'O lote não corresponde aos 92 códigos Receita configurados.'
+                : 'O lote contém código Receita fora das correspondências RJ configuradas.');
         }
 
         $municipios = Municipio::query()->where('uf', 'RJ')->get()->keyBy('codigo_ibge');
-        $atividade = AtividadeEconomica::query()->where('codigo_cnae', '5611201')->first();
+        $atividades = AtividadeEconomica::query()->whereIn('codigo_cnae', $cnaes)->get()->keyBy('codigo_cnae');
 
-        if ($atividade === null) {
-            throw new DomainException('CNAE 5611201 não cadastrado neste banco.');
+        foreach ($cnaes as $cnae) {
+            if (! $atividades->has($cnae)) {
+                throw new DomainException('CNAE '.$cnae.' não cadastrado neste banco.');
+            }
         }
 
         $linhas = [];
         $total = 0;
+        $resumo = [];
+
+        foreach ($cnaes as $cnae) {
+            $resumo[$cnae] = ['codigo_cnae' => $cnae, 'municipios_com_registro' => 0, 'total' => null];
+        }
 
         foreach ($registros as $indice => $registro) {
             $codigoIbge = $mapa['RJ:'.$registro['codigo_municipio']];
@@ -65,9 +94,14 @@ class ValidadorContagensRj
             }
 
             $quantidade = (int) $registro['cnpjs_distintos'];
+            $cnae = $registro['cnae_principal'];
             $total += $quantidade;
+            $resumo[$cnae]['municipios_com_registro']++;
+            $resumo[$cnae]['total'] = ($resumo[$cnae]['total'] ?? 0) + $quantidade;
             $linhas[] = [
                 'municipio_id' => $municipio->id,
+                'atividade_economica_id' => $atividades->get($cnae)->id,
+                'codigo_cnae' => $cnae,
                 'codigo_receita' => $registro['codigo_municipio'],
                 'codigo_ibge' => $codigoIbge,
                 'nome' => $municipio->nome,
@@ -79,16 +113,21 @@ class ValidadorContagensRj
 
         return [
             'linhas' => $linhas,
-            'atividade_id' => $atividade->id,
             'total' => $total,
+            'resumo_cnaes' => array_values($resumo),
             'sha256' => hash('sha256', str_replace(["\r\n", "\r"], "\n", $conteudo)),
         ];
     }
 
-    private function validarRegistros(mixed $registros): void
+    private function validarRegistros(mixed $registros, array $cnaes, bool $exigirTodosMunicipios): void
     {
-        if (! is_array($registros) || ! array_is_list($registros) || count($registros) !== 92) {
-            throw new DomainException('Esperada uma lista JSON com exatamente 92 registros municipais.');
+        $limite = count($cnaes) * 92;
+
+        if (! is_array($registros) || ! array_is_list($registros) || $registros === []
+            || count($registros) > $limite || ($exigirTodosMunicipios && count($registros) !== 92)) {
+            throw new DomainException($exigirTodosMunicipios
+                ? 'Esperada uma lista JSON com exatamente 92 registros municipais.'
+                : 'Esperada uma lista JSON com 1 a 368 grupos de município e CNAE do piloto.');
         }
 
         $campos = ['uf', 'codigo_municipio', 'municipio', 'cnae_principal', 'situacao_cadastral',
@@ -108,8 +147,10 @@ class ValidadorContagensRj
                 }
             }
 
-            if ($registro['uf'] !== 'RJ' || $registro['cnae_principal'] !== '5611201' || $registro['situacao_cadastral'] !== 'Ativa') {
-                throw new DomainException($prefixo.'filtros diferentes de RJ/5611201/Ativa.');
+            if ($registro['uf'] !== 'RJ' || ! in_array($registro['cnae_principal'], $cnaes, true) || $registro['situacao_cadastral'] !== 'Ativa') {
+                throw new DomainException($prefixo.($exigirTodosMunicipios
+                    ? 'filtros diferentes de RJ/5611201/Ativa.'
+                    : 'filtros diferentes de RJ/CNAEs do piloto/Ativa.'));
             }
 
             if (preg_match('/^[0-9]{4}$/D', $registro['codigo_municipio']) !== 1) {
@@ -131,10 +172,12 @@ class ValidadorContagensRj
                 throw new DomainException($prefixo.'ausências, duplicatas ou contagens inconsistentes.');
             }
 
-            $chave = 'RJ:'.$registro['codigo_municipio'];
+            $chave = $registro['cnae_principal'].':RJ:'.$registro['codigo_municipio'];
 
             if (isset($vistos[$chave])) {
-                throw new DomainException($prefixo.'código Receita repetido no lote.');
+                throw new DomainException($prefixo.($exigirTodosMunicipios
+                    ? 'código Receita repetido no lote.'
+                    : 'par município/CNAE repetido no lote.'));
             }
 
             $vistos[$chave] = true;

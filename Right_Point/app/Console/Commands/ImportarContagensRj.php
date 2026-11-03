@@ -2,15 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ContagemEstabelecimento;
-use App\Models\FonteDado;
+use App\Services\GravadorContagensCnpj;
 use App\Services\ValidadorContagensRj;
 use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
 use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use Throwable;
@@ -21,9 +19,7 @@ class ImportarContagensRj extends Command
 
     protected $description = 'Simula ou importa a coleta conferida dos 92 municípios RJ/CNAE 5611201.';
 
-    private const CRITERIO = 'ativos_cnae_principal_exato_v1';
-
-    public function handle(ValidadorContagensRj $validador): int
+    public function handle(ValidadorContagensRj $validador, GravadorContagensCnpj $gravador): int
     {
         try {
             $consultadoEm = $this->validarMetadados();
@@ -59,63 +55,7 @@ class ImportarContagensRj extends Command
         }
 
         try {
-            $resultado = DB::transaction(function () use ($lote, $consultadoEm): array {
-                $fonte = FonteDado::firstOrCreate(
-                    ['codigo' => 'opencnpj-receita'],
-                    ['nome' => 'OpenCNPJ - dados da Receita Federal', 'url_referencia' => 'https://opencnpj.org/']
-                );
-
-                // Mesmo bloqueio do importador piloto: serializa escritores cooperantes.
-                $fonte = FonteDado::query()->whereKey($fonte->id)->lockForUpdate()->firstOrFail();
-                $chaveComum = [
-                    'atividade_economica_id' => $lote['atividade_id'],
-                    'fonte_dado_id' => $fonte->id,
-                    'criterio' => self::CRITERIO,
-                    'consultado_em' => $consultadoEm,
-                ];
-
-                $existentes = ContagemEstabelecimento::query()
-                    ->where($chaveComum)
-                    ->whereIn('municipio_id', array_column($lote['linhas'], 'municipio_id'))
-                    ->lockForUpdate()
-                    ->get()
-                    ->keyBy('municipio_id');
-
-                // Confere divergências em todo o lote antes de inserir qualquer coleta.
-                foreach ($lote['linhas'] as $linha) {
-                    $existente = $existentes->get($linha['municipio_id']);
-
-                    if ($existente === null) {
-                        continue;
-                    }
-
-                    foreach (['quantidade', 'registros_no_recorte', 'cnpjs_ausentes'] as $campo) {
-                        if ($existente->{$campo} !== $linha[$campo]) {
-                            throw new DomainException('Coleta divergente para IBGE '.$linha['codigo_ibge'].'. Nenhum valor foi sobrescrito; transação desfeita.');
-                        }
-                    }
-                }
-
-                $criadas = 0;
-
-                foreach ($lote['linhas'] as $linha) {
-                    if ($existentes->has($linha['municipio_id'])) {
-                        continue;
-                    }
-
-                    ContagemEstabelecimento::create($chaveComum + [
-                        'municipio_id' => $linha['municipio_id'],
-                        'quantidade' => $linha['quantidade'],
-                        'registros_no_recorte' => $linha['registros_no_recorte'],
-                        'cnpjs_ausentes' => $linha['cnpjs_ausentes'],
-                        'periodo_referencia' => null,
-                        'versao_fonte' => null,
-                    ]);
-                    $criadas++;
-                }
-
-                return ['criadas' => $criadas, 'existentes' => $existentes->count()];
-            }, 3);
+            $resultado = $gravador->gravar($lote['linhas'], $consultadoEm);
         } catch (DomainException $erro) {
             $this->error($erro->getMessage());
 
