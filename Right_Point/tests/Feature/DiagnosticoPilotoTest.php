@@ -4,9 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\AtividadeEconomica;
 use App\Models\ContagemEstabelecimento;
+use App\Models\DiagnosticoSalvo;
 use App\Models\FonteDado;
 use App\Models\IndicadorMunicipal;
 use App\Models\Municipio;
+use App\Models\User;
 use App\Services\ConsultaRendaIbge;
 use App\Services\DiagnosticoPiloto;
 use Illuminate\Support\Facades\Artisan;
@@ -156,9 +158,43 @@ class DiagnosticoPilotoTest extends TestCase
         $this->assertStringContainsString('92 códigos', $resposta->json('diagnostico.motivos.0'));
     }
 
+    public function test_salvar_preserva_entradas_dos_92_municipios_e_nao_recalcula_ao_reabrir(): void
+    {
+        $usuario = User::factory()->create();
+        $id = $this->actingAs($usuario)->postJson('/diagnosticos', ['titulo' => 'Restaurante', 'codigo_ibge' => '3306305', 'cnae' => '5611201', 'score' => 0])
+            ->assertCreated()->json('id');
+        $snapshot = DiagnosticoSalvo::findOrFail($id)->snapshot;
+        $this->assertEquals(100, $snapshot['score']);
+        $this->assertCount(92, $snapshot['diagnostico']['entradas_comparacao']);
+        $this->assertArrayHasKey('fonte_dado', $snapshot['diagnostico']['entradas_comparacao'][0]['populacao']);
+        IndicadorMunicipal::query()->where('codigo_indicador', ConsultaRendaIbge::CODIGO_INDICADOR)->update(['valor' => 1234]);
+        $this->getJson('/diagnosticos/'.$id)->assertOk()->assertJsonPath('snapshot', $snapshot);
+        Http::assertNothingSent();
+    }
+
     private function retrato(): string
     {
         return hash('sha256', DB::table('indicadores_municipais')->orderBy('id')->get()->toJson().DB::table('contagens_estabelecimentos')->orderBy('id')->get()->toJson());
+    }
+
+    public function test_cenario_populacional_preserva_consulta_e_bloqueia_conjunto_incompleto(): void
+    {
+        $this->artisan('diagnostico:comparar-populacoes')->expectsOutputToContain('faltam estimativas')->assertFailed();
+        $fonte = FonteDado::create(['codigo' => 'ibge-estimativas-populacao', 'nome' => 'IBGE estimativas', 'url_referencia' => 'https://example.org/']);
+        foreach (Municipio::all() as $cidade) {
+            IndicadorMunicipal::create(['municipio_id' => $cidade->id, 'fonte_dado_id' => $fonte->id, 'codigo_indicador' => 'populacao_estimada',
+                'valor' => 12000, 'unidade' => 'Pessoas', 'periodo_referencia' => '2026', 'versao_fonte' => 'Tabela 6579 / variável 9324 / recorte RJ v1', 'coletado_em' => '2026-11-05 18:00:00']);
+        }
+        $antes = $this->retrato();
+        $this->assertSame(0, Artisan::call('diagnostico:comparar-populacoes', ['--json' => true]));
+        $saida = json_decode(Artisan::output(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertCount(92, $saida['entradas']);
+        $this->assertCount(92, $saida['resultados']);
+        $this->assertEquals(0, $saida['resultados'][0]['deslocamento']);
+        $this->assertEquals(100, $saida['resultados'][91]['estimativa']['score']);
+        $this->assertSame($antes, $this->retrato());
+        $this->getJson('/consulta-demonstrativa?codigo_ibge=3306305&cnae=5611201')->assertOk()->assertJsonPath('score', 100)->assertJsonPath('populacao.periodo_referencia', '2022');
+        Http::assertNothingSent();
     }
 
     public function test_comando_de_sensibilidade_le_quatro_conjuntos_sem_alterar_banco_ou_api(): void

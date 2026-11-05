@@ -24,6 +24,27 @@
     let baseStyle = 'escuro';
     let profiles = [];
     let editingId = null;
+    const overlayLayers = new Map();
+    let querying = false;
+    let selectionKey = '';
+
+    function updateSelectionState() {
+        const valid = byCode.has(select.value) && /^[0-9]{7}$/.test(cnae.value.trim());
+        document.getElementById('consultar-button').disabled = querying || !valid;
+        document.getElementById('consulta-prontidao').textContent = querying ? 'Consultando…' : valid
+            ? 'Consulta pronta. A disponibilidade dos dados será verificada.'
+            : 'Selecione município e atividade ou informe um CNAE válido.';
+        const city = byCode.get(select.value)?.nome || 'Município não selecionado';
+        const activity = document.getElementById('cnae-opcoes');
+        const label = activity?.value === cnae.value.trim() && activity.value
+            ? activity.selectedOptions[0]?.textContent : 'CNAE ' + (cnae.value.trim() || 'não informado');
+        document.getElementById('consulta-resumo').textContent = city + ' · ' + label;
+        const key = select.value + '|' + cnae.value.trim();
+        if (key !== selectionKey) {
+            selectionKey = key;
+            document.dispatchEvent(new CustomEvent('rightpoint:selection', { detail: { codigo_ibge: select.value, cnae: cnae.value.trim() } }));
+        }
+    }
 
     //funcao para normalizar strings, removendo acentos e convertendo para minusculo
     function normalize(value) {
@@ -42,6 +63,8 @@
         select.replaceChildren(new Option(matching.length ? 'Selecione um município' : 'Nenhum município encontrado', ''));
         matching.forEach((item) => select.add(new Option(item.nome, String(item.codigo_ibge))));
         if (matching.some((item) => String(item.codigo_ibge) === previous)) select.value = previous;
+        if (!select.value) { currentCity.textContent = 'Nenhum município selecionado'; highlightCity(); }
+        updateSelectionState();
     }
     //funcao para definir o estilo do poligono do municipio selecionado
     function polygonStyle(isSelected = false) {
@@ -73,6 +96,7 @@
         select.value = String(code);
         currentCity.textContent = city.nome + ' · código IBGE ' + code;
         highlightCity();
+        updateSelectionState();
         if (zoomToCity && selectedPolygon && map) {
             map.fitBounds(selectedPolygon.getBounds(), { padding: [25, 25], maxZoom: 11 });
         }
@@ -138,13 +162,14 @@
                     const code = String(feature.properties?.codarea ?? '');
                     const city = byCode.get(code);
                     if (!city) return;
-                    layer.bindTooltip(city.nome, { sticky: true });
+                    layer.bindTooltip(makeElement('span', '', city.nome), { sticky: true });
                     layer.on('click', () => selectCity(code));
                 },
             }).addTo(map);
             if (boundaryLayer.getLayers().length !== 92) throw new Error('Cobertura municipal incompleta');
             mapStatus.textContent = '92 limites municipais carregados · fonte: IBGE';
             highlightCity();
+            document.dispatchEvent(new CustomEvent('rightpoint:mapready'));
         } catch (_error) {
             if (boundaryLayer) map.removeLayer(boundaryLayer);
             boundaryLayer = null;
@@ -200,7 +225,7 @@
         const offer = data.oferta_por_10_mil_habitantes;
         const validOffer = offer?.estado === 'calculado' && offer.base_populacional === 10000
             && typeof offer.valor === 'number' && Number.isFinite(offer.valor) && offer.valor >= 0;
-        facts.append(makeFact('Oferta registrada · por 10 mil habitantes', validOffer ? number(offer.valor, 2) : 'Indisponível'));
+        facts.append(makeFact('Estabelecimentos por 10 mil habitantes', validOffer ? number(offer.valor, 2) : 'Indisponível'));
         context.append(facts);
         if (!validOffer && offer?.motivo) context.append(makeElement('p', 'result-indicator-note', offer.motivo));
         if (data.atividade.codigo_cnae === '9602501') {
@@ -218,6 +243,9 @@
             factors.append(makeFact('Renda relativa · peso 50%', number(diagnosis.fatores.renda.pontos, 1) + ' pontos'),
                 makeFact('Menor oferta relativa · peso 50%', number(diagnosis.fatores.menor_oferta.pontos, 1) + ' pontos'));
             score.append(factors);
+            score.append(makeElement('p', 'result-indicator-note', 'A renda contribuiu com '
+                + number(diagnosis.fatores.renda.contribuicao, 1) + ' pontos, e o componente de menor quantidade por habitante com '
+                + number(diagnosis.fatores.menor_oferta.contribuicao, 1) + '. Menos estabelecimentos não comprova procura não atendida.'));
             score.append(makeElement('p', 'result-indicator-note', 'Comparação entre os 92 municípios do RJ para esta atividade.'));
         } else {
             score.append(makeElement('h3', '', 'Dados insuficientes para esta análise'));
@@ -262,7 +290,25 @@
         (Array.isArray(data.avisos) ? data.avisos : []).forEach((message) => warnings.append(makeElement('li', '', message)));
         limits.append(warnings);
         report.append(makeDetails('Limites desta análise', limits));
+        if (data.contexto) {
+            const body = makeElement('div', 'result-details__copy');
+            const labels = { populacao_estimada: 'População estimada', populacao_0_14: 'Moradores de 0 a 14 anos', populacao_15_64: 'Moradores de 15 a 64 anos', populacao_65_mais: 'Moradores com 65 anos ou mais' };
+            const extra = makeElement('div', 'result-facts');
+            (data.contexto.indicadores || []).forEach(i => {
+                extra.append(makeFact((labels[i.codigo] || i.codigo) + ' · ' + i.periodo_referencia, number(Number(i.valor)) + ' ' + i.unidade));
+                body.append(makeElement('p', '', (labels[i.codigo] || i.codigo) + ': ' + i.fonte + ' · ' + i.versao_fonte + ' · consulta ' + collection(i.coletado_em)));
+            });
+            (data.contexto.camadas || []).forEach(layer => {
+                if (layer.dados.indicadores) layer.dados.indicadores.forEach(i => extra.append(makeFact(layer.tipo + ' · ' + i.codigo + ' · ' + layer.periodo_referencia, number(Number(i.valor), i.unidade === 'Reais' ? 2 : 0) + ' ' + i.unidade)));
+                else extra.append(makeFact(layer.tipo + ' · recorte importado', number(layer.dados.quantidade_elementos ?? (layer.dados.pontos || layer.dados.features || []).length) + ' elementos'));
+                body.append(makeElement('p', '', layer.tipo + ': ' + layer.fonte_url + ' · referência ' + (layer.periodo_referencia || 'não confirmada') + ' · consulta ' + collection(layer.coletado_em) + '. ' + layer.dados.aviso));
+            });
+            if (!extra.childElementCount) body.append(makeElement('p', '', 'Nenhum contexto complementar foi carregado para este município. Isso não significa ausência de população, empregos ou equipamentos.'));
+            body.prepend(extra); body.append(makeElement('p', '', data.contexto.aviso));
+            report.append(makeDetails('Conheça melhor o município · dados complementares', body));
+        }
         result.replaceChildren(report);
+        result.scrollIntoView({ block: 'start', behavior: 'auto' });
     }
 
     document.getElementById('consulta-form').addEventListener('submit', async (event) => {
@@ -280,6 +326,11 @@
             return;
         }
         const button = document.getElementById('consultar-button');
+        const requestKey = select.value + '|' + cnae.value.trim();
+        const query = { codigo_ibge: select.value, cnae: cnae.value.trim() };
+        querying = true;
+        updateSelectionState();
+        document.dispatchEvent(new CustomEvent('rightpoint:selection', { detail: query }));
         button.disabled = true;
         result.replaceChildren(makeElement('p', 'result-empty', 'Consultando os dados disponíveis neste banco…'));
         try {
@@ -288,11 +339,18 @@
             url.searchParams.set('cnae', cnae.value.trim());
             const response = await fetch(url, { headers: { Accept: 'application/json' } });
             if (!response.ok) throw new Error('A consulta não pôde ser concluída.');
-            renderResult(await response.json());
+            const data = await response.json();
+            if (requestKey !== selectionKey) {
+                result.replaceChildren(makeElement('p', 'result-empty', 'A seleção mudou durante a consulta. Clique em Ver diagnóstico para atualizar.'));
+                return;
+            }
+            renderResult(data);
+            document.dispatchEvent(new CustomEvent('rightpoint:result', { detail: { data, query } }));
         } catch (_error) {
             result.replaceChildren(makeElement('p', 'field-error', 'Não foi possível consultar o banco agora. Confira a conexão e tente novamente.'));
         } finally {
-            button.disabled = false;
+            querying = false;
+            updateSelectionState();
         }
     });
     //funcao para salvar os perfis no localStorage do navegador
@@ -348,12 +406,14 @@
             use.addEventListener('click', () => {
                 selectCity(profile.codigo_ibge);
                 cnae.value = profile.cnae;
+                updateSelectionState();
                 document.getElementById('explorar').scrollIntoView();
             });
             edit.addEventListener('click', () => {
                 editingId = profile.id;
                 selectCity(profile.codigo_ibge);
                 cnae.value = profile.cnae;
+                updateSelectionState();
                 profileName.value = profile.nome;
                 profileNotes.value = profile.notas || '';
                 document.getElementById('perfil-form-titulo').textContent = 'Editar perfil';
@@ -376,7 +436,7 @@
         });
     }
 
-    profileForm.addEventListener('submit', (event) => {
+    if (!config.autenticado) profileForm.addEventListener('submit', (event) => {
         event.preventDefault();
         showError(profileError, '');
         const name = profileName.value.trim();
@@ -400,7 +460,7 @@
         renderProfiles();
     });
 
-    document.getElementById('perfil-cancelar').addEventListener('click', exitEdit);
+    if (!config.autenticado) document.getElementById('perfil-cancelar').addEventListener('click', exitEdit);
 
     const cnaeSearch = document.getElementById('cnae-busca');
     const cnaeStatus = document.getElementById('cnae-busca-status');
@@ -420,6 +480,7 @@
         cnaeOptions.replaceChildren(new Option('Selecione uma atividade', ''));
         cnaeOptionsField.hidden = true;
         cnae.value = '';
+        updateSelectionState();
 
         if (term.length < 2) {
             cnaeStatus.textContent = 'Digite pelo menos 2 caracteres.';
@@ -474,10 +535,12 @@
 
     cnaeOptions.addEventListener('change', () => {
         cnae.value = cnaeOptions.value;
+        updateSelectionState();
     });
 
     cnae.addEventListener('input', () => {
         if (cnae.value.trim() !== cnaeOptions.value) cnaeOptions.value = '';
+        updateSelectionState();
     });
 
     search.addEventListener('input', renderMunicipalOptions);
@@ -486,9 +549,54 @@
         else {
             currentCity.textContent = 'Nenhum município selecionado';
             highlightCity();
+            updateSelectionState();
         }
     });
-    loadProfiles();
-    renderProfiles();
+    document.getElementById('consulta-recolher').addEventListener('click', (event) => {
+        const fields = document.getElementById('consulta-fields');
+        fields.hidden = !fields.hidden;
+        event.currentTarget.setAttribute('aria-expanded', String(!fields.hidden));
+        event.currentTarget.textContent = fields.hidden ? 'Expandir campos ↓' : 'Recolher campos ↑';
+        document.getElementById('consulta-form').classList.toggle('is-collapsed', fields.hidden);
+    });
+    document.getElementById('consulta-limpar').addEventListener('click', () => {
+        activeCnaeRequest?.abort(); clearTimeout(cnaeSearchTimer); ++cnaeSearchVersion;
+        search.value = ''; select.value = ''; cnae.value = ''; cnaeSearch.value = '';
+        cnaeOptions.replaceChildren(new Option('Selecione uma atividade', '')); cnaeOptionsField.hidden = true;
+        cnaeStatus.textContent = 'Digite pelo menos 2 caracteres.';
+        renderMunicipalOptions(); highlightCity(); updateSelectionState();
+        result.replaceChildren(makeElement('p', 'result-empty', 'Seleção limpa. Escolha município e atividade para consultar.'));
+    });
+    window.rightpointUi = {
+        select(query) {
+            selectCity(query.codigo_ibge); cnae.value = query.cnae;
+            cnaeSearch.value = ''; cnaeOptions.value = ''; updateSelectionState();
+        },
+        showSnapshot(data) {
+            renderResult(data);
+            result.prepend(makeElement('p', 'snapshot-notice', 'Fotografia salva em ' + data.gerado_em_utc + '. Não recalculada.'));
+            document.dispatchEvent(new CustomEvent('rightpoint:snapshot'));
+        },
+    };
+    window.rightpointMap = {
+        geometry() { return selectedPolygon?.feature?.geometry || null; },
+        draw(key, features, style = {}) {
+            if (overlayLayers.has(key) && map) map.removeLayer(overlayLayers.get(key));
+            overlayLayers.delete(key);
+            if (!map || !features.length) return;
+            const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
+                style: () => ({ color: '#8be3c4', weight: 1, fillOpacity: .035, ...style }),
+                pointToLayer: (_feature, latlng) => L.circleMarker(latlng, { radius: 5, color: '#ffd090', fillOpacity: .8 }),
+                onEachFeature(feature, sublayer) {
+                    const text = makeElement('span', '', feature.properties?.descricao || 'Elemento do contexto importado');
+                    sublayer.bindTooltip(text);
+                },
+            }).addTo(map);
+            overlayLayers.set(key, layer);
+        },
+    };
+    document.getElementById('consulta-form').addEventListener('change', updateSelectionState);
+    if (!config.autenticado) { loadProfiles(); renderProfiles(); }
+    updateSelectionState();
     initializeMap();
 })();

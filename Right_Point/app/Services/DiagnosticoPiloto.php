@@ -19,7 +19,7 @@ class DiagnosticoPiloto
 
     public function __construct(private CalculadorScoreRelativo $calculador) {}
 
-    public function consultar(Municipio $municipio, ?AtividadeEconomica $atividade, ?IndicadorMunicipal $populacao, ?IndicadorMunicipal $renda, ?ContagemEstabelecimento $contagem): array
+    public function consultar(Municipio $municipio, ?AtividadeEconomica $atividade, ?IndicadorMunicipal $populacao, ?IndicadorMunicipal $renda, ?ContagemEstabelecimento $contagem, bool $preservarEntradas = false): array
     {
         $conjunto = $this->prepararConjunto($atividade);
         $resultado = $conjunto['diagnostico'];
@@ -41,6 +41,14 @@ class DiagnosticoPiloto
         $resultado['estado'] = 'experimental';
         $resultado['score'] = $calculo['score'];
         $resultado['fatores'] = $calculo['fatores'];
+        if ($preservarEntradas) {
+            // Preserva os 92 municípios: hash sozinho não reproduz a normalização histórica.
+            $resultado['entradas_comparacao'] = array_values(array_map(fn ($item) => [
+                'codigo_ibge' => $item['codigo_ibge'], 'nome' => $item['nome'],
+                'populacao' => $item['populacao']->toArray(), 'renda' => $item['renda']->toArray(),
+                'contagem' => $item['contagem']->toArray(), 'fatores_originais' => $item['fatores'],
+            ], $conjunto['linhas']));
+        }
 
         return $resultado;
     }
@@ -82,17 +90,17 @@ class DiagnosticoPiloto
         }
 
         $ids = $municipios->modelKeys();
-        $populacoes = IndicadorMunicipal::query()->whereIn('municipio_id', $ids)
+        $populacoes = IndicadorMunicipal::query()->with('fonteDado')->whereIn('municipio_id', $ids)
             ->where('codigo_indicador', 'populacao_residente')->where('periodo_referencia', '2022')
             ->where('unidade', 'Pessoas')->where('versao_fonte', 'Censo 2022 - agregado 4714 - variavel 93')
             ->whereHas('fonteDado', fn ($q) => $q->where('codigo', 'ibge-censo-2022-populacao'))
             ->get()->keyBy('municipio_id');
-        $rendas = IndicadorMunicipal::query()->whereIn('municipio_id', $ids)
+        $rendas = IndicadorMunicipal::query()->with('fonteDado')->whereIn('municipio_id', $ids)
             ->where('codigo_indicador', ConsultaRendaIbge::CODIGO_INDICADOR)->where('periodo_referencia', '2022')
             ->where('unidade', 'Reais')->where('versao_fonte', ConsultaRendaIbge::VERSAO_RECORTE)
             ->whereHas('fonteDado', fn ($q) => $q->where('codigo', ConsultaRendaIbge::CODIGO_FONTE))
             ->get()->keyBy('municipio_id');
-        $coletas = ContagemEstabelecimento::query()->whereIn('municipio_id', $ids)
+        $coletas = ContagemEstabelecimento::query()->with('fonteDado')->whereIn('municipio_id', $ids)
             ->where('atividade_economica_id', $atividade->id)->where('criterio', 'ativos_cnae_principal_exato_v1')
             ->where('consultado_em', self::COLETA_CNPJ)
             ->whereNull('periodo_referencia')->whereNull('versao_fonte')

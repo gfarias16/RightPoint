@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0b0f10">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="RightPoint: protótipo acadêmico de exploração territorial para negócios no Rio de Janeiro.">
     <title>Explorar municípios — RightPoint</title>
     <link rel="preconnect" href="https://unpkg.com" crossorigin>
@@ -16,10 +17,18 @@
             'consultaUrl' => route('consulta.demonstrativa'),
             'malhaUrl' => route('malha.rj'),
             'cnaeUrl' => route('cnaes.buscar'),
+            'autenticado' => auth()->check(),
+            'perfisUrl' => route('perfis.index'),
+            'diagnosticosUrl' => route('diagnosticos.index'),
+            'loginUrl' => route('login'),
+            'contextoUrl' => url('/contextos'),
         ]) }};
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+    <script src="https://unpkg.com/h3-js@4.3.0/dist/h3-js.umd.js" integrity="sha384-Bd6Gu52dTUBWMKFwlS9PTFn4VymwtB2vNIeCcAyTc/zXMo+vPGfPo08WTOHqveEN" crossorigin="anonymous" defer></script>
     <script src="{{ asset('rightpoint.js') }}?v={{ filemtime(public_path('rightpoint.js')) }}" defer></script>
+    <script src="{{ asset('workspace.js') }}?v={{ filemtime(public_path('workspace.js')) }}" defer></script>
+    <script src="{{ asset('espacial.js') }}?v={{ filemtime(public_path('espacial.js')) }}" defer></script>
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -35,6 +44,12 @@
                 <a href="#explorar">Explorar</a>
                 <a href="#resultado">Diagnóstico</a>
                 <a href="#perfis">Meus perfis</a>
+                <a href="#historico">Histórico</a>
+                @auth
+                    <form method="post" action="{{ route('logout') }}">@csrf<button class="profile-action" type="submit">Sair · {{ auth()->user()->name }}</button></form>
+                @else
+                    <a href="{{ route('login') }}">Entrar</a>
+                @endauth
             </nav>
 
         </div>
@@ -43,7 +58,7 @@
     <main id="conteudo" class="page-shell">
         <section class="intro" aria-labelledby="titulo-pagina">
             <div>
-                <h1 id="titulo-pagina">Um ponto de partida<br>para o seu negócio.</h1>
+                <h1 id="titulo-pagina">Um ponto de partida para o seu negócio.</h1>
                 <p class="intro__text">
                     Escolha um município e uma atividade para explorar
                 </p>
@@ -57,15 +72,16 @@
 
         <section id="explorar" class="explorer-grid" aria-label="Exploração de município e atividade">
             <div class="panel selection-panel">
-                <div class="section-heading">
+                <div class="consulta-heading"><div class="section-heading">
                     <span class="step-number">01</span>
                     <div>
                         <p class="section-heading__kicker">PREPARE A CONSULTA</p>
-                        <h2>Onde e em qual atividade?</h2>
+                        <h2>Prepare sua consulta</h2>
                     </div>
-                </div>
+                </div><button id="consulta-recolher" type="button" class="profile-action" aria-expanded="true" aria-controls="consulta-fields">Recolher campos ↑</button></div>
 
                 <form id="consulta-form" novalidate>
+                    <div id="consulta-fields" class="consulta-fields"><div class="consulta-field-group">
                     <div class="field">
                         <label for="municipio-busca">Buscar município</label>
                         <input id="municipio-busca" name="busca_municipio" type="search" autocomplete="off" placeholder="Digite parte do nome…">
@@ -82,11 +98,11 @@
                         </select>
                         <small id="municipio-ajuda">A seleção usa o código oficial do IBGE.</small>
                     </div>
-
+                    </div><div class="consulta-field-group">
                     <div class="field">
                         <label for="cnae-busca">Buscar atividade por nome ou código</label>
-                        <input id="cnae-busca" type="search" autocomplete="off" maxlength="80"
-                            aria-describedby="cnae-busca-status" placeholder="Ex.: transporte">
+                        <input id="cnae-busca" name="busca_atividade" type="search" autocomplete="off" maxlength="80"
+                            aria-describedby="cnae-busca-status" placeholder="Ex.: restaurantes">
                         <small id="cnae-busca-status" role="status" aria-live="polite">
                             Digite pelo menos 2 caracteres.
                         </small>
@@ -94,22 +110,24 @@
 
                     <div class="field" id="cnae-opcoes-campo" hidden>
                         <label for="cnae-opcoes">Atividades encontradas</label>
-                        <select id="cnae-opcoes">
+                        <select id="cnae-opcoes" name="atividade_encontrada">
                             <option value="">Selecione uma atividade</option>
                         </select>
                     </div>
-
+                    </div>
                     <div class="field">
                         <label for="cnae">Código CNAE da atividade <span aria-hidden="true">*</span></label>
                         <input id="cnae" name="cnae" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" pattern="[0-9]{7}" minlength="7" maxlength="7" placeholder="Ex.: 5611201" required>
                         <small>É a classificação da atividade do negócio.<a href="https://concla.ibge.gov.br/busca-online-cnae.html" target="_blank" rel="noopener noreferrer">Buscar CNAE no IBGE (nova aba)</a>.</small>
                     </div>
-
+                    </div><div class="consulta-actions">
                     <p id="form-error" class="field-error" role="alert" hidden></p>
-                    <button id="consultar-button" class="button button--primary" type="submit">Ver diagnóstico disponível <span aria-hidden="true">→</span></button>
+                    <button id="consultar-button" class="button button--primary" type="submit" disabled>Ver diagnóstico <span aria-hidden="true">→</span></button>
+                    <small id="consulta-prontidao" role="status">Selecione município e atividade ou informe um CNAE válido.</small>
+                    </div>
                 </form>
-
-                <p class="selection-panel__footnote">Compare o contexto dos municípios para a mesma atividade. Indicadores, fontes e limites acompanham o resultado.</p>
+                <div class="consulta-summary"><p id="consulta-resumo" role="status">Nenhum município ou atividade selecionados.</p><button id="consulta-limpar" type="button" class="profile-action">Limpar seleção</button></div>
+                <p class="selection-panel__footnote">Compare municípios dentro da mesma atividade. O índice atual cobre quatro CNAEs; outras consultas podem mostrar dados parciais, sem nota.</p>
             </div>
 
             <div class="panel map-panel">
@@ -139,6 +157,16 @@
                     <p id="municipio-atual" class="selected-city">Nenhum município selecionado</p>
                 </div>
                 <p class="map-panel__help">Clique em um município ou use a busca e a lista.</p>
+                <details class="spatial-controls"><summary>Camadas de contexto e grade H3</summary>
+                    <div class="button-row">
+                        <label><input id="camada-pontos" type="checkbox"> Pontos importados</label>
+                        <label><input id="camada-setores" type="checkbox"> Setores IBGE importados</label>
+                        <label><input id="camada-h3" type="checkbox"> Grade H3</label>
+                        <label for="h3-resolucao">Resolução H3</label><select id="h3-resolucao"><option value="6">6 · células maiores</option><option value="7" selected>7 · intermediária</option><option value="8">8 · células menores</option></select>
+                    </div>
+                    <p id="camadas-status" role="status">Selecione um município. H3 organiza pontos; não estima população por célula.</p>
+                    <p>Pontos OSM: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors · ODbL (nova aba)</a>. Confira a referência de cada camada nos detalhes do diagnóstico.</p>
+                </details>
             </div>
         </section>
 
@@ -158,6 +186,15 @@
                     <p>Selecione um município e informe um CNAE. Mostraremos os indicadores que já existem no banco e as limitações da análise.</p>
                 </div>
             </div>
+            <div class="result-save-bar print-hidden">
+                @auth
+                    <div class="field"><label for="diagnostico-titulo">Nome deste diagnóstico</label><input id="diagnostico-titulo" maxlength="120" placeholder="Ex.: Restaurante em Maricá"></div>
+                    <button id="diagnostico-salvar" class="button button--secondary" type="button" disabled>Salvar diagnóstico</button>
+                @else
+                    <p><a href="{{ route('login') }}">Entre ou crie uma conta</a> para guardar e exportar diagnósticos privados.</p>
+                @endauth
+                <p id="diagnostico-status" role="status" aria-live="polite"></p>
+            </div>
         </section>
 
         <section id="perfis" class="profiles-section" aria-labelledby="perfis-titulo">
@@ -169,7 +206,7 @@
                         <h2 id="perfis-titulo">Perfis do negócio</h2>
                     </div>
                 </div>
-                <p>Guarde combinações de município e CNAE para voltar a consultá-las. Este CRUD é um protótipo: os perfis ficam só neste navegador, sem login e sem sincronização entre computadores.</p>
+                <p>@auth Guarde combinações na sua conta neste servidor. Perfis antigos do navegador só serão copiados se você solicitar. @else Sem conta, seus perfis ficam neste navegador. Entre para usar perfis privados no banco e acessá-los em outros dispositivos ligados ao mesmo servidor. @endauth</p>
             </div>
 
             <div class="profiles-grid">
@@ -186,7 +223,7 @@
                     </div>
                     <p id="perfil-form-error" class="field-error" role="alert" hidden></p>
                     <div class="button-row">
-                        <button id="perfil-salvar" class="button button--secondary" type="submit">Salvar perfil local</button>
+                        <button id="perfil-salvar" class="button button--secondary" type="submit">{{ auth()->check() ? 'Salvar perfil na conta' : 'Salvar perfil local' }}</button>
                         <button id="perfil-cancelar" class="button button--text" type="button" hidden>Cancelar edição</button>
                     </div>
                     <p id="storage-aviso" class="storage-note" role="status" hidden></p>
@@ -194,13 +231,24 @@
 
                 <div class="panel profiles-list-panel">
                     <div class="profiles-list-panel__heading">
-                        <h3>Seus perfis neste navegador</h3>
+                        <h3>{{ auth()->check() ? 'Perfis da sua conta' : 'Seus perfis neste navegador' }}</h3>
                         <span id="perfis-contagem" class="count-pill">0 perfis</span>
                     </div>
                     <div id="perfis-lista" class="profiles-list" aria-live="polite">
                         <p class="profiles-empty">Nenhum perfil salvo ainda. Preencha a consulta e salve o primeiro.</p>
                     </div>
+                    @auth
+                    <div class="button-row"><button id="perfis-anterior" type="button" class="profile-action" disabled>Anterior</button><button id="perfis-proximo" type="button" class="profile-action" disabled>Próxima</button><button id="perfis-importar" type="button" class="profile-action">Copiar perfis deste navegador</button></div>
+                    @endauth
                 </div>
+            </div>
+        </section>
+        <section id="historico" class="profiles-section" aria-labelledby="historico-titulo">
+            <div class="section-heading"><span class="step-number">05</span><div><p class="section-heading__kicker">RASTREABILIDADE</p><h2 id="historico-titulo">Seus diagnósticos salvos</h2></div></div>
+            <div class="panel profiles-list-panel">
+                <p>Cada registro guarda os dados, fontes e método daquele momento. Reabrir não recalcula o resultado.</p>
+                <div id="historico-lista" aria-live="polite"><p class="profiles-empty">{{ auth()->check() ? 'Carregando seu histórico…' : 'Entre na sua conta para salvar e consultar seu histórico.' }}</p></div>
+                @auth<div class="button-row"><button id="historico-anterior" type="button" class="profile-action" disabled>Anterior</button><button id="historico-proximo" type="button" class="profile-action" disabled>Próxima</button></div>@endauth
             </div>
         </section>
     </main>
@@ -208,7 +256,7 @@
     <footer class="site-footer">
         <div class="site-footer__inner">
             <span>RightPoint · Projeto acadêmico</span>
-            <span>Dados: IBGE e contagem piloto OpenCNPJ. Perfis: armazenamento local do navegador.</span>
+            <span>Fontes e referências acompanham cada análise. Índice experimental, não probabilidade de sucesso.</span>
         </div>
     </footer>
 </body>
