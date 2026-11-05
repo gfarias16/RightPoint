@@ -6,6 +6,8 @@ As consultas ao IBGE usam automaticamente `storage/app/ibge-ca-bundle.pem` quand
 
 ## Aplicação
 
+**Verificação de 05/11:** `php artisan test --compact tests/Feature/ConsultaDemonstrativaTest.php tests/Feature/ExampleTest.php` aprovou 21 testes/136 asserções; ambos preparam SQLite em memória. A suíte completa, executada com `DB_CONNECTION=sqlite` e `DB_DATABASE=:memory:` no processo, aprovou 227 testes/1.208 asserções. Não é necessário alterar o `.env` ou executar migrations no MySQL para essa validação. A população da consulta e do indicador exige fonte IBGE/Censo 2022, unidade Pessoas e identificação do recorte 4714/93; entrada incompatível fica indisponível.
+
 - `php artisan serve` — inicia a interface local.
 - `php artisan migrate:status` — mostra quais migrations foram aplicadas neste banco.
 - `php artisan migrate --pretend` — mostra o SQL das migrations pendentes sem executá-lo no banco; revisão não equivale a aplicação.

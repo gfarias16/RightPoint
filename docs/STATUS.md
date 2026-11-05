@@ -7,7 +7,17 @@ Atualizado em 05/11/2026. Este arquivo registra o ponto de retomada entre escola
 - O usuário desenvolve o código na maior parte das vezes. O agente orienta com arquivos, trechos de código e comandos, e revisa o resultado quando solicitado.
 - Preferir facilidades do Artisan quando aplicáveis, como `make:model Nome -m` para gerar model e migration juntos; conferir arquivos existentes para não duplicar. Gerar migration não significa aplicar mudanças ao banco.
 
-## Revisão pré-commit — 05/11/2026
+## Retomada atual — correções da revisão concluídas em 05/11/2026
+
+- **Autorização:** usuário aprovou corrigir os dois achados e preparar novos commits. Agente alterou somente a seleção populacional, os testes relacionados e a documentação; commits anteriores `5dec396` e `ca3299a` preservados, sem reescrita ou push.
+- **Commits de correção:** `57da58c` protege a seleção populacional; `8052a9a` isola o teste da página inicial, seguido deste registro documental. O usuário fará o push após revisar a sequência.
+- **Indicador protegido:** `ExplorarController::consultar` agora exige população residente de 2022, unidade `Pessoas`, fonte `ibge-censo-2022-populacao` e identificação `Censo 2022 - agregado 4714 - variavel 93`, igual ao recorte populacional já exigido pelo score. Sem entrada compatível, retorna população NULL, oferta indisponível e aviso; não converte unidades nem escolhe outra fonte silenciosamente. Dado incompatível mais recente não substitui uma população válida do recorte.
+- **Teste inicial isolado:** `ExampleTest` prepara explicitamente SQLite `:memory:` antes de testar a página, com catálogo vazio e preenchido. Não depende do schema/dados do MySQL pessoal; bloqueia chamadas HTTP externas.
+- **Regressão:** seis novos casos da consulta cobrem unidade em milhares, outra fonte, outro ano, recorte ausente/divergente e fonte incompatível mais recente. O novo caso da página verifica catálogo preparado em memória. Casos de rejeição conferem que a consulta não altera o indicador nem chama a rede. Fixtures de população foram ajustadas ao contrato real, sem alterar dados locais.
+- **Validações executadas:** 21 testes focados/136 asserções; suíte completa **227 testes aprovados, 1.208 asserções**, forçando `DB_CONNECTION=sqlite` e `DB_DATABASE=:memory:` no processo de teste. Sintaxe dos três PHP alterados, Pint e `git diff --check` aprovados. A execução anterior com 219 aprovados/1 falha fica abaixo como histórico. Não houve importação, migration no MySQL, acesso ao BigQuery, mudança de `.env`, fórmula/pesos ou assets. Navegador não revalidado nesta correção de backend.
+- **Próximo passo:** revisar os commits locais e fazer pessoalmente o push; na escola preservar trabalho/configuração antes de atualizar. Banco, JSONs ignorados, dependências e perfis do navegador continuam locais. Se população aparecer indisponível, conferir fonte/unidade/ano/recorte antes de decidir uma carga — não reimportar por rotina. Revisão de interpretação/pesos com grupo/professora continua pendente; testes técnicos não validam chance de sucesso comercial.
+
+## Revisão pré-commit — 05/11/2026 (antes das correções)
 
 - **Pedido:** revisar as atualizações de 04/11 e preparar commits locais, sem push. Revisão do agente no checkout `C:\xampp\htdocs\RightPoint`; alterações anteriores preservadas. Sem importação, migration no MySQL ou mudança dos pesos.
 - **Organização Git:** implementação/testes preservados no commit local `5dec396`; documentação, relatório e este registro compõem um commit separado da mesma revisão. Nenhum push pelo agente. Os achados abaixo não foram corrigidos automaticamente.

@@ -1,6 +1,8 @@
 # RightPoint — roteiro para a apresentação
 
-Atualizado em 04/11/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
+Atualizado em 05/11/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
+
+**Integridade reforçada — 05/11:** o indicador por habitante exige população IBGE/Censo 2022 em pessoas e com recorte identificado. Outra fonte ou unidade não é usada silenciosamente; indisponibilidade não vira zero. Testes isolados verificam essas condições e a página com catálogo vazio/preenchido, sem depender do banco pessoal. Essa proteção técnica não valida a hipótese comercial ou os pesos.
 
 **Etapa mais recente — diagnóstico compacto e estudo dos pesos:** nota/fatores/quatro indicadores em destaque; fórmula, fontes e limitações em detalhes expansíveis, mantendo referência CNPJ adotada e dados originais desconhecidos. Comando de sensibilidade implementado para três cenários nos quatro CNAEs/92 municípios, sem mudar o 50/50 da aplicação. Restaurantes: 30/70 alterou 90/92 posições, máximo 39 em relação à base; isso mostra dependência dos pesos, não validade de uma alternativa. [Procedimento](./procedimentos/sensibilidade-score.md) e [relatório completo](./analises/sensibilidade-score-2026-11-04.md). Suíte 220 testes/1.154 asserções; banco real preservado antes/depois do comando. Próximo passo: revisar interpretação com grupo e avaliar nova referência populacional como cenário próprio.
 

@@ -8,6 +8,8 @@ Leia este documento antes de instalar dependências, criar o `.env`, executar mi
 
 ## Retomada do score experimental — 04/11/2026
 
+**Proteção acrescentada em 05/11:** população exibida/usada na razão exige fonte `ibge-censo-2022-populacao`, unidade `Pessoas`, período `2022` e `versao_fonte` igual a `Censo 2022 - agregado 4714 - variavel 93`. Dados de outra fonte, unidade ou recorte não são convertidos automaticamente. Se ficar indisponível na outra máquina, conferir esses metadados antes de decidir carga; não repetir importação apenas para fazer aparecer um número. O teste inicial agora prepara banco em memória, sem depender do MySQL local.
+
 Código/API/tela agora calculam o método `piloto-rj-censo2022-cnpj2026-v1` sem migration nova. Banco de origem conferido: 92 municípios, 1.332 CNAEs, 92 populações, 92 rendas e 461 coletas históricas, com 368 pares no lote piloto de `2026-11-03 20:41:41` UTC. Em outra máquina, falta de fator no conjunto fixo deixa score NULL com motivo; isso não se resolve apenas recebendo código pelo Git.
 
 Conferir estado/migrations e contagens antes de carregar qualquer coisa. Se faltar renda, seguir [procedimento da renda](./renda-municipal-rj.md); se faltar o lote CNPJ, transportar o JSON original e seguir o procedimento abaixo, sem repetir BigQuery. Não reimportar por rotina dados já existentes. A premissa CNPJ 2026 é versionada no método, mas não altera a referência original NULL; [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md). Próximo trabalho: revisar fatores/perfis/sensibilidade; histórico e população estimada ainda não implementados.
