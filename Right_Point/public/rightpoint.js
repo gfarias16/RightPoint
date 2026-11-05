@@ -165,52 +165,103 @@
         item.append(makeElement('span', '', label), makeElement('strong', '', value));
         return item;
     }
-    //funcao para renderizar o resultado da consulta demonstrativa
+    function makeDetails(title, ...children) {
+        const details = makeElement('details', 'result-details');
+        const body = makeElement('div', 'result-details__body');
+        body.append(...children);
+        details.append(makeElement('summary', '', title), body);
+        return details;
+    }
+
     function renderResult(data) {
         const report = makeElement('div', 'result-report');
-        const summary = makeElement('div', 'result-card');
-        summary.append(
-            makeElement('p', 'result-card__eyebrow', 'CONSULTA DEMONSTRATIVA'),
+        const context = makeElement('div', 'result-card');
+        const diagnosis = data.diagnostico;
+        const hasScore = diagnosis?.estado === 'experimental' && typeof data.score === 'number'
+            && Number.isFinite(data.score) && data.score >= 0 && data.score <= 100;
+        const number = (value, digits = 0) => new Intl.NumberFormat('pt-BR', {
+            minimumFractionDigits: digits, maximumFractionDigits: digits
+        }).format(value);
+        const collection = (value) => value ? String(value).slice(0, 10) : 'Data não informada';
+        context.append(makeElement('p', 'result-card__eyebrow', 'CONTEXTO DO MUNICÍPIO'),
             makeElement('h3', '', data.municipio.nome),
-            makeElement('p', '', data.atividade.nome || 'CNAE ' + data.atividade.codigo_cnae + ' · atividade ainda não catalogada')
-        );
+            makeElement('p', '', data.atividade.nome || 'CNAE ' + data.atividade.codigo_cnae));
         const facts = makeElement('div', 'result-facts');
-        facts.append(makeFact('Código IBGE', data.municipio.codigo_ibge));
-        facts.append(makeFact('CNAE informado', data.atividade.codigo_cnae));
-        if (data.populacao) {
-            const population = Number(data.populacao.valor);
-            facts.append(makeFact('População · ' + data.populacao.periodo_referencia, Number.isFinite(population) ? new Intl.NumberFormat('pt-BR').format(population) + ' pessoas' : 'Dado inválido'));
-            facts.append(makeFact('Fonte / coleta', (data.populacao.fonte || 'Fonte não informada') + (data.populacao.coletado_em ? ' · ' + String(data.populacao.coletado_em).slice(0, 10) : '')));
-        } else {
-            facts.append(makeFact('População', 'Ainda não importada'));
+        const population = data.populacao?.valor == null ? NaN : Number(data.populacao.valor);
+        facts.append(makeFact('População · ' + (data.populacao?.periodo_referencia || 'sem referência'),
+            Number.isFinite(population) && population >= 0 ? number(population) + ' pessoas' : 'Indisponível'));
+        const income = data.renda?.valor == null || String(data.renda.valor).trim() === '' ? NaN : Number(data.renda.valor);
+        facts.append(makeFact('Renda por pessoa · média mensal · ' + (data.renda?.periodo_referencia || 'sem referência'),
+            Number.isFinite(income) && income >= 0
+                ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(income) : 'Indisponível'));
+        const count = data.concorrentes?.quantidade;
+        facts.append(makeFact('Estabelecimentos registrados · mesmo CNAE',
+            Number.isInteger(count) && count >= 0 ? number(count) : 'Indisponível'));
+        const offer = data.oferta_por_10_mil_habitantes;
+        const validOffer = offer?.estado === 'calculado' && offer.base_populacional === 10000
+            && typeof offer.valor === 'number' && Number.isFinite(offer.valor) && offer.valor >= 0;
+        facts.append(makeFact('Oferta registrada · por 10 mil habitantes', validOffer ? number(offer.valor, 2) : 'Indisponível'));
+        context.append(facts);
+        if (!validOffer && offer?.motivo) context.append(makeElement('p', 'result-indicator-note', offer.motivo));
+        if (data.atividade.codigo_cnae === '9602501') {
+            context.append(makeElement('p', 'result-indicator-note', 'Inclui cabeleireiros, manicure e pedicure; não isola barbearias.'));
+        } else if (['1091102', '4721102'].includes(data.atividade.codigo_cnae)) {
+            context.append(makeElement('p', 'result-indicator-note', 'Produção própria e revenda de padarias são analisadas separadamente.'));
         }
 
-        // O agregado da fonte não equivale a um censo de todos os concorrentes reais.
+        const score = makeElement('div', 'result-card' + (hasScore ? ' result-card--score' : ' result-card--warning'));
+        score.append(makeElement('p', 'result-card__eyebrow', hasScore ? 'ÍNDICE DE CONTEXTO' : 'NOTA INDISPONÍVEL'));
+        if (hasScore) {
+            score.append(makeElement('h3', 'result-score', number(data.score, 1) + ' / 100'));
+            score.append(makeElement('p', 'result-status', 'Em avaliação · não representa chance de sucesso.'));
+            const factors = makeElement('div', 'result-facts');
+            factors.append(makeFact('Renda relativa · peso 50%', number(diagnosis.fatores.renda.pontos, 1) + ' pontos'),
+                makeFact('Menor oferta relativa · peso 50%', number(diagnosis.fatores.menor_oferta.pontos, 1) + ' pontos'));
+            score.append(factors);
+            score.append(makeElement('p', 'result-indicator-note', 'Comparação entre os 92 municípios do RJ para esta atividade.'));
+        } else {
+            score.append(makeElement('h3', '', 'Dados insuficientes para esta análise'));
+            (Array.isArray(diagnosis?.motivos) ? diagnosis.motivos : ['Confira a disponibilidade dos indicadores.'])
+                .forEach((reason) => score.append(makeElement('p', 'result-indicator-note', reason)));
+        }
+        score.append(makeElement('p', 'result-indicator-note',
+            hasScore ? 'Referências: população e renda de 2022; CNPJ 2026 como referência adotada. Veja fontes e limites abaixo.'
+                : 'Confira as referências e a disponibilidade dos dados nos detalhes abaixo.'));
+        report.append(context, score);
+
+        const method = makeElement('div', 'result-details__copy');
+        method.append(makeElement('p', '', 'Nota = 50% dos pontos de renda relativa + 50% dos pontos de menor oferta registrada por habitante. Os fatores usam a posição percentual entre municípios no mesmo CNAE, com empates pela posição média.'));
+        method.append(makeElement('p', '', 'Oferta por 10 mil habitantes = estabelecimentos registrados ÷ população × 10.000. A escala facilita a leitura; não é um limite de saturação.'));
+        if (diagnosis) method.append(makeElement('p', '', 'Método: ' + diagnosis.metodo + '. Conjunto apto: '
+            + diagnosis.conjunto.municipios_aptos + ' / ' + diagnosis.conjunto.municipios_esperados + ' municípios.'));
+        report.append(makeDetails('Como a nota é calculada', method));
+
+        const sources = makeElement('div', 'result-facts');
+        sources.append(makeFact('Código IBGE', data.municipio.codigo_ibge), makeFact('CNAE consultado', data.atividade.codigo_cnae));
+        if (data.populacao) sources.append(makeFact('População · fonte / coleta',
+            (data.populacao.fonte || 'Não informada') + ' · ' + collection(data.populacao.coletado_em)));
+        if (data.renda) sources.append(makeFact('Renda · fonte / coleta',
+            (data.renda.fonte || 'Não informada') + ' · ' + collection(data.renda.coletado_em)),
+            makeFact('Renda · tabela / variável', data.renda.versao_fonte || 'Recorte não informado'));
         if (data.concorrentes) {
-            const count = data.concorrentes.quantidade;
-            const collectedAt = data.concorrentes.consultado_em ? new Date(data.concorrentes.consultado_em) : null;
-            const collectedLabel = collectedAt && !Number.isNaN(collectedAt.getTime())
-                ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' }).format(collectedAt) + ' UTC'
-                : 'Data não informada';
-
-            facts.append(makeFact('Estabelecimentos na base · ativos / CNAE principal exato',
-                Number.isInteger(count) && count >= 0 ? new Intl.NumberFormat('pt-BR').format(count) : 'Dado inválido'));
-            facts.append(makeFact('Fonte dos estabelecimentos', data.concorrentes.fonte || 'Fonte não informada'));
-            facts.append(makeFact('Consulta à fonte · não é a competência', collectedLabel));
-            facts.append(makeFact('Período / versão da base',
-                (data.concorrentes.periodo_referencia || 'Período não confirmado') + ' · ' + (data.concorrentes.versao_fonte || 'Versão não confirmada')));
-        } else {
-            facts.append(makeFact('Estabelecimentos na base', 'Dados indisponíveis para este município e CNAE'));
+            const date = data.concorrentes.consultado_em ? new Date(data.concorrentes.consultado_em) : null;
+            sources.append(makeFact('Estabelecimentos · fonte', data.concorrentes.fonte || 'Não informada'),
+                makeFact('Consulta à fonte · UTC', date && !Number.isNaN(date.getTime())
+                    ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' }).format(date) : 'Data não informada'),
+                makeFact('Competência / versão confirmadas pela fonte',
+                    (data.concorrentes.periodo_referencia || 'Competência não confirmada') + ' · '
+                    + (data.concorrentes.versao_fonte || 'Versão não confirmada')));
         }
-        summary.append(facts);
+        const dates = makeElement('p', '', 'Os dados têm referências diferentes. A população é do Censo 2022 e a renda é nominal de julho/2022. No método em avaliação, 2026 é a referência adotada para o lote CNPJ definido, sem confirmação da competência pela fonte. A data da consulta não confirma o período dos registros.');
+        report.append(makeDetails('Fontes e referências dos dados', dates, sources));
 
-        const warning = makeElement('div', 'result-card result-card--warning');
-        warning.append(makeElement('p', 'result-card__eyebrow', 'AINDA NÃO É UM SCORE'), makeElement('h3', '', 'Análise incompleta'));
-        warning.append(makeElement('p', '', 'Os indicadores descrevem os dados disponíveis. Não representam chance de sucesso nem um score validado.'));
-        const list = makeElement('ul', 'result-warnings');
-        (Array.isArray(data.avisos) ? data.avisos : []).forEach((message) => list.append(makeElement('li', '', message)));
-        warning.append(list);
-        report.append(summary, warning);
+        const limits = makeElement('div', 'result-details__copy');
+        limits.append(makeElement('p', '', 'Maior renda e menor oferta são hipóteses de contexto, ainda em avaliação. Menor oferta também pode refletir menor demanda. A nota não considera gestão, preços, custos, turismo ou fluxo local de consumidores.'));
+        if (data.renda) limits.append(makeElement('p', '', 'A renda é uma média domiciliar mensal por pessoa, da amostra do Censo. Exclui moradores classificados como pensionistas, empregados domésticos ou parentes de empregados domésticos. Não equivale a salário individual ou gasto com esta atividade.'));
+        const warnings = makeElement('ul', 'result-warnings');
+        (Array.isArray(data.avisos) ? data.avisos : []).forEach((message) => warnings.append(makeElement('li', '', message)));
+        limits.append(warnings);
+        report.append(makeDetails('Limites desta análise', limits));
         result.replaceChildren(report);
     }
 

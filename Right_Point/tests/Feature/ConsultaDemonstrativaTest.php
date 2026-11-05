@@ -39,6 +39,8 @@ class ConsultaDemonstrativaTest extends TestCase
             ->assertJsonPath('atividade.catalogada', false)
             ->assertJsonPath('populacao', null)
             ->assertJsonPath('concorrentes', null)
+            ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'indisponivel')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.valor', null)
             ->assertJsonPath('score', null)
             ->assertJsonCount(4, 'avisos');
     }
@@ -65,6 +67,8 @@ class ConsultaDemonstrativaTest extends TestCase
         $this->getJson('/consulta-demonstrativa?codigo_ibge=3304557&cnae=5611201')
             ->assertOk()
             ->assertJsonPath('concorrentes.quantidade', 12)
+            ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'indisponivel')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.motivo', 'A população municipal ainda não está disponível.')
             ->assertJsonPath('concorrentes.criterio', 'ativos_cnae_principal_exato_v1')
             ->assertJsonPath('concorrentes.fonte', 'Fonte piloto de teste')
             ->assertJsonPath('concorrentes.codigo_fonte', 'opencnpj-receita')
@@ -176,8 +180,65 @@ class ConsultaDemonstrativaTest extends TestCase
             ->assertOk()
             ->assertJsonPath('populacao.periodo_referencia', '2022')
             ->assertJsonPath('concorrentes.quantidade', 12)
+            ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'calculado')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.valor', 1.2)
+            ->assertJsonPath('oferta_por_10_mil_habitantes.base_populacional', 10000)
+            ->assertJsonPath('oferta_por_10_mil_habitantes.motivo', null)
             ->assertJsonPath('score', null)
             ->assertJsonFragment(['As referências de população e estabelecimentos não foram compatibilizadas; estes dados não formam uma fotografia validada do mesmo período.']);
+    }
+
+    public function test_indicador_usa_coleta_atual_do_cnae_e_preserva_zero_registrado(): void
+    {
+        $contagem = $this->criarContagem();
+        $this->criarPopulacao($contagem->municipio_id, 100000);
+        $this->criarContagem(['consultado_em' => '2026-10-21 12:00:00', 'quantidade' => 0, 'registros_no_recorte' => 0]);
+        $this->criarContagem(['consultado_em' => '2026-10-22 12:00:00', 'criterio' => 'outro_criterio', 'quantidade' => 99, 'registros_no_recorte' => 99]);
+
+        $this->getJson('/consulta-demonstrativa?codigo_ibge=3304557&cnae=5611201')
+            ->assertOk()
+            ->assertJsonPath('concorrentes.quantidade', 0)
+            ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'calculado')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.valor', 0)
+            ->assertJsonPath('score', null);
+
+        AtividadeEconomica::create(['codigo_cnae' => '4712100', 'nome' => 'Outra atividade']);
+        $this->getJson('/consulta-demonstrativa?codigo_ibge=3304557&cnae=4712100')
+            ->assertOk()
+            ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'indisponivel')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.valor', null)
+            ->assertJsonPath('score', null);
+    }
+
+    public function test_populacao_zero_ou_negativa_impede_razao_sem_dividir_por_zero(): void
+    {
+        $contagem = $this->criarContagem();
+        $populacao = $this->criarPopulacao($contagem->municipio_id, 0);
+
+        foreach ([0, -1] as $valor) {
+            $populacao->update(['valor' => $valor]);
+            $this->getJson('/consulta-demonstrativa?codigo_ibge=3304557&cnae=5611201')
+                ->assertOk()
+                ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'indisponivel')
+                ->assertJsonPath('oferta_por_10_mil_habitantes.valor', null)
+                ->assertJsonPath('oferta_por_10_mil_habitantes.motivo', 'A população precisa ser um número finito maior que zero.')
+                ->assertJsonPath('score', null);
+        }
+    }
+
+    private function criarPopulacao(int $municipioId, int $valor): IndicadorMunicipal
+    {
+        $fonte = FonteDado::create(['codigo' => 'populacao-teste', 'nome' => 'População de teste', 'url_referencia' => 'https://example.org/populacao']);
+
+        return IndicadorMunicipal::create([
+            'municipio_id' => $municipioId,
+            'fonte_dado_id' => $fonte->id,
+            'codigo_indicador' => 'populacao_residente',
+            'valor' => $valor,
+            'periodo_referencia' => '2022',
+            'unidade' => 'Pessoas',
+            'coletado_em' => '2026-10-19 12:00:00',
+        ]);
     }
 
     private function criarContagem(array $atributos = []): ContagemEstabelecimento

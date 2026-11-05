@@ -6,6 +6,9 @@ use App\Models\AtividadeEconomica;
 use App\Models\ContagemEstabelecimento;
 use App\Models\IndicadorMunicipal;
 use App\Models\Municipio;
+use App\Services\CalculadorOfertaPorHabitante;
+use App\Services\ConsultaRendaIbge;
+use App\Services\DiagnosticoPiloto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -33,8 +36,8 @@ class ExplorarController extends Controller
 
         $atividades = AtividadeEconomica::query()
             ->where(function ($query) use ($busca) {
-                $query->where('nome', 'like', '%' . $busca . '%')
-                    ->orWhere('codigo_cnae', 'like', $busca . '%');
+                $query->where('nome', 'like', '%'.$busca.'%')
+                    ->orWhere('codigo_cnae', 'like', $busca.'%');
             })
             ->orderBy('nome')
             ->limit(20)
@@ -43,7 +46,7 @@ class ExplorarController extends Controller
         return response()->json($atividades);
     }
 
-    public function consultar(Request $request): JsonResponse
+    public function consultar(Request $request, CalculadorOfertaPorHabitante $calculador, DiagnosticoPiloto $diagnosticoPiloto): JsonResponse
     {
         $dados = $request->validate([
             'codigo_ibge' => [
@@ -67,6 +70,16 @@ class ExplorarController extends Controller
             ->where('municipio_id', $municipio->id)
             ->where('codigo_indicador', 'populacao_residente')
             ->where('periodo_referencia', '2022')
+            ->orderByDesc('coletado_em')
+            ->first();
+
+        $renda = IndicadorMunicipal::query()
+            ->with('fonteDado')
+            ->where('municipio_id', $municipio->id)
+            ->where('codigo_indicador', ConsultaRendaIbge::CODIGO_INDICADOR)
+            ->where('periodo_referencia', '2022')
+            ->where('unidade', 'Reais')
+            ->whereHas('fonteDado', fn ($query) => $query->where('codigo', ConsultaRendaIbge::CODIGO_FONTE))
             ->orderByDesc('coletado_em')
             ->first();
 
@@ -109,7 +122,8 @@ class ExplorarController extends Controller
             }
         }
 
-        $avisos[] = 'A fórmula e os pesos do score ainda não foram aprovados pelo grupo e pela professora.';
+        $diagnostico = $diagnosticoPiloto->consultar($municipio, $atividade, $populacao, $renda, $contagem);
+        $avisos[] = 'Pesos e interpretação em avaliação. A capacidade de prever resultados comerciais não foi validada.';
 
         return response()->json([
             'municipio' => [
@@ -128,6 +142,16 @@ class ExplorarController extends Controller
                 'fonte' => $populacao->fonteDado?->nome,
                 'coletado_em' => $populacao->coletado_em,
             ],
+            'renda' => $renda === null ? null : [
+                'valor' => $renda->valor,
+                'periodo_referencia' => $renda->periodo_referencia,
+                'unidade' => $renda->unidade,
+                'fonte' => $renda->fonteDado->nome,
+                'codigo_fonte' => $renda->fonteDado->codigo,
+                'url_referencia' => $renda->fonteDado->url_referencia,
+                'coletado_em' => $renda->coletado_em,
+                'versao_fonte' => $renda->versao_fonte,
+            ],
             'concorrentes' => $contagem === null ? null : [
                 'quantidade' => $contagem->quantidade,
                 'criterio' => $contagem->criterio,
@@ -138,7 +162,9 @@ class ExplorarController extends Controller
                 'periodo_referencia' => $contagem->periodo_referencia,
                 'versao_fonte' => $contagem->versao_fonte,
             ],
-            'score' => null,
+            'oferta_por_10_mil_habitantes' => $calculador->calcular($contagem?->quantidade, $populacao?->valor),
+            'score' => $diagnostico['score'],
+            'diagnostico' => $diagnostico,
             'avisos' => $avisos,
         ]);
     }

@@ -9,17 +9,17 @@
     <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-    <link rel="stylesheet" href="{{ asset('rightpoint.css') }}">
+    <link rel="stylesheet" href="{{ asset('rightpoint.css') }}?v={{ filemtime(public_path('rightpoint.css')) }}">
     <script>
         window.rightpointDemo = {{ \Illuminate\Support\Js::from([
             'municipios' => $municipios,
-            'consultaUrl' => route('consulta.demonstrativa', [], false),
-            'malhaUrl' => route('malha.rj', [], false),
-            'cnaeUrl' => route('cnaes.buscar', [], false),
+            'consultaUrl' => route('consulta.demonstrativa'),
+            'malhaUrl' => route('malha.rj'),
+            'cnaeUrl' => route('cnaes.buscar'),
         ]) }};
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
-    <script src="{{ asset('rightpoint.js') }}" defer></script>
+    <script src="{{ asset('rightpoint.js') }}?v={{ filemtime(public_path('rightpoint.js')) }}" defer></script>
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -109,7 +109,7 @@
                     <button id="consultar-button" class="button button--primary" type="submit">Ver diagnóstico disponível <span aria-hidden="true">→</span></button>
                 </form>
 
-                <p class="selection-panel__footnote">O resultado usa apenas dados presentes neste banco local. Nenhum score é estimado nesta demonstração.</p>
+                <p class="selection-panel__footnote">Compare o contexto dos municípios para a mesma atividade. Indicadores, fontes e limites acompanham o resultado.</p>
             </div>
 
             <div class="panel map-panel">
