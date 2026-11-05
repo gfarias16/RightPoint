@@ -6,6 +6,10 @@ Este procedimento explica como manter o RightPoint utilizável no computador da 
 
 Leia este documento antes de instalar dependências, criar o `.env`, executar migrations ou atualizar um ambiente que já possua trabalho local.
 
+## Novas tabelas e contexto — 05/11/2026
+
+Contas, perfis e diagnósticos agora podem ser privados no banco de cada servidor, além dos perfis legados do navegador. **Não acompanham o Git e não se sincronizam entre bancos.** As migrations `2026_11_05_180000` e `180100` são aditivas, já aplicadas no notebook do trabalho; conferir estado/SQL antes de aplicar em outro banco. Estimativas/idades carregadas no trabalho não significam carga na escola. Siga o [procedimento v1](./workspace-contextos-h3.md) para preparação, uso, contextos e H3; preservar `.env`, dados e cargas anteriores. Nunca repetir BigQuery ou usar reset para fazer a tela funcionar.
+
 ## Retomada do score experimental — 04/11/2026
 
 **Proteção acrescentada em 05/11:** população exibida/usada na razão exige fonte `ibge-censo-2022-populacao`, unidade `Pessoas`, período `2022` e `versao_fonte` igual a `Censo 2022 - agregado 4714 - variavel 93`. Dados de outra fonte, unidade ou recorte não são convertidos automaticamente. Se ficar indisponível na outra máquina, conferir esses metadados antes de decidir carga; não repetir importação apenas para fazer aparecer um número. O teste inicial agora prepara banco em memória, sem depender do MySQL local.

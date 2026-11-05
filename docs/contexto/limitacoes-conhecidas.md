@@ -2,6 +2,16 @@
 
 ## Estado da modelagem
 
+**Atualização de 05/11/2026:** contas/perfis privados, histórico/snapshots/relatório e piloto de grade H3 implementados. Estimativas 2026 e idades 2022 carregadas como contexto (552 indicadores totais), sem trocar os fatores padrão. A descrição de 04/11 e a tabela abaixo são históricas onde houver divergência. Estado/evidências: [STATUS](../STATUS.md).
+
+Limites atuais acrescentados:
+
+- Interface nova, H3, impressão e navegação autenticada ainda sem observação real no navegador: ferramenta indisponível. Testes HTTP/SQLite/MySQL não provam UX, mobile ou ausência de erros de console.
+- OSM real não carregado. RAIS/Caged/setores/estabelecimentos possuem contrato normalizado, mas não dados reais adquiridos. Não há geocodificador, ingestão de bases brutas ou validação comercial/cobertura independente.
+- H3 inclui células por centro, usa limite simplificado e até 3.000 células; pode extrapolar divisas/deixar pontos de borda fora. Sem população/score por célula, sem rateio uniforme e sem inferência de risco/criminalidade.
+- Cadastros/dados privados ficam no banco de cada servidor. Sem recuperação de senha/e-mail, sincronização de contas, cotas de snapshots ou política de retenção de produção. Revisão de secrets legados/HTTPS/backups é necessária antes de publicar.
+- Índice continua experimental 50/50 nos quatro CNAEs; novos contextos não validam probabilidade de sucesso nem equivalência de atividades. Aquisição e método próprios são necessários para ampliar o score.
+
 Atualizado em 04/11/2026. O RightPoint possui mapa/consulta demonstrativa, catálogos, 92 populações do Censo 2022 e 368 pares município/CNAE em quatro CNAEs, com 461 coletas históricas neste banco. Carga conferida contra o JSON; exemplos dos novos recortes conferidos visualmente por relato do usuário. Indicador por 10 mil habitantes implementado e validado em 04/11, com interpretação exploratória e referências visíveis. Não há fórmula validada de score. Banco e perfis do navegador são locais; ver [matriz](../arquitetura/matriz-dados-diagnostico.md), [status](../STATUS.md) e [plano](../planos/implementacao-inicial.md).
 
 ## Limitações funcionais

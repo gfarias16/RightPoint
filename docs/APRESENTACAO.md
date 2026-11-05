@@ -2,7 +2,22 @@
 
 Atualizado em 05/11/2026. Material de apoio para os slides da professora; ampliar aos poucos, com frases curtas e exemplos reais do projeto. **Implementado**, **em teste** e **planejado** são estados diferentes.
 
+## Entrega funcional de 05/11 — conteúdo novo para a demonstração
+
+- **Implementado:** consulta pública em barra recolhível, busca de atividade/CNAE, mapa municipal sincronizado e detalhes expansíveis; identidade RightPoint preservada. Código pronto não equivale a validação visual: a conferência nova no navegador ficou bloqueada pela ferramenta.
+- **Implementado e testado:** contas e perfis privados; diagnóstico calculado no servidor, salvo com fontes, método e entradas dos 92 municípios. Reabrir mostra a fotografia histórica sem recalcular. Relatório HTML → impressão/PDF no navegador e JSON de rastreabilidade. Senhas protegidas e acesso por proprietário; recuperação de senha/e-mail ainda ausentes.
+- **Dados reais adicionados:** estimativas municipais IBGE 2026 e faixas etárias Censo 2022, com validação dos 92 códigos, recorte e totais. Contextos complementam a explicação, não entram automaticamente no score.
+- **Cenário executado, não adotado como padrão:** trocar só o denominador de todos os municípios para estimativa 2026 altera posições em 64 das 92 cidades para restaurantes. Maricá: 50,0 → 50,5; Barra Mansa: 59,3 → 60,4. Isso é sensibilidade à referência, não aumento de chance de sucesso. [Resumo](./analises/cenario-populacao-2026-11-05.md).
+- **H3 como piloto de organização:** grade municipal limitada e contagem dos pontos realmente importados; não distribui população uniformemente nem cria score por hexágono. Setores, OSM e emprego possuem contratos/importadores; aquisição de setores/trabalho/pontos reais permanece pendente e OSM real não foi carregado. Não usar mapa vazio como ausência de equipamentos ou concorrência.
+- **Evidência técnica:** 255 testes/1.383 asserções isolados, HTTP local e escrita/releitura MySQL transacional com rollback. Não comprovam eficácia comercial ou experiência visual completa.
+
+Fala curta: “O RightPoint reúne indicadores e explica uma comparação experimental entre municípios. As novas fontes enriquecem o contexto, enquanto o histórico preserva o que sustentou cada resultado. H3 prepara a análise local, mas só aprofundaremos o diagnóstico por célula com dados geográficos adequados. A nota não é uma porcentagem de sucesso.”
+
+Os registros datados abaixo preservam as etapas anteriores; suas pendências foram parcialmente superadas pela entrega acima.
+
 **Integridade reforçada — 05/11:** o indicador por habitante exige população IBGE/Censo 2022 em pessoas e com recorte identificado. Outra fonte ou unidade não é usada silenciosamente; indisponibilidade não vira zero. Testes isolados verificam essas condições e a página com catálogo vazio/preenchido, sem depender do banco pessoal. Essa proteção técnica não valida a hipótese comercial ou os pesos.
+
+**Como explicar a sensibilidade — estudo de 05/11:** em restaurantes, Maricá/Barra Mansa têm notas 34,4/57,1 no cenário 30/70, 50,0/59,3 em 50/50 e 65,6/61,5 em 70/30. A ordem se inverte sem mudar nenhum dado. A nota de Barra Mansa sobe de 59,3 para 61,5, mas sua posição entre as 92 cidades cai de 22 para 29: nota e posição são medidas diferentes. Isso evidencia dependência dos pesos, não melhora/piora econômica ou chance de sucesso. [Guia para discussão](./analises/comparacao-marica-barra-mansa-2026-11-05.md). Nenhum peso foi alterado; revisão do grupo/professora continua pendente.
 
 **Etapa mais recente — diagnóstico compacto e estudo dos pesos:** nota/fatores/quatro indicadores em destaque; fórmula, fontes e limitações em detalhes expansíveis, mantendo referência CNPJ adotada e dados originais desconhecidos. Comando de sensibilidade implementado para três cenários nos quatro CNAEs/92 municípios, sem mudar o 50/50 da aplicação. Restaurantes: 30/70 alterou 90/92 posições, máximo 39 em relação à base; isso mostra dependência dos pesos, não validade de uma alternativa. [Procedimento](./procedimentos/sensibilidade-score.md) e [relatório completo](./analises/sensibilidade-score-2026-11-04.md). Suíte 220 testes/1.154 asserções; banco real preservado antes/depois do comando. Próximo passo: revisar interpretação com grupo e avaliar nova referência populacional como cenário próprio.
 

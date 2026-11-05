@@ -1,6 +1,15 @@
 # Fontes de dados candidatas — RightPoint
 
-Registro do grupo, atualizado em 04/11/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam o recorte inicial dos 92 municípios do RJ.
+Registro do projeto, atualizado em 05/11/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam o recorte inicial dos 92 municípios do RJ.
+
+## Integrações de contexto — 05/11/2026
+
+- **Carregado de fonte real:** 92 estimativas IBGE 2026 (tabela 6579/9324) e 276 valores por idade Censo 2022 (9514/93), com metadados/categorias/totais conferidos. População/renda antigas e CNPJ preservados; novos dados fora do score padrão. Total local: 552 indicadores municipais.
+- **Código implementado, fonte real não carregada:** OSM/Overpass para escolas/saúde/transporte; consulta real rejeitada por indisponibilidade/completude. Não foi gravada camada vazia como zero real.
+- **Contrato/importação implementados, aquisição pendente:** agregados municipais RAIS/Caged, setores IBGE 2022 e pontos de estabelecimentos com geocodificação validada. Requerem arquivo normalizado/procedência conferidos, não ingestão automática de bases nacionais ou geração de coordenadas fictícias.
+- **H3 não é fonte de população/negócios:** é uma grade de organização espacial. Nesta versão não faz rateio de população nem calcula índice por célula. Biblioteca fixa, malha simplificada, resoluções/limites e condicionantes estão no procedimento.
+
+[Procedimento com endpoints, recortes, símbolo zero, contratos e limites](./procedimentos/workspace-contextos-h3.md). [Cenário populacional de leitura](./analises/cenario-populacao-2026-11-05.md). Os registros seguintes preservam o histórico de pesquisa; expressões anteriores como “estimativas não integradas” foram superadas pela carga acima.
 
 **Estado mais recente:** 92 populações e 92 rendas Censo 2022 carregadas; renda com fonte/unidade/recorte uniformes, coleta local `2026-11-04 18:05:59` UTC. Fotografia CNPJ de `2026-11-03 20:41:41` UTC com 368 pares. Usuário decidiu assumir CNPJ como 2026 para o score experimental; referência/versão originais continuam NULL. O método 50/50 usa esses três recortes, sem alegar confirmação de competência, cobertura comercial ou renda atual. Estimativas populacionais continuam somente pesquisadas. [Decisão e guia de estudo](./decisoes-arquiteturais/001-score-piloto-rj.md). Os registros datados seguintes documentam etapas anteriores.
 

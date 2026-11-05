@@ -62,6 +62,10 @@ Indicadores e coletas foram comparados antes/depois do comando real e permanecer
 
 ## Validação e próximo passo
 
+**Continuidade da entrega funcional de 05/11:** usuário informou desenvolvimento individual e autorizou a implementação. O método padrão não foi alterado; cenário de população estimada e histórico completo já estão implementados conforme [procedimento v1](./workspace-contextos-h3.md). Discussão acadêmica não deve bloquear o uso experimental explicitamente limitado, mas não foi declarada validação comercial. Os próximos passos datados abaixo são o histórico do estudo anterior.
+
+**Estudo interpretativo de 05/11:** [comparação de Maricá e Barra Mansa](../analises/comparacao-marica-barra-mansa-2026-11-05.md), com os três cenários nos quatro CNAEs, fatores de restaurantes e pauta para o grupo/professora. Reutiliza o relatório versionado, sem nova consulta ao banco ou mudança de pesos. A leitura do agente não equivale a aprovação do método pelo grupo.
+
 Testes de matemática, empates, ordem, pesos, integridade e comando usam dados fictícios/SQLite em memória. Incluem conjunto incompleto no último CNAE, relatório com 92 linhas por atividade e preservação do banco/API. A execução real foi somente de leitura. Testes não comprovam eficácia comercial.
 
 Próximo passo: revisar os perfis e a interpretação de renda/menor oferta com grupo/professora, usando este relatório. Depois avaliar população estimada 2026 como cenário separado e definir persistência/exportação de análises completas. União de padarias e barbearias exclusivas continuam questões próprias, não resolvidas por mudar pesos.

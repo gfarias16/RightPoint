@@ -2,6 +2,20 @@
 
 Esta pasta reúne o fluxo previsto e as decisões iniciais da demonstração visual. A validação final da interface no navegador ainda está pendente.
 
+## Contrato visual e estados da v1 — 05/11/2026
+
+Referências fornecidas pelo usuário: **03 barra recolhível + busca de atividade da 02**. Preservados grafite, verde-menta, destaque municipal amarelo, tipografia/sistema existentes, mapa Leaflet e limites reais IBGE. Não substituir o mapa por uma imagem nem remover campos obrigatórios, origem dos dados ou motivos de indisponibilidade.
+
+- Uma faixa de consulta, mapa amplo abaixo e leitura compacta antes dos detalhes. Recolher mantém resumo e ação; limpar preserva perfis/histórico. Campo manual CNAE permanece como alternativa de rede/teclado.
+- Município selecionável no mapa e em lista nativa; atividade buscável com debounce/abort e lista nativa acessível. CNAE preenchido automaticamente após escolher, editável e validado como sete dígitos. Não criar combobox ARIA incompleto apenas para imitar a referência.
+- Botão desabilitado enquanto faltam campos (requisito do usuário) ou existe requisição. Estado textual informa o motivo. Mudança de seleção durante uma requisição não publica resultado da seleção antiga; atualização limpa a opção de salvar o resultado antigo.
+- Visitante mantém perfis no navegador; conta mostra registros privados/paginados e cópia local explícita. Histórico aberto é identificado como fotografia, não mistura camadas atuais e não permite salvar fingindo consulta nova.
+- Estados: carregando/sem catálogo/sem resultado/erro de rede, dados parciais/sem nota, sucesso experimental, sessão expirada, limite de requisições, nenhuma camada importada, H3 indisponível e resolução excessiva. Ausência nunca significa zero real.
+- Rótulos/controles semânticos, foco visível, live regions, confirmação para exclusão, CSS responsivo 1 coluna em telas menores e movimento reduzido preservados. Texto longo/hash quebra; esquema escuro também nos controles nativos.
+- Contextos e limites ficam expansíveis, fora do score. Relatório tem impressão clara, fontes/anos/versões e JSON. PDF depende da impressão do navegador.
+
+**Revisão aplicada:** UI/UX e acessibilidade (`ui-ux-pro-max`, `web-design-guidelines`) e contrato/gate `anti-ui-slop`, usando referências do usuário e identidade existente; sem catálogo visual pago ou nova biblioteca de componentes. Sintaxe/HTML renderizado/HTTP e testes não substituem observação real. **Gate visual pendente:** acesso ao navegador indisponível e Edge sem aprovação concluída. Não há captura nova aprovada, teste de overflow em 375 px ou fluxo H3/conta/print observado nesta entrega. Conferir antes da apresentação. Validações antigas abaixo referem-se ao layout antigo.
+
 ## Diagnóstico e score experimental — 04/11/2026
 
 **Refinamento após teste do usuário:** leitura principal reduzida a quatro indicadores, nota, fatores e referências curtas. Fórmula, procedência e ressalvas em três `details/summary`: “Como a nota é calculada”, “Fontes e referências dos dados”, “Limites desta análise”. Fechados inicialmente, com foco visível e abertura/fechamento por teclado. A nota usa card neutro/destaque existente; card de alerta fica para indisponibilidade. “Em avaliação” identifica o estágio sem linguagem interna; a referência CNPJ adotada/competência desconhecida permanece nos detalhes e na API. Não apresentar 2026 como competência confirmada.

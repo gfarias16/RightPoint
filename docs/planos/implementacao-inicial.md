@@ -1,6 +1,6 @@
 # Plano de implementação inicial — RightPoint
 
-Última atualização: 04/11/2026. Renda carregada e conferida, razão por habitante e score experimental 50/50 implementados. CNPJ 2026 é premissa autorizada para a fotografia definida; população/renda seguem 2022. Histórico, população estimada, H3 e validação comercial pendentes. [Decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md). Registros datados abaixo preservam etapas anteriores; estado atual no [STATUS](../STATUS.md).
+Última atualização: 05/11/2026. Histórico/contas/relatório implementados, estimativa 2026 e idades 2022 carregadas como contexto, cenário populacional separado e grade H3 limitada implementada. Score padrão 50/50 e premissa CNPJ preservados. Aquisição espacial/emprego, validação visual nova e eficácia comercial continuam pendentes. [Entrega funcional v1](./entrega-funcional-v1.md), [decisão 002](../decisoes-arquiteturais/002-workspace-contextos-h3.md) e [STATUS](../STATUS.md). Registros abaixo preservam o planejamento histórico e não sobrepõem o estado mais recente.
 
 ## Objetivo
 

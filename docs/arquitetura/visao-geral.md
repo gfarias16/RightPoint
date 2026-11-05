@@ -2,6 +2,8 @@
 
 ## Estado
 
+**Implementação atual de 05/11/2026:** Laravel/Blade/JS público/Leaflet com sessão nativa; serviço de consulta compartilhado, snapshots privados e contexto territorial separado do score. Grade H3 no cliente limitada ao município; sem novo servidor/banco geoespacial. [Decisão 002](../decisoes-arquiteturais/002-workspace-contextos-h3.md), [fluxo implementado](./fluxo-de-dados.md) e [STATUS](../STATUS.md). O texto conceitual abaixo é histórico quando não coincidir com essas implementações; publicação de produção continua pendente.
+
 Arquitetura conceitual para orientar a modelagem. A base Laravel está em `Right_Point/` e declara Laravel `^12.0` e PHP `^8.2`; neste computador, Laravel 12.69.2 e PHP 8.2.12 foram verificados. O banco local é MariaDB do XAMPP. A abordagem de frontend e a forma de implantação ainda precisam ser definidas. Consulte o [plano de continuidade](../planos/implementacao-inicial.md).
 
 ## Objetivo arquitetural

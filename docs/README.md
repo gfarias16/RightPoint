@@ -7,7 +7,7 @@ Esta pasta reúne a documentação V2 do RightPoint. O projeto possui uma modela
 - [Minimundo original](./RightPoint%20-%20MINIMUNDO.docx)
 - [Enunciado do trabalho](./Trabalho%20do%201%20Bimestre%20-%20ProfLucieneMotta_2026.2.pdf)
 
-Os arquivos originais são referências da atividade. Os arquivos Markdown são a versão de trabalho, preparada para revisão, histórico no Git e evolução pelo grupo.
+Os arquivos originais são referências da atividade. Os arquivos Markdown são a versão de trabalho, preparada para revisão e histórico no Git. Desde 05/11 o usuário informou desenvolvimento individual; decisões desta entrega foram autorizadas por ele, sem pressupor retorno do antigo grupo.
 
 ## Navegação
 
@@ -30,10 +30,13 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 
 ### Evolução e governança
 
+- [Entrega funcional v1](./planos/entrega-funcional-v1.md): interface recolhível, contas, histórico, contextos e piloto espacial; estado verificado no STATUS.
+- [Decisão 002](./decisoes-arquiteturais/002-workspace-contextos-h3.md) e [operação/contratos](./procedimentos/workspace-contextos-h3.md): propriedade dos registros, snapshots, importações e limites H3.
 - [Referências temporais do diagnóstico e score](./planos/compatibilidade-temporal-diagnostico.md): política v0.2, com cenário experimental autorizado e evolução pendente.
 - [Roteiro simples para a apresentação acadêmica](./APRESENTACAO.md).
 - [Decisão 001 — score piloto](./decisoes-arquiteturais/001-score-piloto-rj.md): método implementado, fórmula explicada, premissa CNPJ 2026, exemplos e limites para estudo/apresentação.
 - [Sensibilidade dos pesos](./procedimentos/sensibilidade-score.md): comando de leitura, definição das posições e interpretação; [relatório completo de 04/11](./analises/sensibilidade-score-2026-11-04.md) para os 92 municípios nos quatro CNAEs.
+- [Maricá e Barra Mansa: estudo dos pesos](./analises/comparacao-marica-barra-mansa-2026-11-05.md): leitura dos resultados, diferença entre nota e posição e perguntas para revisão metodológica.
 - [Planos](./planos/README.md)
 - [Procedimentos](./procedimentos/README.md)
 - [Ambiente local em múltiplos computadores](./procedimentos/ambiente-multiplos-computadores.md)
@@ -48,6 +51,8 @@ Os arquivos originais são referências da atividade. Os arquivos Markdown são 
 - Identificadores como `RN-001` e `RI-001` permitem rastrear regras entre os documentos.
 
 ## Estado atual
+
+**Entrega de 05/11:** contas/perfis privados, diagnósticos históricos imutáveis, relatório imprimível/PDF e JSON; interface 03 + busca 02, contextos expansíveis e piloto H3. MySQL recebeu três tabelas novas e 368 indicadores IBGE adicionais (552 totais); Censo/renda/CNPJ anteriores preservados. Estimativas 2026 e idades 2022 carregadas, fora do score padrão 50/50. OSM não carregado; RAIS/Caged/setores/pontos reais dependem de preparação do contrato. Suíte **255 testes/1.383 asserções** e HTTP real aprovados; **validação visual nova bloqueada por indisponibilidade de acesso ao navegador**. Leia [STATUS](./STATUS.md) e [procedimento](./procedimentos/workspace-contextos-h3.md) antes de retomar. Registros abaixo são históricos, não a lista atual de pendências.
 
 **Correções da revisão — 05/11:** indicador por habitante agora usa somente população IBGE/Censo 2022, em pessoas e no recorte identificado; outras fontes/unidades não viram denominador. Teste inicial independente do banco local. Suíte completa isolada: **227 testes/1.208 asserções aprovados**. Sem mudança no MySQL ou nos pesos do score. Retomada e validações em [STATUS](./STATUS.md).
 

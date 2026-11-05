@@ -1,6 +1,14 @@
 # Fluxo de Dados - RightPoint
 
-Este é o fluxo conceitual de uma consulta. A [matriz e o fluxograma detalhado](./matriz-dados-diagnostico.md) distinguem a atualização agendada, de uma fonte por vez, da consulta aos dados locais publicados. Nada disso está implementado ainda.
+Este diagrama preserva o fluxo conceitual original. A [matriz e o fluxograma detalhado](./matriz-dados-diagnostico.md) distinguem aquisição e consulta. Desde 05/11, partes estão implementadas conforme o fluxo abaixo; atualização agendada e diagnóstico intramunicipal completo continuam planejados.
+
+## Fluxo implementado em 05/11/2026
+
+Consulta pública → `ExplorarController` (validação) → `ConsultaDiagnostico` → indicadores/contagens locais + `DiagnosticoPiloto` (mesmo 50/50). Não consulta serviços externos para calcular a nota. Contexto municipal retorna metadados/valores; geometrias completas são requisitadas separadamente para as camadas.
+
+Aquisição explícita por Artisan → validação integral/simulação → `--gravar` → indicadores IBGE próprios ou lotes de contexto versionados. Contextos novos não substituem fatores Censo/renda/CNPJ.
+
+Usuário autenticado → salvar → recálculo transacional no servidor → snapshot privado com fontes/entradas/resultado/hash → reabrir/relatório/JSON sem recalcular. Conta/perfil/diagnóstico sempre filtrados por proprietário. [Decisão 002](../decisoes-arquiteturais/002-workspace-contextos-h3.md).
 
 ## Fluxo principal da análise
 

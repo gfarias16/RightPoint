@@ -15,6 +15,8 @@ Estas instruções se aplicam a todo o repositório RightPoint. Instruções mai
 
 ## Estado atual conhecido
 
+**Atualização de 05/11/2026:** interface de consulta recolhível, conta/sessão Laravel, perfis privados, histórico com snapshot/entradas, relatório imprimível/JSON, estimativa 2026 e idades 2022 como contexto e grade H3 municipal limitada implementados. Método padrão permanece 50/50 com Censo/renda 2022 e CNPJ 2026 assumido. OSM real não carregado; RAIS/Caged/setores/pontos reais exigem preparação. Validação visual nova bloqueada pela ferramenta, não declarar concluída. Usuário informou desenvolvimento individual e autorizou a implementação desta etapa; decisões não dependem do antigo grupo, mas eficácia comercial continua não validada. Estado verificável no `docs/STATUS.md`; operação em `docs/procedimentos/workspace-contextos-h3.md`, arquitetura na decisão 002. Contas/histórico são locais ao banco e não acompanham Git. Os resumos seguintes são históricos.
+
 Estado do repositório e do notebook do trabalho verificado em 05/10/2026; o estado atual da escola continua a confirmar em `docs/STATUS.md`:
 
 - backend declarado com PHP `^8.2` e Laravel `^12.0`;
