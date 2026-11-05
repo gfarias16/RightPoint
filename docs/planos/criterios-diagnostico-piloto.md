@@ -1,10 +1,10 @@
 # Critérios propostos para o diagnóstico piloto
 
-Registrado em 03/11/2026. **Proposta técnica para discussão; não implementada nem aprovada como fórmula definitiva.** O usuário escolheu restaurantes, padarias e barbearias como os três perfis iniciais. A composição dos CNAEs, a interpretação dos fatores e os pesos abaixo são recomendações do agente, sujeitas à revisão do grupo. Podemos elaborar e testar a proposta antes da validação acadêmica, distinguindo sempre proposta, experimento e resultado validado.
+Registrado em 03/11/2026, atualizado em 04/11. **Proposta inicial implementada como score experimental, a pedido do usuário; não aprovada como fórmula definitiva.** O usuário escolheu restaurantes, padarias e barbearias e autorizou assumir 2026 para o CNPJ. A composição dos CNAEs, interpretação e pesos continuam sujeitos à revisão acadêmica e validação comercial. Método, exceção temporal, fórmula e exemplos de estudo na [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md).
 
 Referências do projeto: [regras de negócio](../contexto/regras-de-negocio.md), [integridade](../contexto/restricoes-de-integridade.md), [matriz](../arquitetura/matriz-dados-diagnostico.md) e [estado local](../STATUS.md).
 
-**Avanço implementado em 03/11:** validação/importação preparadas para os quatro CNAEs separados, com grupos ausentes indisponíveis e fotografia conferida exigida na gravação. Usuário já obteve a nova exportação; simulação real aprovou 368 pares, mantendo banco e arquivo preservados. Metadados do novo job ainda pendentes e gravação bloqueada; banco segue com restaurantes. Isso não implementa a união de padarias, classificação exclusiva de barbearias ou os cálculos/score propostos abaixo. Ver [procedimento](../procedimentos/contagens-perfis-piloto.md).
+**Avanços conferidos até 04/11:** quatro CNAEs separados/92 municípios no lote atual (368 pares), 461 coletas históricas com 93 anteriores preservadas; razão por habitante, 92 rendas municipais e score experimental integrados. União de padarias, barbearias exclusivas e validação comercial continuam pendentes. [Procedimento](../procedimentos/contagens-perfis-piloto.md) e [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md).
 
 ## 1. Perfis e alcance dos CNAEs
 
@@ -45,19 +45,21 @@ Exemplos aritméticos dos dados já conferidos para restaurantes:
 | Barra Mansa | 169.894 | 308 | 18,13 |
 | Maricá | 197.277 | 620 | 31,43 |
 
-Esses quocientes misturam população de 2022 com uma fotografia CNPJ de período desconhecido. São **exemplos exploratórios**, não taxas contemporâneas validadas nem medida de demanda/saturação. Eventual exibição deve declarar as duas referências e preservar a ausência de score. Não foram adicionados ao controller ou à interface.
+Esses quocientes usam população de 2022 e o lote CNPJ assumido como 2026 pelo usuário. Continuam exploratórios, não taxas contemporâneas de um único ano ou medida validada de demanda/saturação. Serviço/API/tela exibem estado, motivo e razão com duas casas; ausências e valores inválidos não viram zero. A escolha de 10 mil é escala de leitura, não limiar comercial. O score experimental usa a razão sem arredondamento, sob as condições da seção 5.
 
 Mais estabelecimentos por habitante pode indicar maior oferta registrada; também pode coexistir com turismo, circulação de trabalhadores, diferenças de formalização ou maior demanda. Menor razão não demonstra oportunidade automaticamente. População municipal não mede fluxo de pedestres ou consumidores efetivos do estabelecimento.
 
 ## 4. Segunda dimensão a investigar
 
-Propor **rendimento domiciliar per capita municipal do Censo 2022** como aproximação inicial da capacidade de consumo, sem tratá-lo como gasto com a atividade. A divulgação de Trabalho e Rendimentos do Censo apresenta essa variável; a tabela/API, unidade exata, cobertura dos 92 municípios e qualidade dos resultados precisam ser verificadas antes de importar. Não substituir renda municipal por um valor estadual da PNAD ou por PIB per capita.
+Usar **rendimento domiciliar per capita municipal do Censo 2022** como aproximação inicial de contexto de consumo, sem tratá-lo como gasto com a atividade. Fonte: tabela 10295/variável 13431, amostra, totais N6/RJ, Reais, julho/2022. Leitura confirmou 92 valores carregados com fonte/unidade/recorte uniformes; API/tela integradas ao experimento. Identificador do recorte não comprova revisão editorial. [Procedimento](../procedimentos/renda-municipal-rj.md). Não substituir por renda estadual PNAD ou PIB per capita.
 
 Renda mais alta não significa necessariamente melhor adequação a qualquer negócio. Um restaurante popular e outro de maior preço podem buscar públicos diferentes; perfis de preço/público são uma evolução proposta, não campos ou regras já implementados. Não atribuir público exclusivamente masculino a toda barbearia sem definição do perfil.
 
-## 5. Hipótese de score para experimentar depois
+## 5. Score experimental implementado — 04/11/2026
 
-Após validar os dados e aceitar a interpretação, experimentar um **índice relativo de contexto de mercado**, de 0 a 100:
+**Condição do experimento:** mesma fonte/conceito/referência por fator nos 92 municípios; Censo/renda 2022 e CNPJ da fotografia de 03/11/2026, assumido como 2026 por decisão explícita do usuário. A competência/versão na fonte continuam desconhecidas. Essa exceção substitui o bloqueio absoluto proposto antes nesta sessão somente para o cenário declarado, conforme [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md) e [política temporal](./compatibilidade-temporal-diagnostico.md). Não autoriza apresentar nota como validada ou ampliar a premissa a outras coletas.
+
+Implementado um **índice experimental relativo de contexto municipal**, de 0 a 100:
 
 ```text
 índice experimental = 0,50 × capacidade de consumo relativa
@@ -70,16 +72,16 @@ Os pesos 50/50 são uma hipótese simples por ausência de evidência para prior
 
 Antes de publicar, fixar e registrar o conjunto comparado, fontes, referências e versão do método; tratar dados faltantes de forma explícita. Se todos os valores de um componente forem iguais, a posição média resulta em 50 e o componente não diferencia municípios. Um conjunto com menos de dois municípios não gera esse índice. Nota relativa depende do conjunto de comparação e não é probabilidade de sucesso ou recomendação financeira.
 
-Testar pesos 30/70, 50/50 e 70/30 e identificar municípios cuja posição muda muito. Essa é análise de sensibilidade: torna visível quanto a classificação depende das escolhas do modelo. O teste não comprova eficácia comercial. A fórmula acima não está autorizada como regra definitiva pelo simples fato de estar documentada; o aplicativo mantém score NULL.
+Testar pesos 30/70, 50/50 e 70/30 e identificar municípios cuja posição muda muito. Essa é análise de sensibilidade: torna visível quanto a classificação depende das escolhas do modelo. O teste não comprova eficácia comercial. O exemplo de Maricá/Barra Mansa na decisão 001 já demonstra inversão de ordem entre essas cidades ao dar 70% à renda; análise dos 92 municípios/quatro CNAEs foi implementada e executada em 04/11, com [procedimento](../procedimentos/sensibilidade-score.md) e [relatório](../analises/sensibilidade-score-2026-11-04.md). Revisão pelo grupo continua pendente. A interface usa 50/50, com versão e premissa. Score permanece NULL fora do recorte ou quando faltar condição técnica; não é regra comercial definitiva.
 
 ## 6. Sequência prática
 
 1. Revisar o mapeamento proposto, especialmente união de padarias e alcance amplo de barbearias.
-2. Para o próximo exercício de programação, orientar uma função de cálculo da razão descritiva e dos estados inválidos/ausentes, fora da view, com testes úteis. Não programar automaticamente sem pedido do usuário.
-3. Concluir a conferência dos metadados do job existente e registrar a fotografia de quatro CNAEs: importador já adaptado/testado e nova exportação de 368 pares já simulada sem escrita. Depois decidir a carga local e conferir os recortes separados. Não repetir BigQuery nem usar o instante da coleta antiga.
-4. Confirmar no job existente que os quatro CNAEs pertencem à mesma consulta e registrar seu instante; não atribuir o instante/hash da coleta antiga a dados novos. Preservar o lote atual como histórico. A exportação já disponível evita repetir a aquisição.
-5. Investigar o indicador municipal de renda e compatibilidade temporal; depois experimentar normalização, pesos e justificativas com dados adequados.
-6. Revisar RN-006/RN-010/RN-017, matriz e eventual decisão versionada quando as escolhas forem aceitas. Até lá, a proposta não substitui as regras existentes.
+2. Razão descritiva, renda municipal e método experimental implementados em 04/11. Revisar critérios e limites na decisão 001; sensibilidade e adequação comercial não são comprovadas pelos testes.
+3. Carga dos quatro CNAEs concluída pelo usuário e conferida em 04/11: 368 novos pares e 461 linhas históricas. Conferir visualmente os novos recortes e preservar a separação por CNAE. Não repetir BigQuery ou carga como rotina.
+4. Preservar os metadados já conferidos: quatro CNAEs na mesma query, instante `2026-11-03 20:41:41` UTC; não atribuir o instante/hash da coleta antiga a dados novos. Preservar o lote atual como histórico. A exportação já disponível evita repetir a aquisição.
+5. Renda carregada: leitura confirmou 92 rendimentos e 184 indicadores, mesma fonte/unidade/período/identificação do recorte. Score piloto 50/50 implementado; referências divergentes e premissa CNPJ preservadas. Próximo passo: revisar interpretação/perfis/sensibilidade com o grupo e avaliar população estimada em novo cenário.
+6. RN/RI receberam ressalva da implementação experimental, com decisão versionada. Validar RN-006/RN-010/RN-017 e matriz com grupo/professora; índice experimental não substitui aprovação definitiva.
 
 ## Referências consultadas
 

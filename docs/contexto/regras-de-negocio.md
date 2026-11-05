@@ -10,6 +10,8 @@ Documentos relacionados: [minimundo estruturado](./minimundo.md), [restricoes de
 
 ## Escopo desta versao
 
+**Implementação experimental em 04/11/2026:** a pedido do usuário, o piloto calcula um índice relativo 50/50 nos quatro CNAEs/92 municípios, sob premissa explícita de CNPJ 2026, preservando população/renda 2022 e metadados originais desconhecidos. [Decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md) detalha interpretação, integridade e limites. É um experimento de contexto municipal, não uma análise de potencial validada; a autorização de implementação não equivale a aprovação acadêmica definitiva de RN-009/RN-010 ou a eficácia comercial demonstrada.
+
 Esta versao descreve somente regras de negocio, ou seja, condicoes que orientam como a realidade representada pelo sistema deve funcionar.
 
 Restricoes de integridade, classes, atributos e relacionamentos estao detalhados em documentos proprios e permanecem sujeitos a validacao do grupo.

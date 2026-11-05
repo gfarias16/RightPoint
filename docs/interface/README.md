@@ -2,6 +2,17 @@
 
 Esta pasta reúne o fluxo previsto e as decisões iniciais da demonstração visual. A validação final da interface no navegador ainda está pendente.
 
+## Diagnóstico e score experimental — 04/11/2026
+
+**Refinamento após teste do usuário:** leitura principal reduzida a quatro indicadores, nota, fatores e referências curtas. Fórmula, procedência e ressalvas em três `details/summary`: “Como a nota é calculada”, “Fontes e referências dos dados”, “Limites desta análise”. Fechados inicialmente, com foco visível e abertura/fechamento por teclado. A nota usa card neutro/destaque existente; card de alerta fica para indisponibilidade. “Em avaliação” identifica o estágio sem linguagem interna; a referência CNPJ adotada/competência desconhecida permanece nos detalhes e na API. Não apresentar 2026 como competência confirmada.
+
+Navegador real: Maricá/restaurantes manteve 50,0, renda/população/contagem/razão. Detalhes abriram e fecharam com Enter, e fontes/recorte foram conferidos; viewport 375 px com fontes expandidas sem overflow horizontal medido. Nenhuma interação de perfis foi alterada. Revisão usa princípios gerais de hierarquia/acessibilidade da UI/UX Pro Max; buscas não localizaram exemplo específico aplicável ao componente.
+
+- Mantida a identidade escura e os componentes de fatos/avisos existentes. Nota/fatores ficam em destaque; explicação, método, conjunto e procedência podem ser expandidos. Usa texto, não só cor. Sem categorias de oportunidade ou porcentagem de sucesso.
+- Estado indisponível mostra motivo, com score NULL; ausência não vira zero. Atividade fora dos quatro CNAEs não recebe nota. Mensagens específicas preservam padarias separadas e alcance amplo de `9602501`.
+- Navegador Apache com banco real: Maricá/restaurantes 50,0; Barra Mansa/restaurantes 59,3; Barra Mansa/9602501 35,7, com aviso do CNAE amplo. Resultado em viewport 375 px sem overflow horizontal medido. Isso não valida todos os municípios, mapa ou CRUD por interação.
+- Referência funcional e de apresentação: [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md). Regras comerciais e pesos ainda precisam de revisão/validação; renda/população continuam 2022.
+
 A [matriz e o fluxograma](../arquitetura/matriz-dados-diagnostico.md) definem a direção inicial: 92 municípios do RJ, escolhidos por busca ou clique no mapa, sempre pelo mesmo código IBGE. Em 14/10/2026 foram implementados um protótipo de mapa e um CRUD de perfis **local ao navegador**, ainda sem sincronização entre máquinas.
 
 ## Decisão visual do mapa de demonstração
@@ -43,3 +54,9 @@ Estados já presentes no protótipo: entrada inválida, consulta em processament
 - Avisos mantêm ausência de score e limites de cobertura/período; não representar 620 como chance de sucesso ou como estabelecimentos geolocalizados no mapa. UI/UX aplicada para clareza do estado vazio, sem redesenho ou dependências novas.
 - Consulta HTTP real e testes automatizados aprovados; renderização visual/responsividade ainda a conferir. A ferramenta do navegador negou acesso a localhost e o bloqueio não foi contornado. Não registrar esta etapa como teste visual concluído.
 - Captura posterior enviada pelo usuário confirmou o resultado de Maricá/5611201 no desktop: população 197.277/2022, 620 estabelecimentos na base, fontes/datas, referências desconhecidas e quatro avisos legíveis. Esta evidência cobre o resultado exibido, não mobile, recortes sem coleta ou todas as interações.
+
+## Indicador exploratório e validação no Apache — 04/11/2026
+
+- Resultado agora inclui oferta registrada por 10 mil habitantes, calculada no backend e formatada com duas casas em pt-BR. Ausência/valor inválido mostra indisponibilidade com motivo; zero registrado permanece zero. Nota textual explica fórmula, arredondamento e limites, junto das referências das fontes. Não há escala de cores de potencial ou score.
+- URLs das três consultas geradas completas pelo Laravel preservam subpastas do XAMPP; antes a raiz relativa causava 404. JS/CSS com versão pela data do arquivo evitam que o navegador continue executando assets antigos. Sem mudança de configuração do Apache.
+- Navegador real aprovou Maricá/5611201 = 31,43, Barra Mansa/5611201 = 18,13 e 7490104 sem coleta com motivo. Os 92 limites carregaram após correção da URL. Resultado acessível em viewport de 375 × 812, sem overflow horizontal medido. Cobertura restrita aos fluxos descritos; mapa completo/CRUD e demais dispositivos seguem com validação própria. Skill UI/UX Pro Max apoiou feedback/estados sem dados; identidade existente preservada.

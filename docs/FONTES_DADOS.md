@@ -1,6 +1,8 @@
 # Fontes de dados candidatas — RightPoint
 
-Registro do grupo, atualizado em 27/10/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam os critérios **propostos** para a primeira versão, limitada aos 92 municípios do RJ.
+Registro do grupo, atualizado em 04/11/2026. Uma fonte listada aqui não está automaticamente integrada nem aprovada para o cálculo do score. Antes de usá-la, conferir acesso, licença, cobertura geográfica, período, unidade, atualização e qualidade dos dados. A [matriz de dados e o fluxograma](./arquitetura/matriz-dados-diagnostico.md) organizam o recorte inicial dos 92 municípios do RJ.
+
+**Estado mais recente:** 92 populações e 92 rendas Censo 2022 carregadas; renda com fonte/unidade/recorte uniformes, coleta local `2026-11-04 18:05:59` UTC. Fotografia CNPJ de `2026-11-03 20:41:41` UTC com 368 pares. Usuário decidiu assumir CNPJ como 2026 para o score experimental; referência/versão originais continuam NULL. O método 50/50 usa esses três recortes, sem alegar confirmação de competência, cobertura comercial ou renda atual. Estimativas populacionais continuam somente pesquisadas. [Decisão e guia de estudo](./decisoes-arquiteturais/001-score-piloto-rj.md). Os registros datados seguintes documentam etapas anteriores.
 
 | Fonte candidata | Dados pretendidos | Possível uso | Estado |
 | --- | --- | --- | --- |
@@ -57,9 +59,44 @@ Uma captura enviada pelo usuário do [endpoint oficial de metadados do agregado 
 
 Em 28/10/2026, no computador em uso, o usuário repetiu a verificação e importou a população após confirmar os 92 municípios. Leitura posterior confirmou 92 indicadores em 92 municípios, fonte IBGE vinculada e unidade Pessoas. A consulta demonstrativa retornou 169.894 para Barra Mansa e 197.277 para Maricá, ambos do Censo 2022, junto das contagens CNPJ já carregadas para o CNAE `5611201`. A resposta preserva o aviso de que as duas referências temporais não foram compatibilizadas e não calcula score. O agente não repetiu a importação; a interface ainda precisa de conferência visual.
 
+## 2.1. IBGE — renda domiciliar municipal, Censo 2022
+
+Em 04/11/2026, metadados e valores da [tabela 10295](https://sidra.ibge.gov.br/tabela/10295) foram consultados via [API oficial de metadados](https://servicodados.ibge.gov.br/api/v3/agregados/10295/metadados), com HTTP 200/TLS verificado pelo Laravel. Variável 13431 = média nominal mensal domiciliar por pessoa, unidade Reais, referência julho/2022 e divulgação baseada na amostra. N6/RJ e totais explícitos de sexo 2[6794], cor/raça 86[95251], idade 58[95253]. Retornou 92 municípios únicos, iguais ao catálogo, sem valores ausentes/não numéricos. Barra Mansa 1.407,80, Maricá 1.707,99 e Niterói 3.577,32 reais/mês/pessoa de 2022. Não confundir com mediana 13534, salário, PIB per capita ou PNAD estadual.
+
+Conceito exclui pensionistas, empregados domésticos e parentes de empregados domésticos conforme condição no domicílio. Referência primária de apoio: [apresentação oficial Trabalho e rendimento](https://agenciadenoticias.ibge.gov.br/media/com_mediaibge/arquivos/53fde9c24f6d8df3108c83f6378e018f.pdf). Média nominal pode esconder desigualdade e não indica gasto no negócio. Revisão editorial não comprovada pelo identificador tabela/variável; ano 2022 não resolve o período desconhecido do CNPJ.
+
+Implementados serviço de validação e `ibge:importar-renda-rj {--gravar}`, leitura local no controller e UI. Simulação real aprovada sem alterar cinco tabelas; **zero renda carregada**, banco mantém 92 populações/461 coletas CNPJ. Suíte 179 testes/954 asserções, com HTTP falso/SQLite nos novos testes; UI positiva com resposta HTTP simulada. Sem migration/dependência ou gravação real pelo agente. Próximo passo: carga explícita e conferência. [Procedimento completo, URL e regras](./procedimentos/renda-municipal-rj.md).
+
+## 2.2. Atualização dos anos de referência — pesquisa em 04/11/2026
+
+O uso conjunto dessas fontes é tratado na [proposta de compatibilidade temporal](./planos/compatibilidade-temporal-diagnostico.md). Disponibilidade de ano mais recente não autoriza substituição automática ou combinação no score; a seleção/população estimada e a política temporal ainda não foram implementadas/aprovadas.
+
+### População municipal anual
+
+[Metadados da tabela 6579](https://servicodados.ibge.gov.br/api/v3/agregados/6579/metadados) consultados via Laravel/TLS: pesquisa Estimativas de População, periodicidade anual 2001–2026, nível N6 e variável 9324 (Pessoas). Foram consultados 2024, 2025 e 2026, cada qual com HTTP 200 e 92 municípios únicos/valores válidos correspondentes ao catálogo RJ. [Valores oficiais de 2026](https://servicodados.ibge.gov.br/api/v3/agregados/6579/periodos/2026/variaveis/9324?localidades=N6%5BN3%5B33%5D%5D).
+
+| Município | Estimativa 2024 | Estimativa 2025 | Estimativa 2026 |
+| --- | ---: | ---: | ---: |
+| Barra Mansa | 181.688 | 181.679 | 181.675 |
+| Maricá | 211.986 | 212.470 | 212.703 |
+
+O [programa oficial de estimativas](https://www.ibge.gov.br/estatisticas/sociais/populacao/9103) descreve referência em 1º de julho e método intercensitário. Estimativa anual não substitui conceitualmente um recenseamento. O código atual seleciona população residente/Censo 2022; nenhuma alteração de seleção/carga foi feita nesta pesquisa. Se adotada população mais recente, preservar Censo como histórico, diferenciar fonte/indicador e explicitar qual população alimenta a razão por 10 mil habitantes. Isso também muda o valor do indicador sem significar mudança na contagem de estabelecimentos.
+
+### Renda recente e território
+
+A [divulgação PNAD de renda domiciliar per capita de 2025](https://agenciadenoticias.ibge.gov.br/agencia-sala-de-imprensa/2013-agencia-de-noticias/releases/45942-ibge-divulga-rendimento-domiciliar-per-capita-2025-para-brasil-e-unidades-da-federacao), publicada em 27/02/2026 e atualizada em 27/03/2026, traz Brasil/UF, incluindo **RJ estadual R$ 2.794**. Esse valor não é renda municipal de cada uma das 92 cidades. A PNAD tem recortes adicionais como capitais e regiões metropolitanas, conforme [nível de divulgação oficial](https://www.ibge.gov.br/en/statistics/social/income-expenditure-and-consumption/18083-annual-dissemination-pnadc3.html), que não equivalem a cobertura individual de todos os municípios. Universo e metodologia também diferem do indicador do Censo preparado; não apresentar a troca como série homogênea.
+
+Não foi identificada nesta pesquisa série oficial equivalente 2024/2025 para substituir diretamente a renda domiciliar municipal 2022 dos 92 municípios. Isso não prova inexistência de toda estimativa alternativa; fontes/modelos adicionais exigem validação própria. Podemos manter renda municipal 2022 com rótulo correto e usar dado estadual recente somente como contexto. Corrigir valores por inflação muda sua expressão monetária, não comprova renda municipal efetivamente recebida em 2025/2026.
+
+### Outros indicadores candidatos
+
+[RAIS 2025/MTE](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/estatisticas-trabalho/rais/rais-2025) e [Perfil do Município/CAGED](https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/estatisticas-trabalho/perfil-do-municipio) são candidatos para vínculos, admissões/desligamentos e remuneração formal. Recorte/cobertura/arquivos ainda não foram validados para a integração dos 92 municípios. Salário de admissão ou remuneração de vínculos formais não é renda domiciliar da população residente. O [PIB dos municípios](https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?c=3552502&t=pib-por-municipio) apresenta resultados 2022–2023 na publicação de 2025; PIB per capita também tem conceito distinto de renda das famílias.
+
+Pesquisa somente de leitura, sem carga, mudança de método ou dependência nova. O importador de renda municipal 2022 permanece preparado e ainda sem carga real; a decisão sobre referência populacional mais recente não foi implementada nesta etapa.
+
 ## 3. Receita Federal — CNPJ
 
-**Preparação implementada em 03/11/2026:** SQL para os quatro CNAEs `5611201`, `1091102`, `4721102` e `9602501`, e novo comando `cnpj:importar-contagens-piloto` disponíveis. Agrupa por município/CNAE, mantém ausências indisponíveis e exige fotografia conferida para gravar. O código não prova cobertura, não identifica exclusivamente barbearias e não soma subclasses de padarias. Suíte completa: 126 testes/701 asserções; simulação real com o arquivo antigo preservou MySQL/JSON. **Atualização da aquisição:** usuário informou execução e salvou o novo JSON; simulação real aprovou 368 pares e 92 municípios por CNAE, preservando banco/arquivo. Nenhuma contagem nova importada: faltam confirmação do início com fuso/UTC, SQL/completude e detalhes de processamento/faturamento do job existente. Não repetir a query; registrar a fotografia após a conferência conforme o [procedimento dos perfis](./procedimentos/contagens-perfis-piloto.md). Registros anteriores abaixo permanecem históricos.
+**Preparação implementada em 03/11/2026:** SQL para os quatro CNAEs `5611201`, `1091102`, `4721102` e `9602501`, e novo comando `cnpj:importar-contagens-piloto` disponíveis. Agrupa por município/CNAE, mantém ausências indisponíveis e exige fotografia conferida para gravar. O código não prova cobertura, não identifica exclusivamente barbearias e não soma subclasses de padarias. Suíte completa: 126 testes/701 asserções; simulação real com o arquivo antigo preservou MySQL/JSON. **Atualização da aquisição:** usuário informou execução e salvou o novo JSON; simulação real aprovou 368 pares e 92 municípios por CNAE, preservando banco/arquivo. Carga posterior executada pelo usuário: 368 novas coletas, conferidas contra o JSON; 461 linhas históricas com 93 anteriores preservadas. **Job conferido em 04/11:** SQL corresponde à preparada, início 03/11/2026 17:41:41 UTC−3 = `2026-11-03 20:41:41` UTC e 3,81 GB processados/faturados arredondados na interface. Referências de competência/versão ainda desconhecidas: NULL. Hash registrado e simulação aprovada sem bloqueio. Não repetir a query ou carga como rotina; próxima etapa é conferir os novos recortes na interface conforme o [procedimento dos perfis](./procedimentos/contagens-perfis-piloto.md). Registros anteriores abaixo permanecem históricos.
 
 ### APIs candidatas para simplificar a obtenção
 

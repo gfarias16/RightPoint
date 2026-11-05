@@ -80,7 +80,11 @@ Cada fator citado na justificativa deve corresponder a um fator registrado na an
 
 Uma análise classificada como sem dados suficientes não pode ser apresentada como resultado confiável. Na primeira versão, a falta de população, de cobertura validada de CNPJ ou de fórmula aprovada impede a apresentação do score; dados disponíveis e o motivo da insuficiência podem ser mostrados. Zero concorrentes exige cobertura verificada; dado ausente não pode virar zero.
 
+**Exceção experimental declarada em 04/11/2026:** a [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md) permite estudar uma nota sob premissa CNPJ 2026 autorizada pelo usuário, sem afirmar cobertura/competência comprovadas ou aprovação definitiva. O serviço exige os 92 municípios, recortes de fonte/unidade/período definidos, população positiva e fatores válidos; incompletude bloqueia score, sem imputação/redistribuição. Zero registrado pode entrar no experimento sem ser chamado de ausência real de concorrência. API retorna fatores, método, premissa e hash; persistência de análises antigas de RI-012/RI-013 continua pendente e não deve ser declarada implementada.
+
 ## Pontos para validação
+
+O detalhamento temporal está na [revisão v0.2](../planos/compatibilidade-temporal-diagnostico.md): referências distintas, conjunto uniforme por fator e cenário com premissa explícita. A elegibilidade técnica está implementada no piloto; validação definitiva e preservação de análises continuam pendentes. Os identificadores PT não substituem silenciosamente RI-010 a RI-015.
 
 - uma análise poderá combinar região e localização ou deverá escolher apenas uma delas;
 - um estabelecimento poderá ter várias atividades ou somente uma atividade principal;

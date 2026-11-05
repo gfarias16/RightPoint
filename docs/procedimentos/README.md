@@ -1,5 +1,7 @@
 # Procedimentos
 
+- [Sensibilidade dos pesos do score](./sensibilidade-score.md): comparação local 30/70, 50/50 e 70/30, relatório, significado de posições/amplitudes e limites; não muda os pesos da aplicação.
+
 Esta pasta armazenará instruções reproduzíveis para operações recorrentes do RightPoint.
 
 ## Procedimentos disponíveis
@@ -10,3 +12,5 @@ Esta pasta armazenará instruções reproduzíveis para operações recorrentes 
 - [Comparação CNPJ entre municípios do RJ](./comparacao-cnpj-municipios-rj.md): SQL agregado do mesmo CNAE, conferência de publicação, custo e códigos; preparação apenas, sem execução ou importador em lote.
 
 Procedimentos futuros podem cobrir atualização de bases públicas, validação do modelo, geração de documentação e recuperação de falhas.
+
+- [Renda domiciliar municipal do RJ: fonte, simulação, carga e limites](./renda-municipal-rj.md).

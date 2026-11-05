@@ -16,6 +16,24 @@ As consultas ao IBGE usam automaticamente `storage/app/ibge-ca-bundle.pem` quand
 - `GET /consulta-demonstrativa?codigo_ibge=3302700&cnae=5611201` — lê população e a coleta agregada mais recente do recorte local, sem API externa ou gravação. `concorrentes` é NULL quando não existe coleta; quando existe, objeto com quantidade, critério, fonte/código/URL, consulta UTC e período/versão nullable. Score continua NULL e avisos explicam limites.
 - `php artisan test --compact tests/Feature/ConsultaDemonstrativaTest.php` — 11 casos de consulta com SQLite na memória; não altera o MySQL. Suíte completa na entrega de 28/10/2026: 85 testes e 447 asserções aprovados.
 
+**Atualização de 04/11 — indicador:** a consulta agora acrescenta `oferta_por_10_mil_habitantes`: `estado` (`calculado`/`indisponivel`), `valor` numérico com arredondamento de duas casas ou NULL, `base_populacional` 10000 e `motivo` textual/NULL. Usa a mesma população/contagem já retornadas e mantém fontes, avisos e score NULL. `php artisan test --compact` aprovou **147 testes/804 asserções** na suíte final; testes do cálculo/integridade usam dados fictícios, não alteram o MySQL. Navegador Apache conferiu exemplos reais e estado sem coleta. Assets públicos não exigem build Vite nesta alteração.
+
+## Score experimental — implementado em 04/11/2026
+
+- `php artisan diagnostico:analisar-sensibilidade` — compara 30/70, 50/50 e 70/30 nos mesmos quatro conjuntos completos. Mostra mudanças de posições em relação à base 50/50; somente leitura, sem rede, importação ou alteração dos pesos da consulta.
+- `php artisan diagnostico:analisar-sensibilidade --markdown --no-ansi` — emite relatório completo no terminal, com notas/posições dos 92 municípios por CNAE, hashes, referências e limites. Não escreve arquivo; conferir saída de sucesso antes de salvar. Qualquer conjunto incompleto bloqueia a publicação, sem resultado parcial. [Procedimento](./procedimentos/sensibilidade-score.md).
+
+- A rota de consulta existente agora retorna `score` numérico ou NULL e `diagnostico` com estado `experimental`/`indisponivel`, método, fatores/pesos/contribuições, motivos, referências, premissa CNPJ 2026 e conjunto/hash de dados. Campo de score não é probabilidade.
+- Recorte: quatro CNAEs, 92 municípios, população/renda 2022 e fotografia CNPJ fixada em `2026-11-03 20:41:41` UTC. Falta/invalidez em qualquer município bloqueia o conjunto. Fonte alternativa ou coleta nova não são incorporadas silenciosamente. Não há comando de gravação de score, rede externa ou migration nova.
+- Testes focados: `php artisan test --compact tests/Unit/CalculadorScoreRelativoTest.php tests/Feature/DiagnosticoPilotoTest.php`. Não alteram o MySQL; usam dados fictícios/SQLite em memória. [Fórmula e integridade](./decisoes-arquiteturais/001-score-piloto-rj.md).
+
+## Renda municipal — integração e carga conferidas em 04/11/2026
+
+- `php artisan ibge:importar-renda-rj` — consulta metadados/valores oficiais, confere tabela 10295/variável média 13431, totais e 92 municípios e simula sem gravar. Requer rede/TLS e catálogo local.
+- `php artisan ibge:importar-renda-rj --gravar` — carga explícita/transacional dos 92 rendimentos de 2022, com upsert por município/fonte/indicador/período. Reimportação pode atualizar valores/coleta sem duplicar; população e outras fontes preservadas. Sem migration nova. Na origem, esperado 184 indicadores após primeira carga.
+- Consulta acrescenta `renda` NULL sem carga ou objeto com valor/unidade/período/fonte/código/URL/coleta/identificação de recorte. Sem rede durante a consulta. Leitura posterior confirmou 92 rendas/184 indicadores no MySQL; renda integra o método experimental descrito acima.
+- `php artisan test --compact tests/Feature/ImportarRendaRjTest.php` — 32 casos novos HTTP falso/SQLite na memória. Suíte completa: **179 testes/954 asserções**. Simulação real preservou banco; escrita MySQL ainda não executada pelo agente. [Procedimento](./procedimentos/renda-municipal-rj.md).
+
 ## Dados do IBGE
 
 - `php artisan ibge:consultar-rio` — consulta município e população do Rio de Janeiro; não grava dados.

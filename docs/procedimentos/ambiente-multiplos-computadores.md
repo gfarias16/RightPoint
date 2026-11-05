@@ -6,6 +6,12 @@ Este procedimento explica como manter o RightPoint utilizável no computador da 
 
 Leia este documento antes de instalar dependências, criar o `.env`, executar migrations ou atualizar um ambiente que já possua trabalho local.
 
+## Retomada do score experimental — 04/11/2026
+
+Código/API/tela agora calculam o método `piloto-rj-censo2022-cnpj2026-v1` sem migration nova. Banco de origem conferido: 92 municípios, 1.332 CNAEs, 92 populações, 92 rendas e 461 coletas históricas, com 368 pares no lote piloto de `2026-11-03 20:41:41` UTC. Em outra máquina, falta de fator no conjunto fixo deixa score NULL com motivo; isso não se resolve apenas recebendo código pelo Git.
+
+Conferir estado/migrations e contagens antes de carregar qualquer coisa. Se faltar renda, seguir [procedimento da renda](./renda-municipal-rj.md); se faltar o lote CNPJ, transportar o JSON original e seguir o procedimento abaixo, sem repetir BigQuery. Não reimportar por rotina dados já existentes. A premissa CNPJ 2026 é versionada no método, mas não altera a referência original NULL; [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md). Próximo trabalho: revisar fatores/perfis/sensibilidade; histórico e população estimada ainda não implementados.
+
 ## Retomada dos perfis piloto — 03/11/2026
 
 Este é o ponto atual; o roteiro de 28/10 abaixo descreve a entrega anterior de restaurantes.
@@ -14,13 +20,13 @@ Este é o ponto atual; o roteiro de 28/10 abaixo descreve a entrega anterior de 
 2. **Levar separadamente** `Right_Point/storage/app/amostras/contagens-perfis-piloto.json` e a exportação antiga de restaurantes, preservando seus conteúdos. A nova tem 83.756 bytes, 368 pares e SHA-256 LF `c6f18525e52c489384b8feaa9c6e700ccdf60acef3ee1b682facece2db6ce3b1`. Levar também data/hora/fuso e SQL/detalhes sanitizados do novo job; não repetir BigQuery para recuperar a exportação. JSONs não acompanham o Git.
 3. Conferir PHP, dependências e banco local. Usar `composer install` se faltar `vendor/`, respeitando o lockfile. O `.env` já é rastreado por decisão anterior; preservar configurações locais e revisar a conexão sem expor credenciais. Dependências, banco XAMPP, cache e perfis em localStorage não são transportados pelos commits.
 4. Executar `php artisan migrate:status` dentro de `Right_Point/`. Esta entrega não cria migrations novas; no computador conferido, as oito migrations estão `Ran`. Se houver pendências na outra máquina, revisar antes de aplicar; não usar reset destrutivo. Conferir os 92 municípios, os quatro CNAEs e população local; não presumir dados iguais. Os comandos já disponíveis de catálogo/IBGE constam em [COMANDOS](../COMANDOS.md).
-5. Colocar o novo JSON em `storage/app/amostras/` e executar apenas a simulação abaixo. Esperado: 92/92 em cada CNAE, totais 39.423, 25.188, 8.992 e 102.086, respectivamente. Banco de origem contém somente 93 coletas de restaurantes; a nova carga não foi realizada.
+5. Colocar o novo JSON em `storage/app/amostras/` e executar apenas a simulação abaixo. Esperado: 92/92 em cada CNAE, totais 39.423, 25.188, 8.992 e 102.086, respectivamente. Carga de origem concluída em 04/11: 368 novas coletas e 461 linhas históricas, com 93 anteriores preservadas. Outra máquina pode ter dados diferentes.
 
 ```powershell
 php artisan cnpj:importar-contagens-piloto "storage/app/amostras/contagens-perfis-piloto.json"
 ```
 
-**Pendência para prosseguir:** confirmar início com data/hora/fuso e SQL/completude do novo job; registrar hash/UTC em [contagens_piloto.php](../../Right_Point/config/contagens_piloto.php), mantendo período/versão desconhecidos como NULL. Atualmente o registro está vazio e a gravação fica bloqueada. Se já existir cache de configuração, reconstruí-lo localmente depois da atualização e conferir conexão; não transportar cache. Só depois de nova simulação decidir `--gravar`, conforme [procedimento dos perfis](./contagens-perfis-piloto.md). Conferir os resultados por CNAE após a carga; não somar padarias automaticamente nem apresentar `9602501` como exclusivo de barbearias. Renda, indicadores derivados e score continuam pendentes.
+**Atualização de 04/11:** captura confirmou SQL e início do job em 03/11/2026 17:41:41 UTC−3, convertido para `2026-11-03 20:41:41` UTC. Hash registrado em [contagens_piloto.php](../../Right_Point/config/contagens_piloto.php), com período/versão NULL; simulação aprovada e carga posterior do usuário conferida, total 461 linhas históricas. Se já existir cache de configuração, reconstruí-lo localmente após receber a atualização e conferir conexão. Carga com `--gravar` concluída na origem; próximo passo ali é conferir visualmente os novos recortes conforme [procedimento](./contagens-perfis-piloto.md). Foram 368 novas coletas e 461 linhas históricas; não presumir estado igual em outra máquina. Conferir resultados por CNAE; não somar padarias automaticamente nem apresentar `9602501` como exclusivo de barbearias. Renda, indicadores derivados e score continuam pendentes.
 
 ## Retomada da entrega CNPJ — 28/10/2026
 

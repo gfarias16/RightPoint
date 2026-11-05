@@ -1,6 +1,6 @@
 # Matriz de dados e fluxograma do diagnóstico — RightPoint
 
-Atualizado em 28/10/2026. População do Censo 2022 e agregado de Maricá/CNAE `5611201` (620) lidos pela consulta demonstrativa, com fontes/datas/avisos. **Não há score aprovado; conferência visual da contagem pendente.** As fontes e evidências estão em [FONTES_DADOS.md](../FONTES_DADOS.md).
+Atualizado em 04/11/2026. Banco local: 92 populações e 92 rendas Censo 2022, 368 pares município/CNAE na fotografia atual e 461 coletas CNPJ históricas. **Razão por habitante e score experimental 50/50 implementados**, com elegibilidade para os 92 municípios no mesmo CNAE, recortes fixos, justificativa e metadados. CNPJ 2026 é premissa do usuário para essa fotografia, sem alterar referência/versão originais NULL. [Decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md) descreve o fluxo atual; as propostas conceituais abaixo não equivalem a funcionalidades prontas. Fontes/evidências em [FONTES_DADOS](../FONTES_DADOS.md) e [plano](../planos/implementacao-inicial.md#visão-futura-da-entrega--04112026).
 
 ## Recorte e critérios da primeira versão
 
@@ -13,17 +13,19 @@ Atualizado em 28/10/2026. População do Censo 2022 e agregado de Maricá/CNAE `
 
 ## Matriz de fontes e indicadores
 
+**Política temporal v0.2:** recortes uniformes e conjunto completo implementados. População/renda 2022; CNPJ 2026 assumido explicitamente pelo usuário para a fotografia fixada, mantendo metadados desconhecidos. [Política](../planos/compatibilidade-temporal-diagnostico.md) e [decisão 001](../decisoes-arquiteturais/001-score-piloto-rj.md). Histórico e população estimada continuam pendentes.
+
 `Proposto` significa que a fonte, o indicador ou sua regra ainda dependem de validação. `Validado` exigirá fonte, licença/acesso, recorte, período, unidade, cobertura, vínculo municipal e regra de uso conferidos. `Integrado` exige importação e consulta testadas no sistema; isso **não** significa que o indicador entre automaticamente no score. As consultas exploratórias do IBGE, sozinhas, não validam cobertura completa.
 
 | ID | Fonte e dado | Unidade | Município/associação | Período de referência | Atualização local | Uso no score proposto | Estado atual |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | M-01 | IBGE Localidades: código e nome | Não se aplica | 92 códigos IBGE do RJ | Data/versão da consulta a registrar | Carga manual realizada; procedência/data por carga ainda não registradas em `fontes_dados` | Não; catálogo e seleção | 92 municípios importados no MySQL local; rastreabilidade da carga pendente |
 | M-02 | IBGE Malha Municipal: limites | Geometria | Associar polígono ao código IBGE | Edição da malha a selecionar | Sem carga; registrar edição e data/hora | Não; mapa | Proposto |
-| M-03 | IBGE Censo/SIDRA: população residente | Pessoas (variável 93 do agregado 4714) | Um valor por código IBGE do RJ | Censo 2022 confirmado nos metadados | Carga manual em 20/10/2026 no notebook do trabalho, com fonte, período e data de coleta registrados | Sim; dado mínimo proposto, mas ainda não calculado | Integrado à consulta demonstrativa: 92 registros para 92 municípios distintos; Maricá retornou população e procedência. Tela atualizada e repetição da carga ainda a conferir |
+| M-03 | IBGE Censo: população residente | Pessoas, agregado 4714/variável 93 | 92 códigos IBGE do RJ | Censo 2022 | 92 valores carregados, coleta 20/10/2026 | Denominador da razão; não recebe bônus separado | Integrado à consulta e ao método experimental v1 |
 | M-04 | IBGE: densidade populacional | Habitantes/km² | Mesmo código e períodos compatíveis para população e área | Tabela/edição a confirmar | Sem carga; registrar data/hora | Condicional, após validação | Proposto |
-| M-05 | IBGE: renda | Conceito e unidade a escolher | Um valor por código IBGE, se houver cobertura municipal | Tabela/período a confirmar | Sem carga; registrar data/hora | Condicional à atividade e à regra aprovada | Proposto |
+| M-05 | IBGE Censo/amostra: rendimento domiciliar per capita médio nominal mensal | Reais/mês/pessoa, tabela 10295/variável 13431/totais | N6, 92 códigos RJ | Julho/2022; revisão editorial não confirmada | 92 valores carregados, coleta 04/11/2026 | Posição relativa, peso 50% | API/tela/método integrados; amostra com exclusões, não salário atual |
 | M-06 | IBGE: perfil etário | Faixas e unidade a escolher | Um valor por código IBGE, se houver cobertura municipal | Tabela/período a confirmar | Sem carga; registrar data/hora | Condicional à atividade e à regra aprovada | Proposto |
-| M-07 | OpenCNPJ/BigQuery: contagem agregada de estabelecimentos | Estabelecimentos (CNPJs distintos no recorte) | Maricá: Receita 5853 → IBGE 3302700; CNAE principal 5611201, Ativa | Período/versão desconhecidos; consulta em 28/10/2026 | Carga manual de uma coleta, controles 620/620/0, fonte e instante UTC registrados | Proposto, sem cálculo aprovado | Piloto importado e leitura HTTP testada; UI implementada, conferência visual pendente. Condições da fonte e cobertura independente pendentes |
+| M-07 | OpenCNPJ/BigQuery: contagem agregada ativa/CNAE principal exato | CNPJs distintos no recorte | 92 códigos RJ, quatro CNAEs separados | Premissa analítica 2026; competência/versão originais NULL | 368 pares na coleta 03/11/2026 20:41:41 UTC; 93 coletas anteriores preservadas | Menor razão por habitante, peso 50% | Integrado ao experimento; cobertura comercial não validada; padarias separadas e 9602501 amplo |
 | M-08 | ANP: preços de combustíveis | Unidade da série escolhida a confirmar | Cobertura municipal a verificar | Série/período a escolher | Sem carga | Não inicialmente; contexto, sem inferir fluxo de pessoas | Proposto |
 | M-09 | INMET: temperatura | °C | Definir método para associar estação a município | Série/período a escolher | Sem carga | Condicional à atividade e à validação espacial | Proposto |
 | M-10 | INMET: chuva | mm | Definir método para associar estação a município | Série/período a escolher | Sem carga | Condicional à atividade e à validação espacial | Proposto |
@@ -41,6 +43,8 @@ Uma contagem **zero** em `M-07` só significa “nenhum concorrente encontrado�
 - Acrescentar renda, idade, clima ou investimentos apenas se houver cobertura, período e relação justificável com o CNAE consultado. A decisão de cada fator, seu sentido e seu peso continuam `A CONFIRMAR` com o grupo/professora; a justificativa só citará fatores efetivamente calculados.
 
 ## Fluxograma de atualização e consulta
+
+**Fluxo atual do experimento:** município/CNAE → leitura local → conferência dos 92 códigos e recortes fixos → dados completos/válidos e coerentes com a tela → posições percentuais dos fatores → média 50/50 → fatores, referências, premissa e score experimental. Se uma condição falhar, mostrar motivos e score NULL. O diagrama abaixo descreve a evolução conceitual para publicação validada/histórico, não um agendador ou persistência já existente.
 
 O fluxo de atualização abaixo é uma **direção de implementação**, não um agendador existente. Haverá no máximo uma fonte em atualização por vez; frequência e retentativas são **A CONFIRMAR** para cada fonte. A consulta usa dados locais publicados, não dispara requisições a todas as fontes externas. Uma falha de atualização mantém a última versão válida identificada com sua data; sua aptidão para o score dependerá de uma regra de validade temporal ainda a aprovar.
 
