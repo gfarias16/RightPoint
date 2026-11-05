@@ -10,6 +10,7 @@ use App\Models\Municipio;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ConsultaDemonstrativaTest extends TestCase
@@ -161,20 +162,7 @@ class ConsultaDemonstrativaTest extends TestCase
     public function test_populacao_e_contagem_juntas_nao_geram_score_e_exibem_limite_temporal(): void
     {
         $contagem = $this->criarContagem();
-        $fontePopulacao = FonteDado::create([
-            'codigo' => 'populacao-teste',
-            'nome' => 'Fonte de população de teste',
-            'url_referencia' => 'https://example.org/populacao',
-        ]);
-        IndicadorMunicipal::create([
-            'municipio_id' => $contagem->municipio_id,
-            'fonte_dado_id' => $fontePopulacao->id,
-            'codigo_indicador' => 'populacao_residente',
-            'valor' => 100000,
-            'periodo_referencia' => '2022',
-            'unidade' => 'Pessoas',
-            'coletado_em' => '2026-10-19 12:00:00',
-        ]);
+        $this->criarPopulacao($contagem->municipio_id, 100000);
 
         $this->getJson('/consulta-demonstrativa?codigo_ibge=3304557&cnae=5611201')
             ->assertOk()
@@ -226,9 +214,62 @@ class ConsultaDemonstrativaTest extends TestCase
         }
     }
 
+    #[DataProvider('populacoesIncompativeis')]
+    public function test_populacao_incompativel_nao_e_exibida_ou_usada_como_denominador(array $alteracoes, bool $outraFonte): void
+    {
+        $contagem = $this->criarContagem();
+        $populacao = $this->criarPopulacao($contagem->municipio_id, 100);
+        if ($outraFonte) {
+            $fonte = FonteDado::create(['codigo' => 'outra-populacao', 'nome' => 'Outra fonte', 'url_referencia' => 'https://example.org/']);
+            $alteracoes['fonte_dado_id'] = $fonte->id;
+        }
+        $populacao->update($alteracoes);
+        $antes = $populacao->fresh()->getAttributes();
+        Http::preventStrayRequests();
+
+        $this->getJson('/consulta-demonstrativa?codigo_ibge=3304557&cnae=5611201')
+            ->assertOk()
+            ->assertJsonPath('populacao', null)
+            ->assertJsonPath('concorrentes.quantidade', 12)
+            ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'indisponivel')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.valor', null)
+            ->assertJsonPath('score', null);
+
+        $this->assertSame($antes, $populacao->fresh()->getAttributes());
+        Http::assertNothingSent();
+    }
+
+    public static function populacoesIncompativeis(): array
+    {
+        return [
+            'mil pessoas nao sao pessoas' => [['unidade' => 'Mil pessoas'], false],
+            'outra fonte mesmo ano e unidade' => [[], true],
+            'outro ano' => [['periodo_referencia' => '2025'], false],
+            'recorte nao identificado' => [['versao_fonte' => null], false],
+            'outro recorte' => [['versao_fonte' => 'Outra tabela'], false],
+        ];
+    }
+
+    public function test_populacao_compativel_nao_e_substituida_por_outra_fonte_mais_recente(): void
+    {
+        $contagem = $this->criarContagem();
+        $populacao = $this->criarPopulacao($contagem->municipio_id, 100000);
+        $fonte = FonteDado::create(['codigo' => 'outra-populacao', 'nome' => 'Outra fonte', 'url_referencia' => 'https://example.org/']);
+        $outra = $populacao->replicate();
+        $outra->fill(['fonte_dado_id' => $fonte->id, 'valor' => 100, 'coletado_em' => '2026-11-05 12:00:00'])->save();
+
+        $resposta = $this->getJson('/consulta-demonstrativa?codigo_ibge=3304557&cnae=5611201')
+            ->assertOk()
+            ->assertJsonPath('populacao.unidade', 'Pessoas')
+            ->assertJsonPath('populacao.coletado_em', '2026-10-19 12:00:00')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.estado', 'calculado')
+            ->assertJsonPath('oferta_por_10_mil_habitantes.valor', 1.2);
+        $this->assertEquals(100000, $resposta->json('populacao.valor'));
+    }
+
     private function criarPopulacao(int $municipioId, int $valor): IndicadorMunicipal
     {
-        $fonte = FonteDado::create(['codigo' => 'populacao-teste', 'nome' => 'População de teste', 'url_referencia' => 'https://example.org/populacao']);
+        $fonte = FonteDado::create(['codigo' => 'ibge-censo-2022-populacao', 'nome' => 'População de teste', 'url_referencia' => 'https://example.org/populacao']);
 
         return IndicadorMunicipal::create([
             'municipio_id' => $municipioId,
@@ -237,6 +278,7 @@ class ConsultaDemonstrativaTest extends TestCase
             'valor' => $valor,
             'periodo_referencia' => '2022',
             'unidade' => 'Pessoas',
+            'versao_fonte' => 'Censo 2022 - agregado 4714 - variavel 93',
             'coletado_em' => '2026-10-19 12:00:00',
         ]);
     }

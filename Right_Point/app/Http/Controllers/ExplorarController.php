@@ -65,11 +65,15 @@ class ExplorarController extends Controller
             ->where('codigo_cnae', $dados['cnae'])
             ->first();
 
+        // O denominador segue o mesmo recorte do score; não converter ou misturar unidades/fontes.
         $populacao = IndicadorMunicipal::query()
             ->with('fonteDado')
             ->where('municipio_id', $municipio->id)
             ->where('codigo_indicador', 'populacao_residente')
             ->where('periodo_referencia', '2022')
+            ->where('unidade', 'Pessoas')
+            ->where('versao_fonte', 'Censo 2022 - agregado 4714 - variavel 93')
+            ->whereHas('fonteDado', fn ($query) => $query->where('codigo', 'ibge-censo-2022-populacao'))
             ->orderByDesc('coletado_em')
             ->first();
 
@@ -101,7 +105,7 @@ class ExplorarController extends Controller
         }
 
         if ($populacao === null) {
-            $avisos[] = 'A população municipal ainda não foi importada para este município.';
+            $avisos[] = 'Não há população compatível com o Censo 2022 do IBGE, em pessoas e com o recorte esperado, para este município.';
         }
 
         if ($contagem === null) {
